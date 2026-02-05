@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/Code/">
+    <File Path="Code/EF.bat" />
+    <File Path="Code/EF.sh" />
     <File Path="Code/readme.txt" />
   </Folder>
   <Folder Name="/Code/ClassLibraries/">
@@ -31,5 +33,7 @@
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
+    <File Path="Rebuild.bat" />
+    <File Path="Rebuild.sh" />
   </Folder>
 </Solution>

@@ -37,7 +37,7 @@
 	<PropertyGroup Condition="'$(DatabaseProvider)' == 'Oracle'">
 		<DefineConstants>$(DefineConstants);USE_ORACLE</DefineConstants>
 	</PropertyGroup>
-	<ItemGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
+	<ItemGroup Condition="'$(DatabaseProvider)' == 'Oracle'">
 		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26100" />
 	</ItemGroup>
 	
