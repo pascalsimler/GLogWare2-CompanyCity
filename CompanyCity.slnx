@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/Code/">
+    <File Path="Code/readme.txt" />
+  </Folder>
+  <Folder Name="/Code/ClassLibraries/">
+    <File Path="Code/ClassLibraries/readme.txt" />
+  </Folder>
+  <Folder Name="/Code/Services/">
+    <File Path="Code/Services/readme.txt" />
+  </Folder>
+  <Folder Name="/Config/">
+    <File Path="Config/readme.txt" />
+  </Folder>
+  <Folder Name="/Docker/">
+    <File Path="Docker/readme.txt" />
+  </Folder>
+  <Folder Name="/Logfiles/">
+    <File Path="Logfiles/readme.txt" />
+  </Folder>
+  <Folder Name="/Runtime/">
+    <File Path="Runtime/readme.txt" />
+  </Folder>
+</Solution>
