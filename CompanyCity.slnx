@@ -4,9 +4,15 @@
   </Folder>
   <Folder Name="/Code/ClassLibraries/">
     <File Path="Code/ClassLibraries/readme.txt" />
+    <Project Path="Code/ClassLibraries/Domain/Shared/Shared.csproj" Id="36010a6a-d7ec-4a7c-9f17-642396cc21fd" />
+    <Project Path="Code/ClassLibraries/EFCore.Domain/EFCore.Domain.csproj" Id="177d0fa8-e7bc-4fda-97a1-73ba4b6ab6a1" />
+    <Project Path="Code/ClassLibraries/EFCore.Infrastructure/EFCore.Infrastructure.csproj" Id="ce4c322d-5865-41cb-a670-32cd0a01ac52" />
   </Folder>
   <Folder Name="/Code/Services/">
     <File Path="Code/Services/readme.txt" />
+  </Folder>
+  <Folder Name="/Code/Tests/">
+    <File Path="Code/Tests/readme.txt" />
   </Folder>
   <Folder Name="/Config/">
     <File Path="Config/readme.txt" />
