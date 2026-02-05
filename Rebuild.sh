@@ -1,3 +1,3 @@
-dotnet clean YourSolution.slnx
+dotnet clean CompanyCity.slnx
 dotnet nuget locals all --clear
-dotnet build YourSolution.slnx --no-incremental
+dotnet build CompanyCity.slnx --no-incremental
