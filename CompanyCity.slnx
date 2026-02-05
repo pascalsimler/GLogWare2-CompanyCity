@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/Code/Services/">
     <File Path="Code/Services/readme.txt" />
+    <Project Path="Code/Services/DemoService/DemoService.csproj" Id="69da6fc9-a188-447a-b8e1-9cd17a1198ac" />
   </Folder>
   <Folder Name="/Code/Tests/">
     <File Path="Code/Tests/readme.txt" />
@@ -30,6 +31,7 @@
     <File Path="Runtime/readme.txt" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />

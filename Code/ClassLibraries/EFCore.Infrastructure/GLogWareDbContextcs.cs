@@ -104,8 +104,7 @@ public partial class GLogWareDbContext: DbContext
                     {
                         if (property.ClrType == typeof(DateTime?))
                         {
-                            Console.WriteLine($"PUTAIN [{entityType.GetTableName()}] [{property.Name}]");
-                            property.SetColumnType("timestamp without time zone");
+                             property.SetColumnType("timestamp without time zone");
                         }
                     }
                     break;
