@@ -8,4 +8,8 @@
     <RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+  </ItemGroup>
+
 </Project>

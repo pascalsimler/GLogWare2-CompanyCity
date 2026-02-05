@@ -1,20 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\EFCore.Domain\EFCore.Domain.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EFCore.Domain\EFCore.Domain.csproj" />
-  </ItemGroup>
-
+	<PropertyGroup Condition="'$(DatabaseProvider)' == 'SqlServer'">
+		<DefineConstants>$(DefineConstants);USE_SQLSERVER</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(DatabaseProvider)' == 'SqlServer'">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
+	</ItemGroup>
+	
+	<PropertyGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
+		<DefineConstants>$(DefineConstants);USE_POSTGRES</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+	</ItemGroup>
+	
+	<PropertyGroup Condition="'$(DatabaseProvider)' == 'Oracle'">
+		<DefineConstants>$(DefineConstants);USE_ORACLE</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26100" />
+	</ItemGroup>
+	
 </Project>

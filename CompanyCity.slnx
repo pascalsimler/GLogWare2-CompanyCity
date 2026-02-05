@@ -13,6 +13,7 @@
   </Folder>
   <Folder Name="/Code/Tests/">
     <File Path="Code/Tests/readme.txt" />
+    <Project Path="Code/Tests/ConsoleTests/ConsoleTests.csproj" Id="cbb06444-f404-4c63-8f90-47b5fa4d8894" />
   </Folder>
   <Folder Name="/Config/">
     <File Path="Config/readme.txt" />
@@ -25,5 +26,10 @@
   </Folder>
   <Folder Name="/Runtime/">
     <File Path="Runtime/readme.txt" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
   </Folder>
 </Solution>
