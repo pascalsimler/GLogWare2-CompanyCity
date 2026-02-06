@@ -25,7 +25,6 @@ public static class ConfigurationHelper
         string path = "/";
 
         string assemblyPath = Assembly.GetExecutingAssembly().Location;
-        assemblyPath = assemblyPath.ToLower();
 
         if ((index = assemblyPath.IndexOf(CodeSubFolder)) > -1)
         {

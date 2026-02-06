@@ -13,6 +13,7 @@ public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
         entity.Property(e => e.Name)
               .HasMaxLength(16)
               .IsRequired()
+              .IsUnicode(false)
               .HasComment("Unique identifier for the JobStatus");
     }
 }

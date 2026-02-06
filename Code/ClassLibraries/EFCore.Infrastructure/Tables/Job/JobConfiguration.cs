@@ -18,6 +18,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
         entity.Property(e => e.JobStatus)
               .HasMaxLength(16)
               .IsRequired()
+              .IsUnicode(false)
               .HasComment("Foreign key referencing JobStatus.Name");
 
         entity.HasOne(e => e.JobStatusRecord)

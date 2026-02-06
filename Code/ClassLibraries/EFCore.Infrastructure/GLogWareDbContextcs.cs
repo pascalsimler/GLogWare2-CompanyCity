@@ -53,21 +53,21 @@ public partial class GLogWareDbContext: DbContext
         // apply BaseTracking properties on all entities inhereting from it.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entityType.SetTableName(ToProviderName(entityType.GetTableName()!));
+            entityType.SetTableName(DatabaseProvider.ToProviderName(entityType.GetTableName()!));
 
             foreach (var property in entityType.GetProperties())
             {
-                property.SetColumnName(ToProviderName(property.GetColumnName()));
+                property.SetColumnName(DatabaseProvider.ToProviderName(property.GetColumnName()));
             }
 
             foreach (var key in entityType.GetKeys())
             {
-                key.SetName(ToProviderName(key.GetName()!));
+                key.SetName(DatabaseProvider.ToProviderName(key.GetName()!));
             }
 
             foreach (var fk in entityType.GetForeignKeys())
             {
-                fk.SetConstraintName(ToProviderName(fk.GetConstraintName()!));
+                fk.SetConstraintName(DatabaseProvider.ToProviderName(fk.GetConstraintName()!));
             }
 
             if (typeof(BaseTracking).IsAssignableFrom(entityType.ClrType))
@@ -87,30 +87,30 @@ public partial class GLogWareDbContext: DbContext
                       .HasComment("User or process who created the record");
 
                 entity.Property(nameof(BaseTracking.CreatedAt))
-                      .HasDefaultValueSql(GetNowSql())
+                      .HasDefaultValueSql(DatabaseProvider.GetNowSql())
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was created");
 
                 entity.Property(nameof(BaseTracking.LastUpdatedAt))
-                      .HasDefaultValueSql(GetNowSql())
+                      .HasDefaultValueSql(DatabaseProvider.GetNowSql())
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was updated for the last time");
             }
 
-            switch (GetDatabaseProvider())
-            {
-                case DatabaseProvider.Postgres:
-                    foreach (var property in entityType.GetProperties())
-                    {
-                        if (property.ClrType == typeof(DateTime?))
-                        {
-                             property.SetColumnType("timestamp without time zone");
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
+            //switch (GetDatabaseProvider())
+            //{
+            //    case DatabaseProvider.Postgres:
+            //        foreach (var property in entityType.GetProperties())
+            //        {
+            //            if (property.ClrType == typeof(DateTime?))
+            //            {
+            //                 property.SetColumnType("timestamp without time zone");
+            //            }
+            //        }
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
 
         // apply properties efined in dedicated Configuration classses for each entity
@@ -153,53 +153,4 @@ public partial class GLogWareDbContext: DbContext
     }
     #endregion
 
-    #region Public methods
-    public DatabaseProvider GetDatabaseProvider()
-    {
-        return Database.ProviderName switch
-        {
-            "Oracle.EntityFrameworkCore" => DatabaseProvider.Oracle,
-            "Microsoft.EntityFrameworkCore.SqlServer" => DatabaseProvider.SqlServer,
-            "Npgsql.EntityFrameworkCore.PostgreSQL" => DatabaseProvider.Postgres,
-            "Pomelo.EntityFrameworkCore.MySql" => DatabaseProvider.MySql,
-            _ => DatabaseProvider.Unknown
-        };
-    }
-
-    public string GetNowSql()
-    {
-        return GetDatabaseProvider() switch
-        {
-            DatabaseProvider.Oracle => "SYSTIMESTAMP",
-            DatabaseProvider.SqlServer => "GETDATE()",
-            DatabaseProvider.Postgres => "LOCALTIMESTAMP",
-            DatabaseProvider.MySql => "NOW()",
-            _ => string.Empty
-        };
-    }
-    #endregion
-
-    #region Private methods
-    private string ToProviderName(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-            return name;
-
-        // PascalCase → snake_case
-        var snake = Regex.Replace(
-            name,
-            "([a-z0-9])([A-Z])",
-            "$1_$2",
-            RegexOptions.Compiled);
-
-        return GetDatabaseProvider() switch
-        {
-            DatabaseProvider.Oracle => snake.ToUpperInvariant(),
-            DatabaseProvider.SqlServer => name,
-            DatabaseProvider.Postgres => snake.ToLowerInvariant(),
-            DatabaseProvider.MySql => name,
-            _ => name
-        };
-    }
-    #endregion
 }

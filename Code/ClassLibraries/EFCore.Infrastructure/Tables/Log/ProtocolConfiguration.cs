@@ -8,9 +8,7 @@ public class ProtocolConfiguration : IEntityTypeConfiguration<Protocol>
 {
     public void Configure(EntityTypeBuilder<Protocol> entity)
     {
-        entity.HasKey(e => e.Guid);
-
-        entity.Property(e => e.Guid)
+        entity.Property(e => e.Id)
               .IsRequired()
               .HasComment("Unique record identifier");
     }

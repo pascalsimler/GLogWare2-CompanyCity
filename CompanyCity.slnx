@@ -19,7 +19,18 @@
     <Project Path="Code/Tests/ConsoleTests/ConsoleTests.csproj" Id="cbb06444-f404-4c63-8f90-47b5fa4d8894" />
   </Folder>
   <Folder Name="/Config/">
+    <File Path="Config/config.json" />
     <File Path="Config/readme.txt" />
+  </Folder>
+  <Folder Name="/Config/Dev/" />
+  <Folder Name="/Config/Dev/passim/">
+    <File Path="Config/Dev/passim/config.json" />
+  </Folder>
+  <Folder Name="/Config/Prod/">
+    <File Path="Config/Prod/config.json" />
+  </Folder>
+  <Folder Name="/Config/Test/">
+    <File Path="Config/Test/config.json" />
   </Folder>
   <Folder Name="/Docker/">
     <File Path="Docker/readme.txt" />

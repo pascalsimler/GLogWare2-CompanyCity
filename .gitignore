@@ -6,3 +6,4 @@
 *.log
 obj
 bin
+Config/config.json

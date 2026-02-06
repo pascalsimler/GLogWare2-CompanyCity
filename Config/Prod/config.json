@@ -1,0 +1,36 @@
+{
+  "ConnectionString": "Server=localhost;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+  "ConnectionString_Postgres": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+  "ConnectionString_SqlServer": "Server=localhost;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+  "ConnectionString_Oracle": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+  "ConnectionString_MySql": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+  "MQTTBroker": {
+    "Hostname": "10.59.0.50",
+    "Port": "1883",
+    "RootTopic": "Michelin/Chennai/GLogWare"
+  },
+  "GantryBridges": {
+    "OP7100BR": {
+      "IP": "10.59.0.50",
+      "Port": 7100,
+      "Description": "First Bridge of Gantry 1"
+    },
+    "OP7200BR": {
+      "IP": "10.59.0.50",
+      "Port": 7200,
+      "Description": "Second Bridge of Gantry 2"
+    }
+  },
+  "Conveyors": {
+    "OP1000AL": {
+      "IP": "10.59.0.50",
+      "Port": 1000,
+      "Description": "Infeed Conveyors"
+    },
+    "OP2000AL": {
+      "IP": "10.59.0.50",
+      "Port": 2000,
+      "Description": "Outfeed Conveyors"
+    }
+  }
+}

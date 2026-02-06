@@ -1,13 +1,30 @@
 ﻿using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Shared;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+Console.WriteLine(DateTimeOffset.Now);
+string projectRootPath = ConfigurationHelper.GetProjectRootPath();
+Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+
+var configuration = new ConfigurationBuilder()
+      .SetBasePath(projectRootPath) // base path for relative files
+      .AddJsonFile(
+          Path.Combine(ConfigurationHelper.GetConfigPath(projectRootPath), "config.json"),
+          optional: false,
+          reloadOnChange: true)
+      .Build();
+string connectionString = configuration["ConnectionString"];
+Console.WriteLine($"connectionString=[{connectionString}");
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        services.AddGLogWareDbContext("Host=localhost;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*");
+        services.AddGLogWareDbContext(connectionString);
     })
     .Build();
+
 
 // Resolve and use DbContext
 using var scope = host.Services.CreateScope();
