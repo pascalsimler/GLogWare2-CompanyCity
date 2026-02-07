@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Gudel.GLogWare.EFCore.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
@@ -12,21 +13,17 @@ public class DbLogger
     }
 
     public async Task WriteAsync(
-        string level,
         string message,
-        string? context = null,
         CancellationToken ct = default)
     {
         try
         {
             await using var db = await _dbFactory.CreateDbContextAsync(ct);
 
-            //db.AppLogs.Add(new AppLogEntry
-            //{
-            //    Level = level,
-            //    Message = message,
-            //    Context = context
-            //});
+            db.Protocols.Add(new Protocol
+            {
+                Message = message
+            });
 
             await db.SaveChangesAsync(ct);
         }

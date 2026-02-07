@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+Console.WriteLine($"databaseproviderName=[{DatabaseProvider.GetDatabaseProviderName()}]");
 
 var configuration = new ConfigurationBuilder()
       .SetBasePath(projectRootPath) // base path for relative files
@@ -41,7 +42,7 @@ Console.WriteLine("----------------------");
 
 foreach (var a in db.Areas)
 {
-    Console.WriteLine(a.Name);
+    Console.WriteLine($"Name=[{a.Name}], CreatedAt=[{a.CreatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}], LastUpdateAt=[{a.LastUpdatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]");
 }
 
 //Place pl = new Place();

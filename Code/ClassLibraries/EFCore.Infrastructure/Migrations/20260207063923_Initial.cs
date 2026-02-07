@@ -121,9 +121,7 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false, comment: "Unique record identifier")
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Timestamp = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    Level = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Context = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations
 {
     [DbContext(typeof(GLogWareDbContext))]
-    [Migration("20260206170727_Initial")]
+    [Migration("20260207063923_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -29048,15 +29048,6 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations
                         .HasComment("Unique record identifier");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Context")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Context");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Level");
 
                     b.Property<string>("Message")
                         .IsRequired()

@@ -1,7 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
