@@ -145,7 +145,7 @@ public partial class GLogWareDbContext: DbContext
         {
             if (entry.State == EntityState.Modified)
             {
-                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTime.Now;
+                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTimeOffset.UtcNow;
             }
         }
         return base.SaveChanges();
