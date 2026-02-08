@@ -1,13 +1,12 @@
 ﻿using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+
 
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
-Console.WriteLine($"databaseproviderName=[{DatabaseProvider.GetDatabaseProviderName()}]");
+Console.WriteLine($"databaseProviderName=[{DatabaseProviderHelper.GetDatabaseProviderName()}]");
 
 var configuration = new ConfigurationBuilder()
       .SetBasePath(projectRootPath) // base path for relative files
@@ -16,21 +15,10 @@ var configuration = new ConfigurationBuilder()
           optional: false,
           reloadOnChange: true)
       .Build();
-string connectionString = configuration["ConnectionString"];
+string connectionString = configuration["ConnectionString"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
-        services.AddGLogWareDbContext(connectionString);
-    })
-    .Build();
-
-
-// Resolve and use DbContext
-using var scope = host.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<GLogWareDbContext>();
-
+GLogWareDbContext db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString);
 Console.WriteLine("DbContext successfully created");
 
 //foreach (var inv in db.VInventories)
@@ -38,11 +26,22 @@ Console.WriteLine("DbContext successfully created");
 //    Console.WriteLine($"{inv.Place} - {inv.Amount}");
 //}
 
-Console.WriteLine("----------------------");
-
-foreach (var a in db.Areas)
+while (true)
 {
-    Console.WriteLine($"Name=[{a.Name}], CreatedAt=[{a.CreatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}], LastUpdateAt=[{a.LastUpdatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]");
+    Console.WriteLine("----------------------");
+    foreach (var a in db.Areas)
+    {
+        Console.WriteLine(
+            $"Name=[{a.Name}]" +
+            $", CreatedAt(localtime)=[{a.CreatedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
+            $", CreatedAt(UTC)=[{a.CreatedAt?.ToUniversalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
+            $", LastUpdateAt(localtime)=[{a.LastUpdatedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
+            $", LastUpdateAt(UTC)=[{a.LastUpdatedAt?.ToUniversalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]"
+        );
+    }
+    Console.Write("Again (y/n) ? ");
+    string choice = Console.ReadLine()!;
+    if (choice.ToLower() != "y") break;
 }
 
 //Place pl = new Place();

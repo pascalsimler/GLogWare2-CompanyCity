@@ -18,29 +18,32 @@ public class Worker : IHostedService, IAsyncDisposable
     #region Private members
     private ILogger<Worker> _logger;
     private IConfiguration _configuration;
-    private IDbContextFactory<GLogWareDbContext> _dbFactory;
-    private GLogWareDbContext? _dbCtx;
-    private DbLogger _dbLogger;
-    private IManagedMqttClient? _mqttClient;
-    private string? _subscriptionTopic;
+    private GLogWareDbContext _db = null!;
+    private DbLogger _dbLogger = null!;
+    private IManagedMqttClient _mqttClient = null!;
+    private string _subscriptionTopic = null!;
     #endregion
 
     public Worker(
         ILogger<Worker> logger,
-        IConfiguration configuration,
-        IDbContextFactory<GLogWareDbContext> dbFactory,
-        DbLogger dbLogger)
+        IConfiguration configuration)
     {
         _logger = logger;
         _configuration = configuration;
-        _dbFactory = dbFactory;
-        _dbLogger = dbLogger;
     }
 
     public async Task StartAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation($"Starting {ServiceName} ...");
 
+        #region Connect to database
+        string connectionString = _configuration["ConnectionString"]!;
+        _logger.LogInformation($"connectionString=[{connectionString}");
+        _db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString)!;
+        _dbLogger = new DbLogger(_db)!;
+        #endregion
+
+        #region Connect to MQTT
         string mqttBrokerConfigPath = "MQTTBroker";
         string mqttBrokerHostname = _configuration[$"{mqttBrokerConfigPath}:Hostname"]!;
         int mqttBrokerPort = int.Parse(_configuration[$"{mqttBrokerConfigPath}:Port"]!);
@@ -87,6 +90,7 @@ public class Worker : IHostedService, IAsyncDisposable
 
         await _mqttClient.SubscribeAsync(mqttSubscriptionTopics);
         await _mqttClient.StartAsync(mqttOptions);
+        #endregion
 
         await Task.CompletedTask;
     }

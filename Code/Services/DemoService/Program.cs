@@ -26,15 +26,10 @@ builder.Configuration.AddJsonFile(
     optional: false,
     reloadOnChange: true);
 
-string connectionString = builder.Configuration.GetValue<string>("ConnectionString")!;
-logger.Information($"connectionString=[{connectionString}]");
-
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
 builder.Services.AddHostedService<Worker>();
-builder.Services.AddGLogWareDbContext(connectionString);
-builder.Services.AddSingleton<DbLogger>();
 
 var host = builder.Build();
 host.Run();

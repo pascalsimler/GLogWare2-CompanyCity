@@ -1,2 +1,0 @@
-dotnet ef migrations add Initial --project ClassLibraries/EFCore.Infrastructure --startup-project Tests/ConsoleTests
-dotnet ef database update --project ClassLibraries/EFCore.Infrastructure --startup-project Tests/ConsoleTests

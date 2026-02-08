@@ -52,21 +52,21 @@ public partial class GLogWareDbContext: DbContext
         // apply BaseTracking properties on all entities inhereting from it.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entityType.SetTableName(DatabaseProvider.ToProviderName(entityType.GetTableName()!));
+            entityType.SetTableName(DatabaseProviderHelper.ToProviderName(entityType.GetTableName()!));
 
             foreach (var property in entityType.GetProperties())
             {
-                property.SetColumnName(DatabaseProvider.ToProviderName(property.GetColumnName()));
+                property.SetColumnName(DatabaseProviderHelper.ToProviderName(property.GetColumnName()));
             }
 
             foreach (var key in entityType.GetKeys())
             {
-                key.SetName(DatabaseProvider.ToProviderName(key.GetName()!));
+                key.SetName(DatabaseProviderHelper.ToProviderName(key.GetName()!));
             }
 
             foreach (var fk in entityType.GetForeignKeys())
             {
-                fk.SetConstraintName(DatabaseProvider.ToProviderName(fk.GetConstraintName()!));
+                fk.SetConstraintName(DatabaseProviderHelper.ToProviderName(fk.GetConstraintName()!));
             }
 
             if (typeof(BaseTracking).IsAssignableFrom(entityType.ClrType))
@@ -86,12 +86,12 @@ public partial class GLogWareDbContext: DbContext
                       .HasComment("User or process who created the record");
 
                 entity.Property(nameof(BaseTracking.CreatedAt))
-                      .HasDefaultValueSql(DatabaseProvider.GetNowSql())
+                      .HasDefaultValueSql(DatabaseProviderHelper.GetNowSql())
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was created");
 
                 entity.Property(nameof(BaseTracking.LastUpdatedAt))
-                      .HasDefaultValueSql(DatabaseProvider.GetNowSql())
+                      .HasDefaultValueSql(DatabaseProviderHelper.GetNowSql())
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was updated for the last time");
             }

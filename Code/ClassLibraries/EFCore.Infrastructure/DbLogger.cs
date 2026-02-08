@@ -5,13 +5,11 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 
 public class DbLogger
 {
-    private readonly IDbContextFactory<GLogWareDbContext> _dbFactory;
-    private readonly GLogWareDbContext db;
+    private readonly GLogWareDbContext _db;
 
-    public DbLogger(IDbContextFactory<GLogWareDbContext> dbFactory)
+    public DbLogger(GLogWareDbContext db)
     {
-        _dbFactory = dbFactory;
-        db = _dbFactory.CreateDbContext();
+        _db = db;
     }
 
     public async Task WriteAsync(
@@ -22,12 +20,12 @@ public class DbLogger
         {
             //await using var db = await _dbFactory.CreateDbContextAsync(ct);
 
-            db.Protocols.Add(new Protocol
+            _db.Protocols.Add(new Protocol
             {
                 Message = message
             });
 
-            await db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync(ct);
         }
         catch
         {
