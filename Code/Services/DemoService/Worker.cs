@@ -37,8 +37,10 @@ public class Worker : IHostedService, IAsyncDisposable
         _logger.LogInformation($"Starting {ServiceName} ...");
 
         #region Connect to database
-        string connectionString = _configuration["ConnectionString"]!;
-        _logger.LogInformation($"connectionString=[{connectionString}");
+        string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+        _logger.LogInformation($"databaseProvider=[{databaseProvider}]");
+        string connectionString = _configuration[$"ConnectionString_{databaseProvider}"]!;
+        _logger.LogInformation($"connectionString=[{connectionString}]");
         _db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString)!;
         _dbLogger = new DbLogger(_db)!;
         #endregion

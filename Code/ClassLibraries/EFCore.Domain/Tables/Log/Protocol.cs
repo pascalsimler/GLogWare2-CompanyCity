@@ -3,6 +3,6 @@
 public class Protocol
 {
     public long Id { get; set; }
-    public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? Timestamp { get; set; } = DateTime.Now;
     public string Message { get; set; } = default!;
 }

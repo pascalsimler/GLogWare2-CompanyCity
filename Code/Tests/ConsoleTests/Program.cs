@@ -6,7 +6,8 @@ using Microsoft.Extensions.Configuration;
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
-Console.WriteLine($"databaseProviderName=[{DatabaseProviderHelper.GetDatabaseProviderName()}]");
+string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+Console.WriteLine($"databaseProvider=[{databaseProvider}]");
 
 var configuration = new ConfigurationBuilder()
       .SetBasePath(projectRootPath) // base path for relative files
@@ -15,7 +16,7 @@ var configuration = new ConfigurationBuilder()
           optional: false,
           reloadOnChange: true)
       .Build();
-string connectionString = configuration["ConnectionString"]!;
+string connectionString = configuration[$"ConnectionString_{databaseProvider}"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
 GLogWareDbContext db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString);
@@ -33,10 +34,8 @@ while (true)
     {
         Console.WriteLine(
             $"Name=[{a.Name}]" +
-            $", CreatedAt(localtime)=[{a.CreatedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
-            $", CreatedAt(UTC)=[{a.CreatedAt?.ToUniversalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
-            $", LastUpdateAt(localtime)=[{a.LastUpdatedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
-            $", LastUpdateAt(UTC)=[{a.LastUpdatedAt?.ToUniversalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")}]"
+            $", CreatedAt=[{a.CreatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
+            $", LastUpdateAt=[{a.LastUpdatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]"
         );
     }
     Console.Write("Again (y/n) ? ");

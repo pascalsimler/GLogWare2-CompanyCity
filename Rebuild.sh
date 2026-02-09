@@ -1,3 +1,2 @@
-dotnet clean CompanyCity.slnx
-dotnet nuget locals all --clear
-dotnet build CompanyCity.slnx --no-incremental
+find . -type d \( -name bin -o -name obj \) -exec rm -rf {} +
+dotnet build

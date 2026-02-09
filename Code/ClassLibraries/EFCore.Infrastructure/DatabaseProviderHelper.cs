@@ -6,7 +6,7 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 
 public static class DatabaseProviderHelper
 {
-    public static DatabaseProvider GetDatabaseProviderName()
+    public static DatabaseProvider GetDatabaseProvider()
     {
         DatabaseProvider providerName = DatabaseProvider.Unknown;
 
@@ -28,12 +28,12 @@ public static class DatabaseProviderHelper
 
     public static string GetNowSql()
     {
-        return GetDatabaseProviderName() switch
+        return GetDatabaseProvider() switch
         {
-            DatabaseProvider.Oracle => "SYSTIMESTAMP",
-            DatabaseProvider.SqlServer => "SYSDATETIMEOFFSET()",
-            DatabaseProvider.Postgres => "CURRENT_TIMESTAMP",
-            DatabaseProvider.MySql => "NOW()",
+            DatabaseProvider.Oracle => "LOCALTIMESTAMP",
+            DatabaseProvider.SqlServer => "GETDATE()",
+            DatabaseProvider.Postgres => "LOCALTIMESTAMP",
+            DatabaseProvider.MySql => "CURRENT_TIMESTAMP",
             _ => string.Empty
         };
     }
@@ -50,7 +50,7 @@ public static class DatabaseProviderHelper
             "$1_$2",
             RegexOptions.Compiled);
 
-        return GetDatabaseProviderName() switch
+        return GetDatabaseProvider() switch
         {
             DatabaseProvider.Oracle => snake.ToUpperInvariant(),
             DatabaseProvider.SqlServer => name,
@@ -81,6 +81,14 @@ public static class DatabaseProviderHelper
                     typeof(DatabaseProvider).Assembly.FullName)));
 #endif
 
+#if USE_ORACLE
+        services.AddDbContext<GLogWareDbContext>(options =>
+            options.UseOracle(
+                connectionString,
+                x => x.MigrationsAssembly(
+                    typeof(DatabaseProvider).Assembly.FullName)));
+#endif
+
         return services;
     }
 
@@ -104,6 +112,14 @@ public static class DatabaseProviderHelper
                     typeof(DatabaseProvider).Assembly.FullName)));
 #endif
 
+#if USE_ORACLE
+        services.AddDbContextFactory<GLogWareDbContext>(options =>
+            options.UseOracle(
+                connectionString,
+                x => x.MigrationsAssembly(
+                    typeof(DatabaseProvider).Assembly.FullName)));
+#endif
+
         return services;
     }
 
@@ -119,7 +135,11 @@ public static class DatabaseProviderHelper
             .UseSqlServer(connectionString)
             .Options;
 #endif
-
+#if USE_ORACLE
+        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
+            .UseOracle(connectionString)
+            .Options;
+#endif
         return new GLogWareDbContext(options);
     }
 }

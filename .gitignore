@@ -4,6 +4,7 @@
 
 .vs
 *.log
+*.tar
 obj
 bin
 Config/config.json

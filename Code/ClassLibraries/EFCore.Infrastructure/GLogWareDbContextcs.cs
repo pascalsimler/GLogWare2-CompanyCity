@@ -96,20 +96,20 @@ public partial class GLogWareDbContext: DbContext
                       .HasComment("Date/time the record was updated for the last time");
             }
 
-            //switch (GetDatabaseProvider())
-            //{
-            //    case DatabaseProvider.Postgres:
-            //        foreach (var property in entityType.GetProperties())
-            //        {
-            //            if (property.ClrType == typeof(DateTime?))
-            //            {
-            //                 property.SetColumnType("timestamp without time zone");
-            //            }
-            //        }
-            //        break;
-            //    default:
-            //        break;
-            //}
+            switch (DatabaseProviderHelper.GetDatabaseProvider())
+            {
+                case DatabaseProvider.Postgres:
+                    foreach (var property in entityType.GetProperties())
+                    {
+                        if (property.ClrType == typeof(DateTime?))
+                        {
+                            property.SetColumnType("timestamp without time zone");
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         // apply properties efined in dedicated Configuration classses for each entity
@@ -145,7 +145,7 @@ public partial class GLogWareDbContext: DbContext
         {
             if (entry.State == EntityState.Modified)
             {
-                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTimeOffset.UtcNow;
+                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTime.Now;
             }
         }
         return base.SaveChanges();

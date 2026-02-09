@@ -24,7 +24,11 @@ public class GLogWareDbContextFactory : IDesignTimeDbContextFactory<GLogWareDbCo
             .UseSqlServer(connectionString)
             .Options;
 #endif
-
+#if USE_ORACLE
+        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
+            .UseOracle(connectionString)
+            .Options;
+#endif
         return new GLogWareDbContext(options);
     }
 }

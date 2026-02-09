@@ -1,5 +1,4 @@
 using Gudel.GLogWare.DemoService;
-using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.EntityFrameworkCore;
 using Serilog;

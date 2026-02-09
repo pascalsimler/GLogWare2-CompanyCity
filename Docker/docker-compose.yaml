@@ -1,0 +1,7 @@
+services:
+  demo_service:
+    image: demoservice:latest
+    container_name: DemoService
+    volumes:
+      - ${HOME_DIR}/config:${DOCKER_APP_DIR}/config
+      - ${HOME_DIR}/logfiles:${DOCKER_APP_DIR}/logfiles

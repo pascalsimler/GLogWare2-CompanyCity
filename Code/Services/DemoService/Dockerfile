@@ -26,4 +26,4 @@ RUN dotnet publish "./DemoService.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DemoService.dll"]
+ENTRYPOINT ["dotnet", "Gudel.GLogWare.DemoService.dll"]
