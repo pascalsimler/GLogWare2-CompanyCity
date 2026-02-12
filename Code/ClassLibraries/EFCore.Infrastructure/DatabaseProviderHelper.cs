@@ -20,7 +20,7 @@ public static class DatabaseProviderHelper
         providerName = DatabaseProvider.Oracle;
 #endif
 #if USE_MYSQL
-        providerName = Databaseprovider.MySql;
+        providerName = DatabaseProvider.MySql;
 #endif
 
         return providerName;
@@ -33,7 +33,7 @@ public static class DatabaseProviderHelper
             DatabaseProvider.Oracle => "LOCALTIMESTAMP",
             DatabaseProvider.SqlServer => "GETDATE()",
             DatabaseProvider.Postgres => "LOCALTIMESTAMP",
-            DatabaseProvider.MySql => "CURRENT_TIMESTAMP",
+            DatabaseProvider.MySql => "CURRENT_TIMESTAMP(6)",
             _ => string.Empty
         };
     }
@@ -138,6 +138,11 @@ public static class DatabaseProviderHelper
 #if USE_ORACLE
         var options = new DbContextOptionsBuilder<GLogWareDbContext>()
             .UseOracle(connectionString)
+            .Options;
+#endif
+#if USE_MYSQL
+        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
+            .UseMySQL(connectionString)
             .Options;
 #endif
         return new GLogWareDbContext(options);

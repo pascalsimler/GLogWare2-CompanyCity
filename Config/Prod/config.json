@@ -1,13 +1,12 @@
 {
-  "ConnectionString": "Server=localhost;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
-  "ConnectionString_Postgres": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-  "ConnectionString_SqlServer": "Server=localhost;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
-  "ConnectionString_Oracle": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-  "ConnectionString_MySql": "Host=10.59.0.50;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+  "ConnectionString_Postgres": "Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+  "ConnectionString_SqlServer": "Server=sqlserver.glogware.com;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+  "ConnectionString_Oracle": "User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;",
+  "ConnectionString_MySql": "server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*",
   "MQTTBroker": {
-    "Hostname": "10.59.0.50",
+    "Hostname": "mqtt.glogware.com",
     "Port": "1883",
-    "RootTopic": "Michelin/Chennai/GLogWare"
+    "RootTopic": "Company/City/GLogWare"
   },
   "GantryBridges": {
     "OP7100BR": {
