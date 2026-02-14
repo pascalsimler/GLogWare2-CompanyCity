@@ -1,3 +1,14 @@
-export ConnectionStrings__Default="Host=localhost;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*"
-dotnet ef migrations add Initial
+export ConnectionStrings__Default="Server=sqlserver.glogware.com;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True"
+dotnet ef migrations add Initial -o Migrations_SqlServer
+
+export ConnectionStrings__Default="Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*"
+dotnet ef migrations add Initial -o Migrations_Postgres
+
+export ConnectionStrings__Default="User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;"
+dotnet ef migrations add Initial -o Migrations_Oracle
+
+export ConnectionStrings__Default="server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*"
+dotnet ef migrations add Initial -o Migrations_MySql
+
+
 dotnet ef database update

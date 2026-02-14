@@ -12,7 +12,7 @@ public class GLogWareDbContextFactory : IDesignTimeDbContextFactory<GLogWareDbCo
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = config.GetConnectionString("Default");
+        var connectionString = config.GetConnectionString("Default")!;
 
 #if USE_POSTGRES
         var options = new DbContextOptionsBuilder<GLogWareDbContext>()
