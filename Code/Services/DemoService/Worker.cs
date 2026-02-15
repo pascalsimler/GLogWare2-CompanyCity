@@ -22,6 +22,8 @@ public class Worker : IHostedService, IAsyncDisposable
     private GLogWareDbContext _db = null!;
     private DbLogger _dbLogger = null!;
     private IManagedMqttClient _mqttClient = null!;
+    private System.Timers.Timer _timer = null!;
+    private readonly SemaphoreSlim _mutex = new(1, 1);
     private string _subscriptionTopic = null!;
     #endregion
 
@@ -39,9 +41,16 @@ public class Worker : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation($"Starting {ServiceName} ...");
 
-        #region Connect to database
-        _db = await _factory.CreateDbContextAsync(stoppingToken);
-        _dbLogger = new DbLogger(_db)!;
+        //#region Connect to database
+        //_db = await _factory.CreateDbContextAsync(stoppingToken);
+        //_dbLogger = new DbLogger(_db)!;
+        //#endregion
+
+        #region Timer
+        _timer = new System.Timers.Timer(2000);
+        _timer.Elapsed += OnTimer;
+        _timer.AutoReset = true;
+        _timer.Enabled = true;
         #endregion
 
         #region Connect to MQTT
@@ -110,15 +119,41 @@ public class Worker : IHostedService, IAsyncDisposable
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
-        string Msg = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-        _logger.LogInformation(Msg);
+        await _mutex.WaitAsync();
+        _timer.Enabled = false;
+        try
+        {
+            string Msg = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+            _logger.LogInformation(Msg);
+            _db = await _factory.CreateDbContextAsync();
+            _dbLogger = new DbLogger(_db)!;
+            await _dbLogger.WriteAsync(Msg);
+            await SendToMqtt($"{_subscriptionTopic}-Response", Msg);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+        }
+        _timer.Enabled = true;
+        _mutex.Release();
+    }
 
-        _db = await _factory.CreateDbContextAsync();
-        _dbLogger = new DbLogger(_db)!;
-
-        await _dbLogger.WriteAsync(Msg);
-
-        await SendToMqtt( $"{_subscriptionTopic}-Response", Msg);
+    private async void OnTimer(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        await _mutex.WaitAsync();
+        _timer.Enabled = false;
+        try
+        {
+            _logger.LogInformation($"Timer fired at {DateTime.Now}");
+            System.Threading.Thread.Sleep(10000);
+            _logger.LogInformation($"Timer quit at {DateTime.Now}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+        }
+        _timer.Enabled = true;
+        _mutex.Release();
     }
 
     public async Task SendToMqtt(string topic, string message)
