@@ -1,6 +1,6 @@
 using Gudel.GLogWare.DemoService;
+using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Worker.ServiceName = "DemoService";
@@ -25,9 +25,15 @@ builder.Configuration.AddJsonFile(
     optional: false,
     reloadOnChange: true);
 
+string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+logger.Information($"databaseProvider=[{databaseProvider}]");
+string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
+logger.Information($"connectionString=[{connectionString}]");
+
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
+builder.Services.AddGLogWareDbContextFactory(connectionString);
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

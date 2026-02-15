@@ -16,8 +16,9 @@ public class Worker : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-    private ILogger<Worker> _logger;
-    private IConfiguration _configuration;
+    private readonly ILogger<Worker> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly IDbContextFactory<GLogWareDbContext> _factory;
     private GLogWareDbContext _db = null!;
     private DbLogger _dbLogger = null!;
     private IManagedMqttClient _mqttClient = null!;
@@ -26,10 +27,12 @@ public class Worker : IHostedService, IAsyncDisposable
 
     public Worker(
         ILogger<Worker> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IDbContextFactory<GLogWareDbContext> factory)
     {
         _logger = logger;
         _configuration = configuration;
+        _factory = factory;
     }
 
     public async Task StartAsync(CancellationToken stoppingToken)
@@ -37,11 +40,7 @@ public class Worker : IHostedService, IAsyncDisposable
         _logger.LogInformation($"Starting {ServiceName} ...");
 
         #region Connect to database
-        string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
-        _logger.LogInformation($"databaseProvider=[{databaseProvider}]");
-        string connectionString = _configuration[$"ConnectionString_{databaseProvider}"]!;
-        _logger.LogInformation($"connectionString=[{connectionString}]");
-        _db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString)!;
+        _db = await _factory.CreateDbContextAsync(stoppingToken);
         _dbLogger = new DbLogger(_db)!;
         #endregion
 
@@ -114,7 +113,9 @@ public class Worker : IHostedService, IAsyncDisposable
         string Msg = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
         _logger.LogInformation(Msg);
 
-//        _dbCtx = await _dbFactory.CreateDbContextAsync();
+        _db = await _factory.CreateDbContextAsync();
+        _dbLogger = new DbLogger(_db)!;
+
         await _dbLogger.WriteAsync(Msg);
 
         await SendToMqtt( $"{_subscriptionTopic}-Response", Msg);
