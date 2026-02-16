@@ -4,12 +4,8 @@ using System.Reflection;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
-public partial class GLogWareDbContext: DbContext
+public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> options) : DbContext(options)
 {
-    public GLogWareDbContext(DbContextOptions<GLogWareDbContext> options) : base(options)
-    {
-    }
-
     #region Entity Sets
     #region Tables
     #region Topology

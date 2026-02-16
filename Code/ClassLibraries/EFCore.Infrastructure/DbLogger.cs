@@ -7,9 +7,9 @@ public class DbLogger
 {
     private readonly GLogWareDbContext _db;
 
-    public DbLogger(GLogWareDbContext db)
+    public DbLogger(IDbContextFactory<GLogWareDbContext> factory)
     {
-        _db = db;
+        _db = factory.CreateDbContext();
     }
 
     public async Task WriteAsync(
