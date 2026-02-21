@@ -5,7 +5,7 @@ using MQTTnet.Packets;
 using MQTTnet.Protocol;
 using System.Text;
 
-namespace Gudel.GLogWare.DemoService;
+namespace Gudel.GLogWare.Services.DemoService;
 
 public class Worker : IHostedService, IAsyncDisposable
 {

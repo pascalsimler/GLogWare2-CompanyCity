@@ -1,13 +1,14 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
+using Gudel.GLogWare.EFCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace Gudel.GLogWare.EFCore.Infrastructure;
+namespace Gudel.GLogWare.EFCore.Application;
 
-public class DbLogger
+public class DbLoggerService
 {
     private readonly GLogWareDbContext _db;
 
-    public DbLogger(IDbContextFactory<GLogWareDbContext> factory)
+    public DbLoggerService(IDbContextFactory<GLogWareDbContext> factory)
     {
         _db = factory.CreateDbContext();
     }

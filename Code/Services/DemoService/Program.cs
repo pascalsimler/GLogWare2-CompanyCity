@@ -1,4 +1,5 @@
-using Gudel.GLogWare.DemoService;
+using Gudel.GLogWare.Services.DemoService;
+using Gudel.GLogWare.EFCore.Application;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
@@ -46,7 +47,7 @@ logger.Information($"connectionString=[{connectionString}]");
 
 
 builder.Services.AddSingleton<DemoService>();
-builder.Services.AddSingleton<DbLogger>();
+builder.Services.AddSingleton<DbLoggerService>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
 builder.Services.AddHostedService<Worker>();
 

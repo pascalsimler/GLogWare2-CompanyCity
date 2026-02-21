@@ -7,8 +7,8 @@
     <UserSecretsId>dotnet-DemoService-64794c10-e08b-4077-973f-f0fef5ac28cf</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
-    <AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>Gudel.GLogWare.Services.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Gudel.GLogWare.Services.$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ClassLibraries\EFCore.Infrastructure\EFCore.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\ClassLibraries\EFCore.Application\EFCore.Application.csproj" />
     <ProjectReference Include="..\..\ClassLibraries\Shared\Shared.csproj" />
   </ItemGroup>
 </Project>

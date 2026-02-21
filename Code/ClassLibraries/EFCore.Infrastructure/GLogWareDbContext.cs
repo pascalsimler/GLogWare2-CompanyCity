@@ -32,6 +32,12 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
 
     #region Language
     public DbSet<Language> Languages => Set<Language>();
+    public DbSet<Translation> Translations => Set<Translation>();
+    #endregion
+
+    #region User Management
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
     #endregion
     #endregion
 
