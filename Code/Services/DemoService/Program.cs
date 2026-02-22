@@ -15,11 +15,12 @@ builder.Configuration.AddJsonFile(
     optional: false,
     reloadOnChange: true);
 
-string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{Method}] {Message:lj}{NewLine}{Exception}";
+string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{Namespace}::{Method}] {Message:lj}{NewLine}{Exception}";
 int enableEFCoreLogging = builder.Configuration.GetValue<int>("EnableEFCoreLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .Enrich.WithCallerInfo(false, new List<string> { "Gudel.GLogWare.DemoService" });
+    .Enrich.WithCallerInfo(false, ConfigurationHelper.GetGudelNamespaces())
+    .Enrich.With(new CustomLoggerEnricher(depthNamespace:2));
 
 if (enableEFCoreLogging == 0)
 {

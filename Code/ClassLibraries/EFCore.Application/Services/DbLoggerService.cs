@@ -13,9 +13,7 @@ public class DbLoggerService
         _db = factory.CreateDbContext();
     }
 
-    public async Task WriteAsync(
-        string message,
-        CancellationToken ct = default)
+    public async Task WriteAsync(string message)
     {
         try
         {
@@ -26,7 +24,7 @@ public class DbLoggerService
                 Message = message
             });
 
-            await _db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync();
         }
         catch
         {

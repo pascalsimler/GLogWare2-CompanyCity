@@ -101,4 +101,23 @@ public static class ConfigurationHelper
         path = Path.Combine(projectRootPath, ConfigSubFolder);
         return path;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public static List<string> GetGudelNamespaces()
+    {
+        // Get assemblies that start with Gudel
+        var gudelAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => a.GetName().Name?.StartsWith("Gudel") == true);
+
+        return gudelAssemblies
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => type.Namespace?.StartsWith("Gudel") == true)
+            .Select(type => type.Namespace!)
+            .Distinct()
+            .OrderBy(ns => ns)
+            .ToList();
+    }
 }
