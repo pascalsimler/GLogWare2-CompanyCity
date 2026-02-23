@@ -24,9 +24,13 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<Job> Jobs => Set<Job>();
     #endregion
 
-    #region Log
+    #region Logs
     public DbSet<LogErp> LogErps => Set<LogErp>();
+
+    public DbSet<LogPlcCategory> LogPlcCategories => Set<LogPlcCategory>();
+    public DbSet<LogPlcDirection> LogPlcDirections => Set<LogPlcDirection>();
     public DbSet<LogPlc> LogPlcs => Set<LogPlc>();
+    
     public DbSet<Protocol> Protocols => Set<Protocol>();
     #endregion
 

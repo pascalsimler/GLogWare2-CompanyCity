@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
-public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
+public class LogPlcCategoryConfiguration : IEntityTypeConfiguration<LogPlcCategory>
 {
-    public void Configure(EntityTypeBuilder<JobStatus> entity)
+    public void Configure(EntityTypeBuilder<LogPlcCategory> entity)
     {
         entity.HasKey(e => e.Name);
 
@@ -14,6 +14,6 @@ public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
               .HasMaxLength(32)
               .IsRequired()
               .IsUnicode(false)
-              .HasComment("Unique identifier for the JobStatus");
+              .HasComment("Unique identifier for the PLC category");
     }
 }

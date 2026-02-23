@@ -8,4 +8,8 @@
     <RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Tables\Logs\LogPlcCategory.cs" />
+  </ItemGroup>
+
 </Project>

@@ -38,6 +38,18 @@ public static class DatabaseProviderHelper
         };
     }
 
+    public static string GetBlobType()
+    {
+        return GetDatabaseProvider() switch
+        {
+            DatabaseProvider.Oracle => "CLOB",
+            DatabaseProvider.SqlServer => "NVARCHAR(MAX)",
+            DatabaseProvider.Postgres => "TEXT",
+            DatabaseProvider.MySql => "LONGTEXT",
+            _ => string.Empty
+        };
+    }
+
     public static string ToProviderName(string name)
     {
         if (string.IsNullOrEmpty(name))

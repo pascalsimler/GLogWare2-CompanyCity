@@ -13,11 +13,15 @@
     "OP7100BR": {
       "IP": "10.59.0.50",
       "Port": 7100,
+      "DelayConnection": 3000,
+      "DelayRetry": 3000,
       "Description": "First Bridge of Gantry 1"
     },
     "OP7200BR": {
       "IP": "10.59.0.50",
       "Port": 7200,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
       "Description": "Second Bridge of Gantry 2"
     }
   },
@@ -25,11 +29,15 @@
     "OP1000AL": {
       "IP": "10.59.0.50",
       "Port": 1000,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
       "Description": "Infeed Conveyors"
     },
     "OP2000AL": {
       "IP": "10.59.0.50",
       "Port": 2000,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
       "Description": "Outfeed Conveyors"
     }
   }

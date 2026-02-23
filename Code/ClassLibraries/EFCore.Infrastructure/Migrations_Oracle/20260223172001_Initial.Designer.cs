@@ -3,16 +3,16 @@ using System;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Oracle.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
-namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
+namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_Oracle
 {
     [DbContext(typeof(GLogWareDbContext))]
-    [Migration("20260221233718_Initial")]
+    [Migration("20260223172001_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -23,53 +23,53 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Area", b =>
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Name")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("NAME")
                         .HasComment("Unique identifier for the area");
 
                     b.Property<string>("Comments")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Comments");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("COMMENTS");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("Name");
 
-                    b.ToTable("Areas");
+                    b.ToTable("AREAS");
 
                     b.HasData(
                         new
@@ -93,185 +93,212 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 {
                     b.Property<string>("ArticleNumber")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("ArticleNumber")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("ARTICLE_NUMBER")
                         .HasComment("Unique number of the article");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Description");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("DESCRIPTION");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("Remarks")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Remarks");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("REMARKS");
 
                     b.HasKey("ArticleNumber");
 
-                    b.ToTable("Articles");
+                    b.ToTable("ARTICLES");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Job", b =>
                 {
                     b.Property<string>("JobId")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("JobId")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("JOB_ID")
                         .HasComment("Unique JobId");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("JobStatus")
                         .IsRequired()
-                        .HasMaxLength(16)
+                        .HasMaxLength(32)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(16)")
-                        .HasColumnName("JobStatus")
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("JOB_STATUS")
                         .HasComment("Foreign key referencing JobStatus.Name");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("JobId")
-                        .HasName("PK_Jobs");
+                        .HasName("PK_JOBS");
 
                     b.HasIndex("JobStatus");
 
-                    b.ToTable("Jobs");
+                    b.ToTable("JOBS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.JobStatus", b =>
                 {
                     b.Property<string>("Name")
-                        .HasMaxLength(16)
+                        .HasMaxLength(32)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(16)")
-                        .HasColumnName("Name")
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("NAME")
                         .HasComment("Unique identifier for the JobStatus");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Description");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("DESCRIPTION");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
+                    b.Property<string>("TranslationKey")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("TRANSLATION_KEY");
+
                     b.HasKey("Name");
 
-                    b.ToTable("JobStatus");
+                    b.ToTable("JOB_STATUS");
 
                     b.HasData(
                         new
                         {
                             Name = "OK_BRIDGE",
-                            Description = "Bridge is ready to receive an ORDS"
+                            Description = "Bridge is ready to receive a new pick order",
+                            TranslationKey = "JobStatus.OK_BRIDGE"
                         },
                         new
                         {
                             Name = "BRIDGE_LOAD",
-                            Description = "Bridge is currently processing an ORDS"
+                            Description = "Bridge is currently processing a pick order",
+                            TranslationKey = "JobStatus.BRIDGE_LOAD"
                         },
                         new
                         {
                             Name = "BRIDGE_LOAD_END",
-                            Description = "Bridge has issued a COMP"
+                            Description = "Pick order has been processed",
+                            TranslationKey = "JobStatus.BRIDGE_LOAD_END"
                         },
                         new
                         {
-                            Name = "WAIT_ON_JOBMNG",
-                            Description = "New tarthet needs to be calculated by the Job Manager"
+                            Name = "OK_BRIDGE_UNLOAD",
+                            Description = "Bridge is ready to receive a new drop order",
+                            TranslationKey = "JobStatus.OK_BRIDGE_UNLOAD"
+                        },
+                        new
+                        {
+                            Name = "BRIDGE_UNLOAD",
+                            Description = "Bridge is currently processing a drop order",
+                            TranslationKey = "JobStatus.BRIDGE_UNLOAD"
+                        },
+                        new
+                        {
+                            Name = "BRIDGE_UNLOAD_END",
+                            Description = "Drop order has been processed",
+                            TranslationKey = "JobStatus.BRIDGE_UNLOAD_END"
+                        },
+                        new
+                        {
+                            Name = "WAIT_ON_JOBMANAGER",
+                            Description = "New target needs to be calculated by the Job Manager",
+                            TranslationKey = "JobStatus.WAIT_ON_JOBMANAGER"
                         },
                         new
                         {
                             Name = "WAIT_ON_ROUTE",
-                            Description = "Conveyor is waiting for a new TARG"
+                            Description = "Conveyor is waiting for a new order",
+                            TranslationKey = "JobStatus.WAIT_ON_ROUTE"
                         },
                         new
                         {
-                            Name = "CONV_MOVE",
-                            Description = "Job is moving on the conveyor"
+                            Name = "CONVEYOR_MOVE",
+                            Description = "Job is moving on the conveyor",
+                            TranslationKey = "JobStatus.CONVEYOR_MOVE"
                         });
                 });
 
@@ -279,151 +306,361 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Name")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("NAME")
                         .HasComment("Unique Language name");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("Name");
 
-                    b.ToTable("Languages");
+                    b.ToTable("LANGUAGES");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogErp", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("Guid")
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("GUID")
                         .HasComment("Unique record identifier");
 
                     b.HasKey("Guid");
 
-                    b.ToTable("LogErps");
+                    b.ToTable("LOG_ERPS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlc", b =>
                 {
-                    b.Property<Guid>("Guid")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("Guid")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID")
                         .HasComment("Unique record identifier");
 
-                    b.HasKey("Guid");
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.ToTable("LogPlcs");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .IsUnicode(false)
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("CATEGORY")
+                        .HasComment("Foreign key referencing PlcCategory.Name");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("DATA")
+                        .HasComment("Telegram data");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .IsUnicode(false)
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("DIRECTION")
+                        .HasComment("Foreign key referencing PlcDirection.Name");
+
+                    b.Property<string>("Identifier")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("IDENTIFIER");
+
+                    b.Property<string>("Information")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("INFORMATION");
+
+                    b.Property<string>("Process")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("PROCESS");
+
+                    b.Property<string>("Receiver")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("RECEIVER");
+
+                    b.Property<string>("Sender")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("SENDER");
+
+                    b.HasKey("Id")
+                        .HasName("PK_LOG_PLCS");
+
+                    b.HasIndex("Category");
+
+                    b.HasIndex("Direction");
+
+                    b.ToTable("LOG_PLCS");
+                });
+
+            modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlcCategory", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .IsUnicode(false)
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("NAME")
+                        .HasComment("Unique identifier for the PLC category");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
+                        .HasComment("Date/time the record was created");
+
+                    b.Property<string>("CreatedBy")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
+                        .HasDefaultValueSql("'GÜDEL'")
+                        .HasComment("User or process who created the record");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
+                        .HasComment("Date/time the record was updated for the last time");
+
+                    b.Property<string>("LastUpdatedBy")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
+                        .HasDefaultValueSql("'GÜDEL'")
+                        .HasComment("User or process who created the record");
+
+                    b.Property<string>("TranslationKey")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("TRANSLATION_KEY");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("LOG_PLC_CATEGORIES");
+
+                    b.HasData(
+                        new
+                        {
+                            Name = "CONVEYOR",
+                            Description = "Conveyor",
+                            TranslationKey = "LogPlcCategory.CONVEYOR"
+                        },
+                        new
+                        {
+                            Name = "GANTRY",
+                            Description = "Gantry FP",
+                            TranslationKey = "LogPlcCategory.GANTRY"
+                        },
+                        new
+                        {
+                            Name = "PALLETIZER",
+                            Description = "Palletizer ZP",
+                            TranslationKey = "LogPlcCategory.PALLETIZER"
+                        },
+                        new
+                        {
+                            Name = "SHUTTLE",
+                            Description = "Powertrain shuttle",
+                            TranslationKey = "LogPlcCategory.SHUTTLE"
+                        },
+                        new
+                        {
+                            Name = "KUKA_ROBOT",
+                            Description = "KUKA Robot",
+                            TranslationKey = "LogPlcCategory.KUKA_ROBOT"
+                        },
+                        new
+                        {
+                            Name = "UNCATEGORIZED",
+                            Description = "Uncategorized",
+                            TranslationKey = "LogPlcCategory.UNCATEGORIZED"
+                        });
+                });
+
+            modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlcDirection", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .IsUnicode(false)
+                        .HasColumnType("VARCHAR2(32)")
+                        .HasColumnName("NAME")
+                        .HasComment("Unique identifier for the PlcDirection");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
+                        .HasComment("Date/time the record was created");
+
+                    b.Property<string>("CreatedBy")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
+                        .HasDefaultValueSql("'GÜDEL'")
+                        .HasComment("User or process who created the record");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
+                        .HasComment("Date/time the record was updated for the last time");
+
+                    b.Property<string>("LastUpdatedBy")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
+                        .HasDefaultValueSql("'GÜDEL'")
+                        .HasComment("User or process who created the record");
+
+                    b.Property<string>("TranslationKey")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("TRANSLATION_KEY");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("LOG_PLC_DIRECTIONS");
+
+                    b.HasData(
+                        new
+                        {
+                            Name = "CONNECTION",
+                            Description = "Connection status",
+                            TranslationKey = "LogPlcDirection.CONNECTION"
+                        },
+                        new
+                        {
+                            Name = "GLOGWARE_TO_PLC",
+                            Description = "GLogWare ==> PLC",
+                            TranslationKey = "LogPlcDirection.GLOGWARE_TO_PLC"
+                        },
+                        new
+                        {
+                            Name = "PLC_TO_GLOGWARE",
+                            Description = "PLC ==> GLogWare",
+                            TranslationKey = "LogPlcDirection.PLC_TO_GLOGWARE"
+                        });
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Place", b =>
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Name")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("NAME")
                         .HasComment("Unique identifier for the place");
 
                     b.Property<string>("Area")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Area")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("AREA")
                         .HasComment("Foreign key referencing Area.Name");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<int>("Distance")
-                        .HasColumnType("int")
-                        .HasColumnName("Distance");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("DISTANCE");
 
                     b.Property<string>("G")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("G");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("PlaceType")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("PlaceType")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("PLACE_TYPE")
                         .HasComment("Foreign key referencing PlaceType.Name");
 
                     b.Property<string>("XCell")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("XCell");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("XCELL");
 
                     b.Property<int>("XPos")
-                        .HasColumnType("int")
-                        .HasColumnName("XPos");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("XPOS");
 
                     b.Property<string>("YCell")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("YCell");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("YCELL");
 
                     b.Property<int>("YPos")
-                        .HasColumnType("int")
-                        .HasColumnName("YPos");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("YPOS");
 
                     b.Property<int>("Zone")
-                        .HasColumnType("int")
-                        .HasColumnName("Zone");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ZONE");
 
                     b.HasKey("Name");
 
@@ -431,7 +668,7 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
 
                     b.HasIndex("PlaceType");
 
-                    b.ToTable("Places");
+                    b.ToTable("PLACES");
 
                     b.HasData(
                         new
@@ -29000,177 +29237,177 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Name")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("NAME")
                         .HasComment("Unique identifier for the PlaceType");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("Name");
 
-                    b.ToTable("PlaceTypes");
+                    b.ToTable("PLACE_TYPES");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Protocol", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("Id")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID")
                         .HasComment("Unique record identifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Message");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MESSAGE");
 
                     b.Property<DateTime?>("Timestamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Timestamp");
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("TIMESTAMP");
 
                     b.HasKey("Id")
-                        .HasName("PK_Protocols");
+                        .HasName("PK_PROTOCOLS");
 
-                    b.ToTable("Protocols");
+                    b.ToTable("PROTOCOLS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("Id")
-                        .HasName("PK_Roles");
+                        .HasName("PK_ROLES");
 
-                    b.ToTable("Roles");
+                    b.ToTable("ROLES");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Sku", b =>
                 {
                     b.Property<string>("SkuId")
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("SkuId")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("SKU_ID")
                         .HasComment("Unique identifier of the Sku - It is its barcode");
 
                     b.Property<string>("Article")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Article")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("ARTICLE")
                         .HasComment("Foreign key referencing Article.ArticleNumber");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("JobId")
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("JobId");
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("JOB_ID");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("Place")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Place")
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("PLACE")
                         .HasComment("Foreign key referencing Place.Name");
 
                     b.Property<int>("PositionInStack")
-                        .HasColumnType("int")
-                        .HasColumnName("PositionInStack");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("POSITION_IN_STACK");
 
                     b.HasKey("SkuId")
-                        .HasName("PK_Skus");
+                        .HasName("PK_SKUS");
 
                     b.HasIndex("Article");
 
@@ -29178,106 +29415,106 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
 
                     b.HasIndex("Place");
 
-                    b.ToTable("Skus");
+                    b.ToTable("SKUS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Translation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.HasKey("Id")
-                        .HasName("PK_Translations");
+                        .HasName("PK_TRANSLATIONS");
 
-                    b.ToTable("Translations");
+                    b.ToTable("TRANSLATIONS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was created");
 
                     b.Property<string>("CreatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("CreatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<bool>("IsLdap")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsLdap");
+                        .HasColumnType("BOOLEAN")
+                        .HasColumnName("IS_LDAP");
 
                     b.Property<DateTime?>("LastUpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastUpdatedAt")
-                        .HasDefaultValueSql("GETDATE()")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("LAST_UPDATED_AT")
+                        .HasDefaultValueSql("LOCALTIMESTAMP")
                         .HasComment("Date/time the record was updated for the last time");
 
                     b.Property<string>("LastUpdatedBy")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LastUpdatedBy")
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("LAST_UPDATED_BY")
                         .HasDefaultValueSql("'GÜDEL'")
                         .HasComment("User or process who created the record");
 
                     b.Property<string>("Login")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Login");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("LOGIN");
 
                     b.HasKey("Id")
-                        .HasName("PK_Users");
+                        .HasName("PK_USERS");
 
-                    b.ToTable("Users");
+                    b.ToTable("USERS");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Job", b =>
@@ -29287,9 +29524,30 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                         .HasForeignKey("JobStatus")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_Jobs_JobStatus_JobStatusRecordTempId");
+                        .HasConstraintName("FK_JOBS_JOB_STATUS_JOB_STATUS_RECORD_TEMP_ID");
 
                     b.Navigation("JobStatusRecord");
+                });
+
+            modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlc", b =>
+                {
+                    b.HasOne("Gudel.GLogWare.EFCore.Domain.LogPlcCategory", "PlcCategoryRecord")
+                        .WithMany("LogPlcs")
+                        .HasForeignKey("Category")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_LOG_PLCS_LOG_PLC_CATEGORIES_PLC_CATEGORY_RECORD_TEMP_ID");
+
+                    b.HasOne("Gudel.GLogWare.EFCore.Domain.LogPlcDirection", "PlcDirectionRecord")
+                        .WithMany("LogPlcs")
+                        .HasForeignKey("Direction")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_LOG_PLCS_LOG_PLC_DIRECTIONS_PLC_DIRECTION_RECORD_TEMP_ID");
+
+                    b.Navigation("PlcCategoryRecord");
+
+                    b.Navigation("PlcDirectionRecord");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Place", b =>
@@ -29298,13 +29556,13 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                         .WithMany("Places")
                         .HasForeignKey("Area")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_Places_Areas_AreaRecordTempId");
+                        .HasConstraintName("FK_PLACES_AREAS_AREA_RECORD_TEMP_ID");
 
                     b.HasOne("Gudel.GLogWare.EFCore.Domain.PlaceType", "PlaceTypeRecord")
                         .WithMany("Places")
                         .HasForeignKey("PlaceType")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_Places_PlaceTypes_PlaceTypeRecordTempId");
+                        .HasConstraintName("FK_PLACES_PLACE_TYPES_PLACE_TYPE_RECORD_TEMP_ID");
 
                     b.Navigation("AreaRecord");
 
@@ -29318,19 +29576,19 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                         .HasForeignKey("Article")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_Skus_Articles_ArticleRecordTempId");
+                        .HasConstraintName("FK_SKUS_ARTICLES_ARTICLE_RECORD_TEMP_ID");
 
                     b.HasOne("Gudel.GLogWare.EFCore.Domain.Job", "JobRecord")
                         .WithMany()
                         .HasForeignKey("JobId")
-                        .HasConstraintName("FK_Skus_Jobs_JobId");
+                        .HasConstraintName("FK_SKUS_JOBS_JOB_ID");
 
                     b.HasOne("Gudel.GLogWare.EFCore.Domain.Place", "PlaceRecord")
                         .WithMany("Skus")
                         .HasForeignKey("Place")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_Skus_Places_PlaceRecordTempId");
+                        .HasConstraintName("FK_SKUS_PLACES_PLACE_RECORD_TEMP_ID");
 
                     b.Navigation("ArticleRecord");
 
@@ -29352,6 +29610,16 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.JobStatus", b =>
                 {
                     b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlcCategory", b =>
+                {
+                    b.Navigation("LogPlcs");
+                });
+
+            modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.LogPlcDirection", b =>
+                {
+                    b.Navigation("LogPlcs");
                 });
 
             modelBuilder.Entity("Gudel.GLogWare.EFCore.Domain.Place", b =>

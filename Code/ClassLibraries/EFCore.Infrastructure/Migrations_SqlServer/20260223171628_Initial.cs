@@ -50,8 +50,9 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 name: "JobStatus",
                 columns: table => new
                 {
-                    Name = table.Column<string>(type: "varchar(16)", unicode: false, maxLength: 16, nullable: false, comment: "Unique identifier for the JobStatus"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Unique identifier for the JobStatus"),
+                    TranslationKey = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was created"),
                     LastUpdatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
@@ -89,14 +90,37 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 });
 
             migrationBuilder.CreateTable(
-                name: "LogPlcs",
+                name: "LogPlcCategories",
                 columns: table => new
                 {
-                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Unique record identifier")
+                    Name = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Unique identifier for the PLC category"),
+                    TranslationKey = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was created"),
+                    LastUpdatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
+                    LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was updated for the last time")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogPlcs", x => x.Guid);
+                    table.PrimaryKey("PK_LogPlcCategories", x => x.Name);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LogPlcDirections",
+                columns: table => new
+                {
+                    Name = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Unique identifier for the PlcDirection"),
+                    TranslationKey = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was created"),
+                    LastUpdatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
+                    LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was updated for the last time")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogPlcDirections", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,7 +207,7 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 columns: table => new
                 {
                     JobId = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false, comment: "Unique JobId"),
-                    JobStatus = table.Column<string>(type: "varchar(16)", unicode: false, maxLength: 16, nullable: false, comment: "Foreign key referencing JobStatus.Name"),
+                    JobStatus = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Foreign key referencing JobStatus.Name"),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()", comment: "Date/time the record was created"),
                     LastUpdatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValueSql: "'GÜDEL'", comment: "User or process who created the record"),
@@ -196,6 +220,38 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                         name: "FK_Jobs_JobStatus_JobStatusRecordTempId",
                         column: x => x.JobStatus,
                         principalTable: "JobStatus",
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LogPlcs",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false, comment: "Unique record identifier")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Direction = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Foreign key referencing PlcDirection.Name"),
+                    Category = table.Column<string>(type: "varchar(32)", unicode: false, maxLength: 32, nullable: false, comment: "Foreign key referencing PlcCategory.Name"),
+                    Sender = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Receiver = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Process = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Identifier = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Information = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Data = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true, comment: "Telegram data")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogPlcs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LogPlcs_LogPlcCategories_PlcCategoryRecordTempId",
+                        column: x => x.Category,
+                        principalTable: "LogPlcCategories",
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LogPlcs_LogPlcDirections_PlcDirectionRecordTempId",
+                        column: x => x.Direction,
+                        principalTable: "LogPlcDirections",
                         principalColumn: "Name",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -284,15 +340,41 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
 
             migrationBuilder.InsertData(
                 table: "JobStatus",
-                columns: new[] { "Name", "Description" },
+                columns: new[] { "Name", "Description", "TranslationKey" },
                 values: new object[,]
                 {
-                    { "BRIDGE_LOAD", "Bridge is currently processing an ORDS" },
-                    { "BRIDGE_LOAD_END", "Bridge has issued a COMP" },
-                    { "CONV_MOVE", "Job is moving on the conveyor" },
-                    { "OK_BRIDGE", "Bridge is ready to receive an ORDS" },
-                    { "WAIT_ON_JOBMNG", "New tarthet needs to be calculated by the Job Manager" },
-                    { "WAIT_ON_ROUTE", "Conveyor is waiting for a new TARG" }
+                    { "BRIDGE_LOAD", "Bridge is currently processing a pick order", "JobStatus.BRIDGE_LOAD" },
+                    { "BRIDGE_LOAD_END", "Pick order has been processed", "JobStatus.BRIDGE_LOAD_END" },
+                    { "BRIDGE_UNLOAD", "Bridge is currently processing a drop order", "JobStatus.BRIDGE_UNLOAD" },
+                    { "BRIDGE_UNLOAD_END", "Drop order has been processed", "JobStatus.BRIDGE_UNLOAD_END" },
+                    { "CONVEYOR_MOVE", "Job is moving on the conveyor", "JobStatus.CONVEYOR_MOVE" },
+                    { "OK_BRIDGE", "Bridge is ready to receive a new pick order", "JobStatus.OK_BRIDGE" },
+                    { "OK_BRIDGE_UNLOAD", "Bridge is ready to receive a new drop order", "JobStatus.OK_BRIDGE_UNLOAD" },
+                    { "WAIT_ON_JOBMANAGER", "New target needs to be calculated by the Job Manager", "JobStatus.WAIT_ON_JOBMANAGER" },
+                    { "WAIT_ON_ROUTE", "Conveyor is waiting for a new order", "JobStatus.WAIT_ON_ROUTE" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "LogPlcCategories",
+                columns: new[] { "Name", "Description", "TranslationKey" },
+                values: new object[,]
+                {
+                    { "CONVEYOR", "Conveyor", "LogPlcCategory.CONVEYOR" },
+                    { "GANTRY", "Gantry FP", "LogPlcCategory.GANTRY" },
+                    { "KUKA_ROBOT", "KUKA Robot", "LogPlcCategory.KUKA_ROBOT" },
+                    { "PALLETIZER", "Palletizer ZP", "LogPlcCategory.PALLETIZER" },
+                    { "SHUTTLE", "Powertrain shuttle", "LogPlcCategory.SHUTTLE" },
+                    { "UNCATEGORIZED", "Uncategorized", "LogPlcCategory.UNCATEGORIZED" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "LogPlcDirections",
+                columns: new[] { "Name", "Description", "TranslationKey" },
+                values: new object[,]
+                {
+                    { "CONNECTION", "Connection status", "LogPlcDirection.CONNECTION" },
+                    { "GLOGWARE_TO_PLC", "GLogWare ==> PLC", "LogPlcDirection.GLOGWARE_TO_PLC" },
+                    { "PLC_TO_GLOGWARE", "PLC ==> GLogWare", "LogPlcDirection.PLC_TO_GLOGWARE" }
                 });
 
             migrationBuilder.InsertData(
@@ -2688,6 +2770,16 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
                 column: "JobStatus");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LogPlcs_Category",
+                table: "LogPlcs",
+                column: "Category");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogPlcs_Direction",
+                table: "LogPlcs",
+                column: "Direction");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Places_Area",
                 table: "Places",
                 column: "Area");
@@ -2739,6 +2831,12 @@ namespace Gudel.GLogWare.EFCore.Infrastructure.Migrations_SqlServer
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "LogPlcCategories");
+
+            migrationBuilder.DropTable(
+                name: "LogPlcDirections");
 
             migrationBuilder.DropTable(
                 name: "Articles");
