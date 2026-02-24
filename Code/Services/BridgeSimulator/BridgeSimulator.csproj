@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-BridgeDriver-88f11c23-8230-4919-a830-5bdf1bcdf04a</UserSecretsId>
+    <UserSecretsId>dotnet-BridgeSimulator-edaeb040-4b27-4ecc-8fa1-06ed1bf8f037</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>

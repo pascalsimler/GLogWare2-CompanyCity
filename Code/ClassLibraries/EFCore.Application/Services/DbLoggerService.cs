@@ -13,17 +13,39 @@ public class DbLoggerService
         _db = factory.CreateDbContext();
     }
 
-    public async Task WriteAsync(string message)
+    public async Task WriteProtocolAsync(Protocol protocol)
     {
         try
         {
-            //await using var db = await _dbFactory.CreateDbContextAsync(ct);
+            _db.Protocols.Add(protocol);
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            // ⚠️ NEVER throw from logging
+            // swallow intentionally
+        }
+    }
 
-            _db.Protocols.Add(new Protocol
-            {
-                Message = message
-            });
+    public async Task WriteLogPlcAsync(LogPlc logPlc)
+    {
+        try
+        {
+            _db.LogPlcs.Add(logPlc);
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            // ⚠️ NEVER throw from logging
+            // swallow intentionally
+        }
+    }
 
+    public async Task WriteLogErpAsync(LogErp logErp)
+    {
+        try
+        {
+            _db.LogErps.Add(logErp);
             await _db.SaveChangesAsync();
         }
         catch

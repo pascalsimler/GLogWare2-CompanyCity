@@ -11,7 +11,8 @@
   </Folder>
   <Folder Name="/Code/Services/">
     <File Path="Code/Services/readme.txt" />
-    <Project Path="Code/Services/BridgeDriver/BridgeDriver.csproj" Id="72ea2672-0d55-48e3-87d2-ad096a1d4e66" />
+    <Project Path="Code/Services/BridgeManager/BridgeManager.csproj" />
+    <Project Path="Code/Services/BridgeSimulator/BridgeSimulator.csproj" Id="c27bede6-2c99-4057-a8f7-bd0bd7fe45d2" />
     <Project Path="Code/Services/DemoService/DemoService.csproj" Id="69da6fc9-a188-447a-b8e1-9cd17a1198ac" />
   </Folder>
   <Folder Name="/Code/Tests/">

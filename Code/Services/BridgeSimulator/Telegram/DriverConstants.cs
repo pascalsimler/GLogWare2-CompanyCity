@@ -1,4 +1,4 @@
-namespace Gudel.GLogWare.BridgeDriver;
+namespace Gudel.GLogWare.BridgeSimulator;
 
 
 /// <summary>
@@ -9,30 +9,17 @@ public struct DriverConstants
     /// <summary>
     /// Start of Text ASCII code
     /// </summary>
-    public const byte STX = (byte)'$';
-    //public const byte STX = 0x02;
+    public const byte STX = 0x02;
 
     /// <summary>
     /// End of Text ASCII Code
     /// </summary>
-    public const byte ETX = (byte)'#';
-    //public const byte ETX = 0x03;
+    public const byte ETX = 0x03;
 
     /// <summary>
     /// Fixed dize telegram length for the GLogWare-PLC data exchange
     /// </summary>
-    public const int TELEGRAM_LENGTH = 32;
-    //public const int TELEGRAM_LENGTH = 240;
-
-    /// <summary>
-    /// Valid names for received telegrams (used by the regex validation)
-    /// </summary>
-    public const string VALID_RECEIVING_NAMES = @"\b(STAT|ALRM|COMP|ACKN)\b";
-
-    /// <summary>
-    /// Valid names for sent telegrams (used by the regex validation)
-    /// </summary>
-    public const string VALID_SENDING_NAMES = @"\b(ORDS|ACKN)\b";
+    public const int TELEGRAM_LENGTH = 240;
 
     /// <summary>
     /// GLogWare sender/receiver identifier

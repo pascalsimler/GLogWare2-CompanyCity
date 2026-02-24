@@ -1,4 +1,5 @@
 ﻿using Gudel.GLogWare.EFCore.Application;
+using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
@@ -37,7 +38,9 @@ public class DemoService
             string logMsg = $"topic=[{topic}], message=[{message}]";
             _logger.LogInformation(logMsg);
             await using var db = await _factory.CreateDbContextAsync();
-            await _dbLoggerService.WriteAsync(logMsg);
+            Protocol protocol = new Protocol();
+            protocol.Message = logMsg;
+            await _dbLoggerService.WriteProtocolAsync(protocol);
             await Task.Delay(5000);
             await SendToMqtt($"{topic}-Response", message);
         }
@@ -58,7 +61,9 @@ public class DemoService
                 {
                     string logMsg = $"area=[{area.Name}]";
                     _logger.LogInformation(logMsg);
-                    await _dbLoggerService.WriteAsync(logMsg);
+                    Protocol protocol = new Protocol();
+                    protocol.Message = logMsg;
+                    await _dbLoggerService.WriteProtocolAsync(protocol);
                     await Task.Delay(1000);
                 }
             }

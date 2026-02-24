@@ -33,6 +33,16 @@ public class LogPlcConfiguration : IEntityTypeConfiguration<LogPlc>
             .HasForeignKey(e => e.Direction)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.Property(e => e.Ackflag)
+            .HasMaxLength(1)
+            .IsUnicode(false)
+            .HasComment("Acknowledge flag");
+
+        entity.Property(e => e.Counter)
+            .HasMaxLength(1)
+            .IsUnicode(false)
+            .HasComment("Telegram counter [0-9]");
+
         entity.Property(e => e.Data)
             .HasColumnType(DatabaseProviderHelper.GetBlobType())
             .HasComment("Telegram data");

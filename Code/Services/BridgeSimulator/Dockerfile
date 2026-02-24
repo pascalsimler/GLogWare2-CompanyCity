@@ -11,19 +11,19 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Build.props", "."]
-COPY ["Code/Services/BridgeDriver/BridgeDriver.csproj", "Code/Services/BridgeDriver/"]
-RUN dotnet restore "./Code/Services/BridgeDriver/BridgeDriver.csproj"
+COPY ["Code/Services/BridgeSimulator/BridgeSimulator.csproj", "Code/Services/BridgeSimulator/"]
+RUN dotnet restore "./Code/Services/BridgeSimulator/BridgeSimulator.csproj"
 COPY . .
-WORKDIR "/src/Code/Services/BridgeDriver"
-RUN dotnet build "./BridgeDriver.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Code/Services/BridgeSimulator"
+RUN dotnet build "./BridgeSimulator.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./BridgeDriver.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./BridgeSimulator.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "BridgeDriver.dll"]
+ENTRYPOINT ["dotnet", "BridgeSimulator.dll"]

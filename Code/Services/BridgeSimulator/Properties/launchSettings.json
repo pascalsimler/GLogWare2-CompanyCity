@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "BridgeDriver": {
+    "BridgeSimulator": {
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
