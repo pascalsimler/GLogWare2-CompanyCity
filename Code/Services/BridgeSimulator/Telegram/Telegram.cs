@@ -9,7 +9,7 @@ public class Telegram
 {
     public Telegram()
     {
-        Bytes = new byte[DriverConstants.TELEGRAM_LENGTH];
+        Bytes = new byte[TelegramConstants.TELEGRAM_LENGTH];
     }
 
     /// <summary>
@@ -43,9 +43,9 @@ public class Telegram
     public string Sender { get; set; } = string.Empty;
 
     /// <summary>
-    /// The telegram name
+    /// The telegram dentifier
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Identifier { get; set; } = string.Empty;
 
     /// <summary>
     /// The datas of the telegram
@@ -54,14 +54,14 @@ public class Telegram
 
     public void Build()
     {
-        AsciiString = DriverConstants.TELEGRAM_TEMPLATE;
-        AsciiString = AsciiString.Replace("[STX]", Convert.ToChar(DriverConstants.STX).ToString());
-        AsciiString = AsciiString.Replace("[ETX]", Convert.ToChar(DriverConstants.ETX).ToString());
+        AsciiString = TelegramConstants.TELEGRAM_TEMPLATE;
+        AsciiString = AsciiString.Replace("[STX]", Convert.ToChar(TelegramConstants.STX).ToString());
+        AsciiString = AsciiString.Replace("[ETX]", Convert.ToChar(TelegramConstants.ETX).ToString());
         AsciiString = AsciiString.Replace("[AckFlag]", AckFlag);
         AsciiString = AsciiString.Replace("[Counter]", Counter);
         AsciiString = AsciiString.Replace("[Receiver]", Receiver);
         AsciiString = AsciiString.Replace("[Sender]", Sender);
-        AsciiString = AsciiString.Replace("[Name]", Name);
+        AsciiString = AsciiString.Replace("[Identifier]", Identifier);
         AsciiString = AsciiString.Replace("[Data]", Data.PadRight(216, '.'));
 
         Array.Clear(Bytes, 0, Bytes.Length);
@@ -71,17 +71,18 @@ public class Telegram
 
     public void Parse()
     {
-        AsciiString = Encoding.Default.GetString(Bytes, 0, Bytes.Length);
+        AsciiString = Encoding.ASCII.GetString(Bytes, 0, Bytes.Length);
         AckFlag = AsciiString.Substring(1, 1);
         Counter = AsciiString.Substring(2, 1);
         Receiver = AsciiString.Substring(3, 8);
         Sender = AsciiString.Substring(11, 8);
-        Name = AsciiString.Substring(19, 4);
-        Data = AsciiString.Substring(23);
+        Identifier = AsciiString.Substring(19, 4);
+        Data = AsciiString.Substring(23, 216);
     }
 
     public string HexaDump()
     {
+        byte b;
         StringBuilder sb = new StringBuilder();
         sb.AppendLine();
         string line = string.Empty;
@@ -102,9 +103,10 @@ public class Telegram
                 if (i == Bytes.Length) break;
             }
             if (sbHexa.Length > 0) sbHexa.Append(" ");
-            sbHexa.Append(Bytes[i].ToString("X2"));
-            if (sbChar.Length > 0) sbChar.Append(" ");
-            sbChar.Append((char)Bytes[i]).ToString();
+            b = Bytes[i];
+            sbHexa.Append(b.ToString("X2"));
+            char display = (b >= 0x20 && b < 0x7F) ? (char)b : '.';
+            sbChar.Append(display);
         }
 
         return sb.ToString();

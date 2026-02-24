@@ -3,7 +3,7 @@
 /// <summary>
 /// All valid telegram identifiers GLogWare sends to the PLC.
 /// </summary>
-public enum PlcTelegramSendIdentifiers
+public enum TelegramSendIdentifiers
 {
     /// <summary>
     /// LIFE signal (GLogWare -> PLC)

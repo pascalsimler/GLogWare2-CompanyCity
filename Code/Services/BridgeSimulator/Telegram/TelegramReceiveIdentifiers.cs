@@ -1,4 +1,4 @@
-﻿namespace Gudel.GLogWare.BridgeManager;
+﻿namespace Gudel.GLogWare.BridgeSimulator;
 
 /// <summary>
 /// All valid telegram names Plc sends to GLogWare
@@ -6,19 +6,19 @@
 public enum TelegramReceiveIdentifiers
 {
     /// <summary>
-    /// Bridge STATus (PLC->GLogWare)
+    /// LIFE signal (GLogWare -> PLC)
     /// </summary>
-    STAT,
+    LIFE,
 
     /// <summary>
-    /// Bridge order COMPleted (PLC->GLogWare)
+    /// Bridge ORDer Sorter (GLogWare -> PLC)
     /// </summary>
-    COMP,
+    ORDS,
 
     /// <summary>
-    /// ALaRM bitmask (PLC->GLogWare)
+    /// Bridge order DELeTion (GLogWare -> PLC)
     /// </summary>
-    ALRM,
+    DELT,
 
     /// <summary>
     /// ACKNowledge telegram

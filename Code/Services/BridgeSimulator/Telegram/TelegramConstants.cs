@@ -4,7 +4,7 @@ namespace Gudel.GLogWare.BridgeSimulator;
 /// <summary>
 /// Constants for the communication GLogWare-PLC
 /// </summary>
-public struct DriverConstants
+public struct TelegramConstants
 {
     /// <summary>
     /// Start of Text ASCII code
@@ -17,7 +17,7 @@ public struct DriverConstants
     public const byte ETX = 0x03;
 
     /// <summary>
-    /// Fixed dize telegram length for the GLogWare-PLC data exchange
+    /// Fixed size telegram length for the GLogWare-PLC data exchange
     /// </summary>
     public const int TELEGRAM_LENGTH = 240;
 
@@ -29,6 +29,6 @@ public struct DriverConstants
     /// <summary>
     /// Telegram template
     /// </summary>
-    public const string TELEGRAM_TEMPLATE = "[STX][AckFlag][Counter][Receiver][Sender][Name][Data][ETX]";
-                                          //    1 +    1   +    1   +    8    +    8  +   4 + 216 +  1   = 240 bytes   
+    public const string TELEGRAM_TEMPLATE = "[STX][AckFlag][Counter][Receiver][Sender][Identifier][Data][ETX]";
+                                          //   +1       +1       +1        +8      +8          +4  +216   +1   = 240 bytes   
 }
