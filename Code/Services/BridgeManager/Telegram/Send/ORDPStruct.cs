@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Gudel.GLogWare.BridgeManager;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-public struct ORDSStruct
+public struct ORDPStruct
 {
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string JobId;
@@ -41,7 +41,7 @@ public struct ORDSStruct
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 6)]
     public string OffsetZ3;
 
-    public static ORDSStruct FromORDS(ORDS r) => new ORDSStruct
+    public static ORDPStruct FromORDP(ORDP r) => new ORDPStruct
     {
         JobId = string.Empty,
         JobType = string.Empty,

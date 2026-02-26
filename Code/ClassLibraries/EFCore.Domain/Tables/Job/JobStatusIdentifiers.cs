@@ -1,6 +1,6 @@
 ﻿namespace Gudel.GLogWare.EFCore.Domain;
 
-public enum JobStatusNames
+public enum JobStatusIdentifiers
 {
     OK_BRIDGE,
     BRIDGE_LOAD,

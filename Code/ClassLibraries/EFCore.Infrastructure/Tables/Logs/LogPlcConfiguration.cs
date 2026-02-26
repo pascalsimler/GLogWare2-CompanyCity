@@ -68,7 +68,7 @@ public class LogPlcConfiguration : IEntityTypeConfiguration<LogPlc>
             .HasComment("Telegram data");
 
 
-        //Table relations
+        // Table relations
         entity.HasOne(e => e.PlcDirectionRecord)
            .WithMany(a => a.LogPlcs)
            .HasForeignKey(e => e.Direction)

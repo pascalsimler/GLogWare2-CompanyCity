@@ -3,7 +3,7 @@
 [SeedOrder(1)]
 public class LogPlcDirection : BaseTracking, ISeedData<LogPlcDirection>
 {
-    public string? Name { get; set; }
+    public string? Identifier { get; set; }
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 
@@ -13,18 +13,18 @@ public class LogPlcDirection : BaseTracking, ISeedData<LogPlcDirection>
     {
         return new List<LogPlcDirection>() {
             new LogPlcDirection { 
-                Name = LogPlcDirectionIdentifiers.GENERAL.ToString(), 
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.GENERAL.ToString()}",
+                Identifier = nameof(LogPlcDirectionIdentifiers.GENERAL), 
+                TranslationKey = $"{nameof(LogPlcDirection)}.{nameof(LogPlcDirectionIdentifiers.GENERAL)}",
                 Description = "General information"
             },
             new LogPlcDirection {
-                Name = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString(),
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString()}",
+                Identifier = nameof(LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC),
+                TranslationKey = $"{nameof(LogPlcDirection)}.{nameof(LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC)}",
                 Description = "GLogWare ==> PLC"
             },
             new LogPlcDirection {
-                Name = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString(),
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString()}",
+                Identifier = nameof(LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE),
+                TranslationKey = $"{nameof(LogPlcDirection)}.{nameof(LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE)}",
                 Description = "PLC ==> GLogWare"
             }
         };

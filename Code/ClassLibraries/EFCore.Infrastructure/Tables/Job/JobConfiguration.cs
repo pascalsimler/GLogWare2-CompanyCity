@@ -8,6 +8,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
 {
     public void Configure(EntityTypeBuilder<Job> entity)
     {
+        // Column properties
         entity.HasKey(e => e.JobId);
 
         entity.Property(e => e.JobId)
@@ -21,6 +22,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
               .IsUnicode(false)
               .HasComment("Foreign key referencing JobStatus.Name");
 
+        // Column properties
         entity.HasOne(e => e.JobStatusRecord)
               .WithMany(a => a.Jobs)
               .HasForeignKey(e => e.JobStatus)

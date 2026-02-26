@@ -8,9 +8,9 @@ public class LogPlcCategoryConfiguration : IEntityTypeConfiguration<LogPlcCatego
 {
     public void Configure(EntityTypeBuilder<LogPlcCategory> entity)
     {
-        entity.HasKey(e => e.Name);
+        entity.HasKey(e => e.Identifier);
 
-        entity.Property(e => e.Name)
+        entity.Property(e => e.Identifier)
               .HasMaxLength(32)
               .IsUnicode(false)
               .IsRequired()

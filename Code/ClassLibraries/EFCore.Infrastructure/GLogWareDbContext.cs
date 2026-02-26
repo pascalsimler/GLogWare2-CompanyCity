@@ -17,6 +17,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
 
     #region Sku
     public DbSet<Article> Articles => Set<Article>();
+    public DbSet<SkuType> SkuTypes => Set<SkuType>();
     public DbSet<Sku> Skus => Set<Sku>();
     #endregion
 
@@ -33,6 +34,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<LogPlc> LogPlcs => Set<LogPlc>();
     
     public DbSet<Protocol> Protocols => Set<Protocol>();
+    public DbSet<Statistic> Statistics => Set<Statistic>();
     #endregion
 
     #region Language

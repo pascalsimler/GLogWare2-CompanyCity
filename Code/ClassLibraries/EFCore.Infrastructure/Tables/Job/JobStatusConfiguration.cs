@@ -8,9 +8,9 @@ public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
 {
     public void Configure(EntityTypeBuilder<JobStatus> entity)
     {
-        entity.HasKey(e => e.Name);
+        entity.HasKey(e => e.Identifier);
 
-        entity.Property(e => e.Name)
+        entity.Property(e => e.Identifier)
               .HasMaxLength(32)
               .IsRequired()
               .IsUnicode(false)

@@ -8,6 +8,7 @@ public class SkuConfiguration : IEntityTypeConfiguration<Sku>
 {
     public void Configure(EntityTypeBuilder<Sku> entity)
     {
+        // Column properties
         entity.HasKey(e => e.SkuId);
 
         entity.Property(e => e.SkuId)
@@ -26,6 +27,8 @@ public class SkuConfiguration : IEntityTypeConfiguration<Sku>
               .IsUnicode (false)
               .HasComment("Foreign key referencing Place.Name");
 
+
+        // Table relations
         entity.HasOne(e => e.ArticleRecord)
               .WithMany(a => a.Skus)
               .HasForeignKey(e => e.Article)
