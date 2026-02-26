@@ -11,9 +11,9 @@ public class Area : BaseTracking, ISeedData<Area>
     public static IEnumerable<Area> SeedData()
     {
         return new List<Area>() {
-            new Area { Name = AreaConstants.GantryStorage, Comments = "Gantry area cell" },
-            new Area { Name = AreaConstants.GantryBridge, Comments = "Gantry bridge" },
-            new Area { Name = AreaConstants.Conveyor, Comments = "Conveyor belt" }
+            new Area { Name = AreaIdentifiers.GANTRY.ToString(), Comments = "Gantry area cell" },
+            new Area { Name = AreaIdentifiers.BRIDGE.ToString(), Comments = "Gantry bridge" },
+            new Area { Name = AreaIdentifiers.CONV.ToString(), Comments = "Conveyor belt" }
         };
     }
 }

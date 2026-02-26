@@ -13,18 +13,18 @@ public class LogPlcDirection : BaseTracking, ISeedData<LogPlcDirection>
     {
         return new List<LogPlcDirection>() {
             new LogPlcDirection { 
-                Name = LogPlcDirectionNames.GENERAL.ToString(), 
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionNames.GENERAL.ToString()}",
+                Name = LogPlcDirectionIdentifiers.GENERAL.ToString(), 
+                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.GENERAL.ToString()}",
                 Description = "General information"
             },
             new LogPlcDirection {
-                Name = LogPlcDirectionNames.GLOGWARE_TO_PLC.ToString(),
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionNames.GLOGWARE_TO_PLC.ToString()}",
+                Name = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString(),
+                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString()}",
                 Description = "GLogWare ==> PLC"
             },
             new LogPlcDirection {
-                Name = LogPlcDirectionNames.PLC_TO_GLOGWARE.ToString(),
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionNames.PLC_TO_GLOGWARE.ToString()}",
+                Name = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString(),
+                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString()}",
                 Description = "PLC ==> GLogWare"
             }
         };

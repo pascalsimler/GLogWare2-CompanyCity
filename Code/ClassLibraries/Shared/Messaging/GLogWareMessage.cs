@@ -6,8 +6,9 @@ namespace Gudel.GLogWare.Shared;
 
 public class GLogWareMessage
 {
-    public GLogWareMessageName MessageName { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.Now;
+    public string Sender { get; set; } = string.Empty;
+    public GLogWareMessageIdentifiers Identifier { get; set; }
     public object? Data { get; set; }
 
     public string Serialize()

@@ -33,8 +33,8 @@ public class Place : BaseTracking, ISeedData<Place>
                 for (int y = 1; y <= 17; y++)
                 {
                     p = new Place();
-                    p.Name = $"{AreaConstants.GantryStorage}-{g:0}-{x:00}.{y:00}";
-                    p.Area = AreaConstants.GantryStorage;
+                    p.Name = $"{AreaIdentifiers.GANTRY.ToString()}-{g:0}-{x:00}.{y:00}";
+                    p.Area = AreaIdentifiers.GANTRY.ToString();
                     p.PlaceType = null;
                     p.G = g.ToString();
                     p.XCell = x.ToString();

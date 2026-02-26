@@ -1,6 +1,6 @@
 ﻿namespace Gudel.GLogWare.Shared;
 
-public enum GLogWareMessageName
+public enum GLogWareMessageIdentifiers
 {
     WakeUp,
     FromPlc,

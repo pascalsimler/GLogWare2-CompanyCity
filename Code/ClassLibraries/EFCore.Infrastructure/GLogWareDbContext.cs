@@ -12,6 +12,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<PlaceType> PlaceTypes => Set<PlaceType>();
     public DbSet<Place> Places => Set<Place>();
+    public DbSet<Route> Routes => Set<Route>();
     #endregion
 
     #region Sku

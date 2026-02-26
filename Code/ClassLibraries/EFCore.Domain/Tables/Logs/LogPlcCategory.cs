@@ -13,33 +13,33 @@ public class LogPlcCategory : BaseTracking, ISeedData<LogPlcCategory>
     {
         return new List<LogPlcCategory>() {
             new LogPlcCategory { 
-                Name = LogPlcCategoryNames.CONVEYOR.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.CONVEYOR.ToString()}",
+                Name = LogPlcCategoryIdentifiers.CONVEYOR.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.CONVEYOR.ToString()}",
                 Description = "Conveyor"
             },
             new LogPlcCategory {
-                Name = LogPlcCategoryNames.GANTRY.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.GANTRY.ToString()}",
+                Name = LogPlcCategoryIdentifiers.GANTRY.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.GANTRY.ToString()}",
                 Description = "Gantry FP"
             },
             new LogPlcCategory {
-                Name = LogPlcCategoryNames.PALLETIZER.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.PALLETIZER.ToString()}",
+                Name = LogPlcCategoryIdentifiers.PALLETIZER.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.PALLETIZER.ToString()}",
                 Description = "Palletizer ZP"
             },
             new LogPlcCategory {
-                Name = LogPlcCategoryNames.SHUTTLE.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.SHUTTLE.ToString()}",
+                Name = LogPlcCategoryIdentifiers.SHUTTLE.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.SHUTTLE.ToString()}",
                 Description = "Powertrain shuttle"
             },
             new LogPlcCategory {
-                Name = LogPlcCategoryNames.KUKA_ROBOT.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.KUKA_ROBOT.ToString()}",
+                Name = LogPlcCategoryIdentifiers.KUKA_ROBOT.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.KUKA_ROBOT.ToString()}",
                 Description = "KUKA Robot"
             },
             new LogPlcCategory {
-                Name = LogPlcCategoryNames.UNCATEGORIZED.ToString(),
-                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryNames.UNCATEGORIZED.ToString()}",
+                Name = LogPlcCategoryIdentifiers.UNCATEGORIZED.ToString(),
+                TranslationKey = $"{typeof(LogPlcCategory).Name}.{LogPlcCategoryIdentifiers.UNCATEGORIZED.ToString()}",
                 Description = "Uncategorized"
             },
         };

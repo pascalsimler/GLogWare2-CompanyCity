@@ -1,6 +1,7 @@
 ﻿using Gudel.GLogWare.EFCore.Application;
 using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Shared;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
 using MQTTnet.Client;
@@ -159,15 +160,57 @@ public class BridgeManager : IHostedService, IAsyncDisposable
         //_plcSendingReleased.WaitOne();
         //_plcSendingReleased.Reset();
 
-        string Msg = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-        _logger.LogInformation(Msg);
+        string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+        _logger.LogInformation(payload);
 
-        Telegram t = new Telegram();
-        t.Identifier = TelegramSendIdentifiers.LIFE.ToString();
-        t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
-        t.Receiver = OP!;
-        t.Data = string.Empty;
-        await SendToPlc(t, true);
+        GLogWareMessage? m = GLogWareMessage.DeSerialize(payload);
+        if (m == null)
+        {
+            _logger.LogInformation("Cannot deserialize into a GLogWareMessage");
+            return;
+        }
+
+        switch (m.Identifier)
+        {
+            case GLogWareMessageIdentifiers.WakeUp:
+                break;
+            case GLogWareMessageIdentifiers.ToPlc:
+                Telegram t = new Telegram();
+                t.Identifier = TelegramSendIdentifiers.LIFE.ToString();
+                t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
+                t.Receiver = OP!;
+                t.Data = string.Empty;
+                await SendToPlc(t, true);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public async Task SendToMqtt(string topic, GLogWareMessage m)
+    {
+        string payload = string.Empty;
+
+        try
+        {
+            m.Sender = ServiceName;
+            payload = m.Serialize();
+
+            _logger.LogInformation($"topic=[{topic}]");
+            _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
+
+            var mqttMessage = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(Encoding.UTF8.GetBytes(payload))
+                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
+                .Build();
+            await _mqttClient!.EnqueueAsync(mqttMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception");
+        }
+  
     }
 
     private async Task TcpConnectLoopAsync(CancellationToken token)
@@ -194,7 +237,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 {
                     LogPlc lp = new LogPlc();
                     InitLogPlc(lp);
-                    lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                     lp.Information = information;
                     await _dbLoggerService.WriteLogPlcAsync(lp);
                 }
@@ -207,7 +250,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 {
                     LogPlc lp = new LogPlc();
                     InitLogPlc(lp);
-                    lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                     lp.Information = information;
                     await _dbLoggerService.WriteLogPlcAsync(lp);
                 }
@@ -218,7 +261,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 _logger.LogWarning(ex, information);
                 LogPlc lp = new LogPlc();
                 InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                 lp.Information = information;
                 lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
                 await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -230,7 +273,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 _logger.LogWarning(ex, information);
                 LogPlc lp = new LogPlc();
                 InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                 lp.Information = information;
                 lp.Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}";
                 await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -241,7 +284,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 _logger.LogWarning(ex, information);
                 LogPlc lp = new LogPlc();
                 InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                 lp.Information = information;
                 lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
                 await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -252,7 +295,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
                 _logger.LogError(ex, information);
                 LogPlc lp = new LogPlc();
                 InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
                 lp.Information = information;
                 lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
                 await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -308,7 +351,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogWarning(ex, information);
             LogPlc lp = new LogPlc();
             InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
             lp.Information = information;
             lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
             await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -319,7 +362,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogWarning(ex, information);
             LogPlc lp = new LogPlc();
             InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
             lp.Information = information;
             lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
             await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -330,7 +373,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogError(ex, information);
             LogPlc lp = new LogPlc();
             InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionNames.GENERAL.ToString();
+            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
             lp.Information = information;
             lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
             await _dbLoggerService.WriteLogPlcAsync(lp);
@@ -343,7 +386,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
     {
         _lpReceive = new LogPlc();
         InitLogPlc(_lpReceive);
-        _lpReceive.Direction = LogPlcDirectionNames.PLC_TO_GLOGWARE.ToString(); 
+        _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString(); 
 
         if (!Validate(t))
         {
@@ -356,47 +399,79 @@ public class BridgeManager : IHostedService, IAsyncDisposable
         _logger.LogInformation(t.AsciiString);
         if (t.Identifier == TelegramReceiveIdentifiers.ACKN.ToString())
         {
-            if (t.Counter == _lastSentTelegram.Counter)
+            if (_watchdogRetry.Enabled)
             {
-                _watchdogRetry.Enabled = false;
-                //if (sendingReleased != null)
-                //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
+                if (t.Counter == _lastSentTelegram.Counter)
+                {
+                    _watchdogRetry.Enabled = false;
+                    //if (sendingReleased != null)
+                    //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
+                }
+                else
+                {
+                    _lpReceive.Information =
+                        $"Unexpected counter in ACKN: " +
+                        $"Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]";
+                    _lpReceive.Data = t.HexaDump();
+                    _logger.LogError(_lpReceive.Information);
+                    await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
+                }
             }
             else
             {
                 _lpReceive.Information =
-                     $"Unexpected counter in ACKN: " +
-                     $"Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]";
+                    $"No pending ACKN expected !";
                 _lpReceive.Data = t.HexaDump();
                 _logger.LogError(_lpReceive.Information);
                 await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
             }
+            return;
         }
-        else
+
+        _ackTelegram.Sender = t.Receiver;
+        _ackTelegram.Receiver = t.Sender;
+        _ackTelegram.Identifier = TelegramSendIdentifiers.ACKN.ToString();
+        _ackTelegram.AckFlag = "0";
+        _ackTelegram.Counter = t.Counter;
+        _ackTelegram.Data = t.Data;
+        await SendToPlc(_ackTelegram, false);
+        
+        if (t.Counter == _lastReceivedCounter && t.Counter != "0")
         {
-            _ackTelegram.Sender = t.Receiver;
-            _ackTelegram.Receiver = t.Sender;
-            _ackTelegram.Identifier = TelegramSendIdentifiers.ACKN.ToString();
-            _ackTelegram.AckFlag = "0";
-            _ackTelegram.Counter = t.Counter;
-            _ackTelegram.Data = t.Data;
-            await SendToPlc(_ackTelegram, false);
-            if (t.Counter == _lastReceivedCounter && t.Counter != "0")
-            {
-                _lpReceive.Information =
-                    $"Same counter [{t.Counter}] as previous telegram. " +
-                    $"It is a retry telegram --> No processing";
-                _lpReceive.Data = t.HexaDump();
-                _logger.LogError(_lpReceive.Information);
-                await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
-            }
-            else
-            {
-                _lastReceivedCounter = t.Counter;
-                //if (telegramReceived != null)
-                //    telegramReceived.Invoke(this, new TelegramReceivedEventArgs(_receivedTelegram));
-            }
+            _lpReceive.Information =
+                $"Same counter [{t.Counter}] as previous telegram. " +
+                $"It is a retry telegram --> No processing";
+            _lpReceive.Data = t.HexaDump();
+            _logger.LogError(_lpReceive.Information);
+            await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
+            return;
+        }   
+        _lastReceivedCounter = t.Counter;
+
+        switch (t.Identifier)
+        {
+            case nameof(TelegramReceiveIdentifiers.STAT):
+                await Handle_STAT(t);
+                break;
+            case nameof(TelegramReceiveIdentifiers.COMP):
+                await Handle_COMP(t);
+                break;
+            case nameof(TelegramReceiveIdentifiers.ALRM):
+                await Handle_ALRM(t);
+                break;
         }
+    }
+
+    private async Task Handle_STAT(Telegram t)
+    {
+    }
+
+    private async Task Handle_COMP(Telegram t)
+    {
+    }
+
+    private async Task Handle_ALRM(Telegram t)
+    {
     }
 
     private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
@@ -474,10 +549,10 @@ public class BridgeManager : IHostedService, IAsyncDisposable
         //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
 
         _lpReceive.Ackflag = t.AckFlag;
-        _lpSend.Counter = t.Counter;
+        _lpReceive.Counter = t.Counter;
         _lpReceive.Sender = t.Sender;
-        _lpSend.Receiver = t.Receiver;
-        _lpSend.Identifier = t.Identifier;
+        _lpReceive.Receiver = t.Receiver;
+        _lpReceive.Identifier = t.Identifier;
 
         b = t.Bytes[0];
         if (b != TelegramConstants.STX)
@@ -553,7 +628,7 @@ public class BridgeManager : IHostedService, IAsyncDisposable
 
     private void InitLogPlc(LogPlc lp)
     {
-        lp.Category = LogPlcCategoryNames.GANTRY.ToString();
+        lp.Category = LogPlcCategoryIdentifiers.GANTRY.ToString();
         lp.Process = ServiceName;
     }
 

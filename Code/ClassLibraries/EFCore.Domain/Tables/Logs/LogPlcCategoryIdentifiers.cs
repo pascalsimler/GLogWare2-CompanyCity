@@ -1,6 +1,6 @@
 ﻿namespace Gudel.GLogWare.EFCore.Domain;
 
-public enum LogPlcCategoryNames
+public enum LogPlcCategoryIdentifiers
 {
     CONVEYOR,
     GANTRY,
