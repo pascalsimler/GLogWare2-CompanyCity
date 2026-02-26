@@ -12,15 +12,18 @@ public class SkuConfiguration : IEntityTypeConfiguration<Sku>
 
         entity.Property(e => e.SkuId)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .IsRequired()
               .HasComment("Unique identifier of the Sku - It is its barcode");
 
         entity.Property(e => e.Article)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .HasComment("Foreign key referencing Article.ArticleNumber");
 
         entity.Property(e => e.Place)
               .HasMaxLength(16)
+              .IsUnicode (false)
               .HasComment("Foreign key referencing Place.Name");
 
         entity.HasOne(e => e.ArticleRecord)

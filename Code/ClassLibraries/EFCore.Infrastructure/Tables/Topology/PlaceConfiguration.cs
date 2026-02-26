@@ -12,15 +12,18 @@ public class PlaceConfiguration : IEntityTypeConfiguration<Place>
 
         entity.Property(e => e.Name)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .IsRequired()
               .HasComment("Unique identifier for the place");
 
         entity.Property(e => e.Area)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .HasComment("Foreign key referencing Area.Name");
 
         entity.Property(e => e.PlaceType)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .HasComment("Foreign key referencing PlaceType.Name");
 
         entity.HasOne(e => e.AreaRecord)

@@ -2,7 +2,7 @@
 
 public enum LogPlcDirectionNames
 {
-    CONNECTION,
+    GENERAL,
     GLOGWARE_TO_PLC,
     PLC_TO_GLOGWARE
 }

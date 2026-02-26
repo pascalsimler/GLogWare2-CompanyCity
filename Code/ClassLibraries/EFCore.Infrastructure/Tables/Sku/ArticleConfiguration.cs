@@ -12,6 +12,7 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         entity.Property(e => e.ArticleNumber)
                .HasMaxLength(16)
+               .IsUnicode(false)
                .IsRequired()
                .HasComment("Unique number of the article");
     }

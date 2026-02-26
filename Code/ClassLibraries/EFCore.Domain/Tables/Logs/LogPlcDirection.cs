@@ -13,9 +13,9 @@ public class LogPlcDirection : BaseTracking, ISeedData<LogPlcDirection>
     {
         return new List<LogPlcDirection>() {
             new LogPlcDirection { 
-                Name = LogPlcDirectionNames.CONNECTION.ToString(), 
-                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionNames.CONNECTION.ToString()}",
-                Description = "Connection status"
+                Name = LogPlcDirectionNames.GENERAL.ToString(), 
+                TranslationKey = $"{typeof(LogPlcDirection).Name}.{LogPlcDirectionNames.GENERAL.ToString()}",
+                Description = "General information"
             },
             new LogPlcDirection {
                 Name = LogPlcDirectionNames.GLOGWARE_TO_PLC.ToString(),

@@ -12,8 +12,8 @@ public class LogPlcDirectionConfiguration : IEntityTypeConfiguration<LogPlcDirec
 
         entity.Property(e => e.Name)
             .HasMaxLength(32)
-            .IsRequired()
             .IsUnicode(false)
+            .IsRequired()
             .HasComment("Unique identifier for the PlcDirection");
     }
 }

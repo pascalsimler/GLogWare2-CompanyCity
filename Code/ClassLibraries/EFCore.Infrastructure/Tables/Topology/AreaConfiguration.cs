@@ -12,6 +12,7 @@ public class AreaConfiguration : IEntityTypeConfiguration<Area>
 
         entity.Property(e => e.Name)
               .HasMaxLength(16)
+              .IsUnicode(false)
               .IsRequired()
               .HasComment("Unique identifier for the area");
     }
