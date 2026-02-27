@@ -34,12 +34,14 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<LogPlc> LogPlcs => Set<LogPlc>();
     
     public DbSet<Protocol> Protocols => Set<Protocol>();
+
+    public DbSet<StatisticCategory> StatisticCategories => Set<StatisticCategory>();
     public DbSet<Statistic> Statistics => Set<Statistic>();
     #endregion
 
     #region Language
     public DbSet<Language> Languages => Set<Language>();
-    public DbSet<Translation> Translations => Set<Translation>();
+    public DbSet<Dictionary> Dictionaries => Set<Dictionary>();
     #endregion
 
     #region User Management

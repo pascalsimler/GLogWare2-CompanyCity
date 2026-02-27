@@ -26,6 +26,8 @@ public class PlaceConfiguration : IEntityTypeConfiguration<Place>
               .IsUnicode(false)
               .HasComment("Foreign key referencing PlaceType.Name");
 
+
+        // Table relations
         entity.HasOne(e => e.AreaRecord)
               .WithMany(a => a.Places)
               .HasForeignKey(e => e.Area)

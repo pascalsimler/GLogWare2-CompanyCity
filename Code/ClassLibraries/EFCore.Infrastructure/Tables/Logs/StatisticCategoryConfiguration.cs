@@ -6,7 +6,14 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 
 public class StatisticCategoryConfiguration : IEntityTypeConfiguration<StatisticCategory>
 {
-    public void Configure(EntityTypeBuilder<StatisticCategory> builder)
+    public void Configure(EntityTypeBuilder<StatisticCategory> entity)
     {
+        entity.HasKey(e => e.Identifier);
+
+        entity.Property(e => e.Identifier)
+              .HasMaxLength(16)
+              .IsUnicode(false)
+              .IsRequired()
+              .HasComment("Unique identifier for the statistic category");
     }
 }

@@ -20,6 +20,13 @@ public class Place : BaseTracking, ISeedData<Place>
     public PlaceType PlaceTypeRecord { get; set; } = null!;
 
     public ICollection<Sku> Skus { get; set; } = new List<Sku>();
+    public ICollection<Job> JobSourcePlaces { get; set; } = new List<Job>();
+    public ICollection<Job> JobDestinationPlaces { get; set; } = new List<Job>();
+    public ICollection<Job> JobActualPlaces { get; set; } = new List<Job>();
+    public ICollection<Job> JobNextPlaces { get; set; } = new List<Job>();
+    public ICollection<Route> RouteDecisionPlaces { get; set; } = new List<Route>();
+    public ICollection<Route> RouteDestinationPlaces { get; set; } = new List<Route>();
+    public ICollection<Route> RouteNextPlaces { get; set; } = new List<Route>();
 
     public static IEnumerable<Place> SeedData()
     {

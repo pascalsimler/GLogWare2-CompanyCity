@@ -2,5 +2,8 @@
 
 public class Language : BaseTracking
 {
-    public string Name { get; set; } = null!;
+    public string Code { get; set; } = null!;
+    public string? Description { get; set; }
+
+    public ICollection<Dictionary> Dictionaries { get; set; } = new List<Dictionary>();
 }

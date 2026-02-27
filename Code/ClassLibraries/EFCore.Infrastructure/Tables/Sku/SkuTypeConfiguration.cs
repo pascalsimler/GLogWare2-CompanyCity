@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
-public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
+public class SkuTypeConfiguration : IEntityTypeConfiguration<SkuType>
 {
-    public void Configure(EntityTypeBuilder<JobStatus> entity)
+    public void Configure(EntityTypeBuilder<SkuType> entity)
     {
         entity.HasKey(e => e.Identifier);
 
@@ -14,7 +14,7 @@ public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
             .HasMaxLength(32)
             .IsRequired()
             .IsUnicode(false)
-            .HasComment("Unique identifier for the JobStatus");
+            .HasComment("Unique identifier for the SkuType");
 
         entity.Property(e => e.TranslationKey)
             .HasMaxLength(32)

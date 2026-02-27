@@ -2,4 +2,6 @@
 
 public enum StatisticCategoryIdentifiers
 {
+    Bridge,
+    FillLevel
 }

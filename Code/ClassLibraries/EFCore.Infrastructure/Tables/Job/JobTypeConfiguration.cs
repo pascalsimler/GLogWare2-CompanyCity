@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
-public class JobStatusConfiguration : IEntityTypeConfiguration<JobStatus>
+public class JobTypeConfiguration : IEntityTypeConfiguration<JobType>
 {
-    public void Configure(EntityTypeBuilder<JobStatus> entity)
+    public void Configure(EntityTypeBuilder<JobType> entity)
     {
         entity.HasKey(e => e.Identifier);
 

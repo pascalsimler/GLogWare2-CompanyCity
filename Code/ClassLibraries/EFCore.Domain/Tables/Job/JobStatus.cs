@@ -3,7 +3,7 @@
 [SeedOrder(1)]
 public class JobStatus : BaseTracking, ISeedData<JobStatus>
 {
-    public string? Identifier { get; set; }
+    public string Identifier { get; set; } = null!;
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 

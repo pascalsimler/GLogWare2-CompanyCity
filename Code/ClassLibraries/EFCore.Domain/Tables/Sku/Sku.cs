@@ -2,8 +2,8 @@
 
 public class Sku : BaseTracking
 {
-    public string SkuId { get; set; } = null!;
-    public string? JobId { get; set; } = null!;
+    public string Skuid { get; set; } = null!;
+    public string? Jobid { get; set; } = null!;
     public string? SkuType { get; set; } = null!;
     public string? Article { get; set; } = null!;
     public string? Place { get; set; } = null!;

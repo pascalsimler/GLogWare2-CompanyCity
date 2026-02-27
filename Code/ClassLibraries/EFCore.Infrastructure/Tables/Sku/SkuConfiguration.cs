@@ -9,9 +9,9 @@ public class SkuConfiguration : IEntityTypeConfiguration<Sku>
     public void Configure(EntityTypeBuilder<Sku> entity)
     {
         // Column properties
-        entity.HasKey(e => e.SkuId);
+        entity.HasKey(e => e.Skuid);
 
-        entity.Property(e => e.SkuId)
+        entity.Property(e => e.Skuid)
               .HasMaxLength(16)
               .IsUnicode(false)
               .IsRequired()
