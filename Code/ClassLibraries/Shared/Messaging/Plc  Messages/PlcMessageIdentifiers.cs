@@ -2,6 +2,8 @@
 
 public enum PlcMessageIdentifiers
 {
+    LIFE, 
+
     ORDS,
 
     TARG,

@@ -23,6 +23,11 @@ public class JobType : BaseTracking, ISeedData<JobType>
                 Description = "Outfeed from the gantry store"
             },
             new JobType {
+                Identifier = nameof(JobTypeIdentifiers.RELOCATION),
+                TranslationKey = $"{nameof(JobType)}.{nameof(JobTypeIdentifiers.RELOCATION)}",
+                Description = "Relocation inside the gantry store"
+            },
+            new JobType {
                 Identifier = nameof(JobTypeIdentifiers.PALLETIZING),
                 TranslationKey = $"{nameof(JobType)}.{nameof(JobTypeIdentifiers.PALLETIZING)}",
                 Description = "Palletizing with ZP or Kuka robot"

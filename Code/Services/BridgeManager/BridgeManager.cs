@@ -1,5 +1,4 @@
 ﻿using Gudel.GLogWare.EFCore.Application;
-using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -7,14 +6,11 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
-using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Timers;
 
 namespace Gudel.GLogWare.BridgeManager;
 
-public class BridgeManager : IHostedService, IAsyncDisposable
+public partial class BridgeManager : IHostedService, IAsyncDisposable
 {
     #region Public members
     public static string? OP = string.Empty;
@@ -29,29 +25,11 @@ public class BridgeManager : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-
-    // PLC
-    private string _plcIp { get; set; } = "127.0.0.1";
-    private int _plcPort { get; set; } = 7000;
-    private int _plcDelayConnection { get; set; } = 5000;
-    private int _plcDelayRetry { get; set; } = 5000;
-    private TcpClient? _tcpClient = null;
-    private string _lastReceivedCounter = "0";
-    private Telegram _lastSentTelegram = null!;
-    private Telegram _ackTelegram = null!;
-    private System.Timers.Timer _watchdogRetry = null!;
-
-    // MQTT
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
     private IManagedMqttClient? _mqttClient = null;
-
-    // Miscellaneous
     private CancellationTokenSource? _cts;
-    private LogPlc _lpReceive = null!;
-    private LogPlc _lpSend = null!;
-
     #endregion
 
     public BridgeManager(
@@ -90,27 +68,19 @@ public class BridgeManager : IHostedService, IAsyncDisposable
 
     private void LoadConfiguration()
     {
-        string path = string.Empty; 
-        
-        // MQTT Broker configuration
-        path = "MQTTBroker";
+        LoadConfiguration_Mqtt();
+        LoadConfiguration_Plc();
+    }
+
+    private void LoadConfiguration_Mqtt()
+    {
+        string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
         _mqttBrokerRootTopic = _configuration[$"{path}:RootTopic"] ?? _mqttBrokerRootTopic;
         _logger.LogInformation($"_mqttBrokerIp=[{_mqttBrokerIp}]");
         _logger.LogInformation($"_mqttBrokerPort=[{_mqttBrokerPort}]");
         _logger.LogInformation($"_mqttBrokerRootTopic=[{_mqttBrokerRootTopic}]");
-
-        // Gantry bridge configuration
-        path = $"GantryBridges:{OP}";
-        _plcIp = _configuration[$"{path}:Ip"] ?? _plcIp;
-        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPlcPort)) _plcPort = tmpPlcPort;
-        if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpPlcDelayConnection)) _plcDelayConnection = tmpPlcDelayConnection;
-        if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpPlcDelayRetry)) _plcDelayRetry = tmpPlcDelayRetry;
-        _logger.LogInformation($"_plcIp=[{_plcIp}]");
-        _logger.LogInformation($"_plcPort=[{_plcPort}]");
-        _logger.LogInformation($"_plcDelayConnectionPlc=[{_plcDelayConnection}]");
-        _logger.LogInformation($"_plcDelayRetry=[{_plcDelayRetry}]");
     }
 
     private async Task StartMqtt()
@@ -160,30 +130,29 @@ public class BridgeManager : IHostedService, IAsyncDisposable
         //_plcSendingReleased.WaitOne();
         //_plcSendingReleased.Reset();
 
-        string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-        _logger.LogInformation(payload);
-
-        GLogWareMessage? m = GLogWareMessage.DeSerialize(payload);
-        if (m == null)
+        try
         {
-            _logger.LogInformation("Cannot deserialize into a GLogWareMessage");
-            return;
+            string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+            _logger.LogInformation(payload);
+
+            GLogWareMessage m = GLogWareMessage.DeSerialize(payload)!;
+            switch (m.Identifier)
+            {
+                case GLogWareMessageIdentifiers.WakeUp:
+                    break;
+                case GLogWareMessageIdentifiers.ToPlc:
+                    PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await SendPlcMessage(pm);
+                    break;
+                case GLogWareMessageIdentifiers.FromPlc:
+                    break;
+                default:
+                    break;
+            }
         }
-
-        switch (m.Identifier)
+        catch (Exception ex)
         {
-            case GLogWareMessageIdentifiers.WakeUp:
-                break;
-            case GLogWareMessageIdentifiers.ToPlc:
-                Telegram t = new Telegram();
-                t.Identifier = TelegramSendIdentifiers.LIFE.ToString();
-                t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
-                t.Receiver = OP!;
-                t.Data = string.Empty;
-                await SendToPlc(t, true);
-                break;
-            default:
-                break;
+            _logger.LogError(ex, "Error processing GLogWareMessage");
         }
     }
 
@@ -211,425 +180,5 @@ public class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Exception");
         }
   
-    }
-
-    private async Task TcpConnectLoopAsync(CancellationToken token)
-    {
-        string information = string.Empty;
-
-        _lastSentTelegram = new Telegram();
-        _ackTelegram = new Telegram();
-        _watchdogRetry = new System.Timers.Timer(_plcDelayRetry);
-        _watchdogRetry.Elapsed += OnWatchdogRetry!;
-        _watchdogRetry.AutoReset = true;
-        _watchdogRetry.Enabled = false;
-
-        while (!token.IsCancellationRequested)
-        {
-            try
-            {
-                _tcpClient = new TcpClient();
-
-                _logger.LogInformation($"Connecting to {_plcIp}:{_plcPort} ...");
-                await _tcpClient.ConnectAsync(_plcIp, _plcPort, token);
-                information = $"Connected to {_plcIp}:{_plcPort} !";
-                _logger.LogInformation(information);
-                {
-                    LogPlc lp = new LogPlc();
-                    InitLogPlc(lp);
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    await _dbLoggerService.WriteLogPlcAsync(lp);
-                }
-
-                using NetworkStream stream = _tcpClient.GetStream();
-                await TcpReceiveLoopAsync(stream, token);
-
-                information = $"Connection closed by the PLC !";
-                _logger.LogWarning(information);
-                {
-                    LogPlc lp = new LogPlc();
-                    InitLogPlc(lp);
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    await _dbLoggerService.WriteLogPlcAsync(lp);
-                }
-            }
-            catch (OperationCanceledException ex)
-            {
-                information = $"Normal termination";
-                _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
-                break;
-            }
-            catch (SocketException ex)
-            {
-                information = $"Socket error (Network or PLC inaccessible) !";
-                _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
-            }
-            catch (IOException ex)
-            {
-                information = $"Connection interrupted !";
-                _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
-            }
-            catch (Exception ex)
-            {
-                information = $"Unexpected error !";
-                _logger.LogError(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
-            }
-
-            if (!token.IsCancellationRequested)
-            {
-                _logger.LogInformation($"Reconnecting in {_plcDelayConnection} milliseconds ...");
-                await Task.Delay(TimeSpan.FromMilliseconds(_plcDelayConnection), token);
-            }
-
-            if (_tcpClient != null)
-            {
-                _tcpClient.Dispose();
-            }
-        }
-
-        await Task.CompletedTask;
-    }
-
-    private async Task TcpReceiveLoopAsync(NetworkStream stream, CancellationToken token)
-    {
-        int bytesRead = 0;
-        int offset = 0;
-        string information = string.Empty;
-        Telegram t = new Telegram();
-
-        try
-        {
-            while (true)
-            {
-                offset = 0;
-                Array.Clear(t.Bytes, 0, t.Bytes.Length);
-                while (offset < t.Bytes.Length)
-                {
-                    bytesRead = await stream.ReadAsync(t.Bytes, offset, t.Bytes.Length - offset, token);
-                    if (bytesRead == 0) break; // connection closed properly
-                    offset += bytesRead;
-                }
-                if (bytesRead == 0)
-                {
-                    information = $"Connection closed by the PLC !";
-                    _logger.LogWarning(information);
-                    break;
-                }
-
-                await ProcessTelegram(t);
-            }
-        }
-        catch (OperationCanceledException ex)
-        {
-            information = $"Normal termination";
-            _logger.LogWarning(ex, information);
-            LogPlc lp = new LogPlc();
-            InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-            await _dbLoggerService.WriteLogPlcAsync(lp);
-        }
-        catch (IOException ex)
-        {
-            information = $"Connection interrupted !";
-            _logger.LogWarning(ex, information);
-            LogPlc lp = new LogPlc();
-            InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-            await _dbLoggerService.WriteLogPlcAsync(lp);
-        }
-        catch (Exception ex)
-        {
-            information = $"Unexpected error !";
-            _logger.LogError(ex, information);
-            LogPlc lp = new LogPlc();
-            InitLogPlc(lp);
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-            await _dbLoggerService.WriteLogPlcAsync(lp);
-        }
-
-        await Task.CompletedTask;
-    }
-
-    private async Task ProcessTelegram(Telegram t)
-    {
-        _lpReceive = new LogPlc();
-        InitLogPlc(_lpReceive);
-        _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString(); 
-
-        if (!Validate(t))
-        {
-            _lpReceive.Data = t.HexaDump();
-            _logger.LogWarning(_lpReceive.Data);
-            await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
-            return;
-        }
-
-        _logger.LogInformation(t.AsciiString);
-        if (t.Identifier == TelegramReceiveIdentifiers.ACKN.ToString())
-        {
-            if (_watchdogRetry.Enabled)
-            {
-                if (t.Counter == _lastSentTelegram.Counter)
-                {
-                    _watchdogRetry.Enabled = false;
-                    //if (sendingReleased != null)
-                    //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
-                }
-                else
-                {
-                    _lpReceive.Information =
-                        $"Unexpected counter in ACKN: " +
-                        $"Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]";
-                    _lpReceive.Data = t.HexaDump();
-                    _logger.LogError(_lpReceive.Information);
-                    await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
-                }
-            }
-            else
-            {
-                _lpReceive.Information =
-                    $"No pending ACKN expected !";
-                _lpReceive.Data = t.HexaDump();
-                _logger.LogError(_lpReceive.Information);
-                await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
-            }
-            return;
-        }
-
-        _ackTelegram.Sender = t.Receiver;
-        _ackTelegram.Receiver = t.Sender;
-        _ackTelegram.Identifier = TelegramSendIdentifiers.ACKN.ToString();
-        _ackTelegram.AckFlag = "0";
-        _ackTelegram.Counter = t.Counter;
-        _ackTelegram.Data = t.Data;
-        await SendToPlc(_ackTelegram, false);
-        
-        if (t.Counter == _lastReceivedCounter && t.Counter != "0")
-        {
-            _lpReceive.Information =
-                $"Same counter [{t.Counter}] as previous telegram. " +
-                $"It is a retry telegram --> No processing";
-            _lpReceive.Data = t.HexaDump();
-            _logger.LogError(_lpReceive.Information);
-            await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
-            return;
-        }   
-        _lastReceivedCounter = t.Counter;
-
-        switch (t.Identifier)
-        {
-            case nameof(TelegramReceiveIdentifiers.STAT):
-                await Handle_STAT(t);
-                break;
-            case nameof(TelegramReceiveIdentifiers.COMP):
-                await Handle_COMP(t);
-                break;
-            case nameof(TelegramReceiveIdentifiers.ALRM):
-                await Handle_ALRM(t);
-                break;
-        }
-    }
-
-    private async Task Handle_STAT(Telegram t)
-    {
-    }
-
-    private async Task Handle_COMP(Telegram t)
-    {
-    }
-
-    private async Task Handle_ALRM(Telegram t)
-    {
-    }
-
-    private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
-    {
-        _watchdogRetry.Enabled = false;
-        await SendToPlc(_lastSentTelegram, false);
-        _watchdogRetry.Enabled = true;
-    }
-
-    public async Task SendToPlc(Telegram t, bool isNew = false)
-    {
-        try
-        {
-            if (isNew)
-            {
-                t.AckFlag = "1";
-                if (_lastSentTelegram.Counter == string.Empty)
-                {
-                    t.Counter = "0";
-                }
-                else
-                {
-                    int counter = int.Parse(_lastSentTelegram.Counter);
-                    counter++;
-                    if (counter > 9) counter = 1;
-                    t.Counter = $"{counter:0}";
-                }
-            }
-            
-            t.Build();
-
-            if (_tcpClient != null)
-            {
-                if (_tcpClient.Connected)
-                {
-                    _logger.LogInformation($"{t.AsciiString}");
-                    //_logger.LogInformation($"Hexa: {t.HexaDump()}");
-                    NetworkStream stream = _tcpClient.GetStream();
-                    await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
-                }
-                else
-                {
-                    _logger.LogError($"_tcpClient is not connected !");
-                }
-            }
-            else
-            {
-                _logger.LogError($"_tcpClient is null !");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error !");
-        }
-
-        if (isNew)
-        {
-            _lastSentTelegram = t;
-            _watchdogRetry.Enabled = true;
-        }
-    }
-
-    private bool Validate(Telegram t)
-    {
-        byte b;
-
-        t.Parse();
-        //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
-        //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
-        //_logger.LogInformation($"Counter=[{t.Counter}]");
-        //_logger.LogInformation($"Receiver=[{t.Receiver}]");
-        //_logger.LogInformation($"Sender=[{t.Sender}]");
-        //_logger.LogInformation($"Identifier=[{t.Identifier}]");
-        //_logger.LogInformation($"Data=[{t.Data}]");
-        //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
-
-        _lpReceive.Ackflag = t.AckFlag;
-        _lpReceive.Counter = t.Counter;
-        _lpReceive.Sender = t.Sender;
-        _lpReceive.Receiver = t.Receiver;
-        _lpReceive.Identifier = t.Identifier;
-
-        b = t.Bytes[0];
-        if (b != TelegramConstants.STX)
-        {
-            _lpReceive.Information = 
-                $"Telegramm has wrong start byte: " +
-                $"STX != [Hexa:0x{b.ToString("X2")} - " +
-                $"Decimal:{b} - " +
-                $"ASCII:{((char)b).ToString()}]";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        b = t.Bytes[^1];
-        if (b != TelegramConstants.ETX)
-        {
-            _lpReceive.Information =
-                $"Telegramm has wrong end byte: " +
-                $"ETX != [Hexa:0x{b.ToString("X2")} - " +
-                $"Decimal:{b} - " + 
-                $"ASCII:{((char)b).ToString()}]";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        if (!Regex.IsMatch(t.AckFlag, @"^[0-1]$"))
-        {
-            _lpReceive.Information =
-                $"Telegram has invalid AckFlag=[{t.AckFlag}]. " +
-                $"Expected values are: [0]=Acknowledge not required, [1]=Acknowledge required";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        if (!Regex.IsMatch(t.Counter, @"^[0-9]$"))
-        {
-            _lpReceive.Information =
-                $"Telegram has invalid Counter=[{t.Counter}]";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        if (t.Receiver != TelegramConstants.GLOGWARE_IDENTIFIER)
-        {
-            _lpReceive.Information =
-                $"Telegram has an invalid Receiver. " +
-                $"(Is=[{t.Receiver}]) != (Should=[{TelegramConstants.GLOGWARE_IDENTIFIER}]";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        if (t.Sender != OP)
-        {
-            _lpReceive.Information =
-                $"Telegram has an invalid Sender. " +
-                $"(Is=[{t.Sender}]) != (Should=[{OP}])";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        if (!Enum.TryParse<TelegramReceiveIdentifiers>(t.Identifier, out _))
-        {
-            string validValues = string.Join("|", Enum.GetNames<TelegramReceiveIdentifiers>());
-            _lpReceive.Information =
-                $"Telegram has an invalid Identifier. " +
-                $"(Is=[{t.Identifier}]) != (Should=[{validValues}])";
-            _logger.LogError(_lpReceive.Information);
-            return false;
-        }
-
-        return true;
-    }
-
-    private void InitLogPlc(LogPlc lp)
-    {
-        lp.Category = LogPlcCategoryIdentifiers.GANTRY.ToString();
-        lp.Process = ServiceName;
-    }
-
+    }  
 }

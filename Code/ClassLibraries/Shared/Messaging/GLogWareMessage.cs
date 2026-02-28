@@ -8,6 +8,7 @@ public class GLogWareMessage
 {
     public DateTime Timestamp { get; set; } = DateTime.Now;
     public string Sender { get; set; } = string.Empty;
+    [JsonRequired]
     public GLogWareMessageIdentifiers Identifier { get; set; }
     public object? Data { get; set; }
 

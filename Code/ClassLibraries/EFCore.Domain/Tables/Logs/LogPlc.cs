@@ -3,7 +3,7 @@
 public class LogPlc
 {
     public Int64 Id { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.Now;
+    public DateTime? Timestamp { get; set; } = DateTime.Now;
     public string? Status { get; set; }
     public string? Direction { get; set; }
     public string? Category { get; set; }
