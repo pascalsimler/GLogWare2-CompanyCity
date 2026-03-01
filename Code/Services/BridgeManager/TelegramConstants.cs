@@ -25,10 +25,4 @@ public struct TelegramConstants
     /// GLogWare sender/receiver identifier
     /// </summary>
     public const string GLOGWARE_IDENTIFIER = "GLOGWARE";
-
-    /// <summary>
-    /// Telegram template
-    /// </summary>
-    public const string TELEGRAM_TEMPLATE = "[STX][AckFlag][Counter][Receiver][Sender][Identifier][Data][ETX]";
-                                          //   +1       +1       +1        +8      +8          +4  +216   +1   = 240 bytes  
 }

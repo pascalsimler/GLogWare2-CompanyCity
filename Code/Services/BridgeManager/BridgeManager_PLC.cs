@@ -228,7 +228,7 @@ public partial class BridgeManager
         }
 
         _logger.LogInformation(t.AsciiString);
-        if (t.Identifier == TelegramReceiveIdentifiers.ACKN.ToString())
+        if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
         {
             if (_watchdogRetry.Enabled)
             {
@@ -261,7 +261,7 @@ public partial class BridgeManager
 
         _ackTelegram.Sender = t.Receiver;
         _ackTelegram.Receiver = t.Sender;
-        _ackTelegram.Identifier = TelegramSendIdentifiers.ACKN.ToString();
+        _ackTelegram.Identifier = PlcMessageIdentifiers.ACKN.ToString();
         _ackTelegram.AckFlag = "0";
         _ackTelegram.Counter = t.Counter;
         _ackTelegram.Data = t.Data;
@@ -281,13 +281,13 @@ public partial class BridgeManager
 
         switch (t.Identifier)
         {
-            case nameof(TelegramReceiveIdentifiers.STAT):
+            case nameof(PlcMessageIdentifiers.STAT):
                 await Handle_STAT(t);
                 break;
-            case nameof(TelegramReceiveIdentifiers.COMP):
+            case nameof(PlcMessageIdentifiers.COMP):
                 await Handle_COMP(t);
                 break;
-            case nameof(TelegramReceiveIdentifiers.ALRM):
+            case nameof(PlcMessageIdentifiers.ALRM):
                 await Handle_ALRM(t);
                 break;
         }
@@ -372,12 +372,12 @@ public partial class BridgeManager
             return false;
         }
 
-        if (!Enum.TryParse<TelegramReceiveIdentifiers>(t.Identifier, out _))
+        string validIdentifiers = @"\b(ACKN|STAT|ALRM|COMP)\b";
+        if (!Regex.IsMatch(t.Identifier, validIdentifiers)) 
         {
-            string validValues = string.Join("|", Enum.GetNames<TelegramReceiveIdentifiers>());
             _lpReceive.Information =
                 $"Telegram has an invalid Identifier. " +
-                $"(Is=[{t.Identifier}]) != (Should=[{validValues}])";
+                $"(Is=[{t.Identifier}]) != (Should=[{validIdentifiers}])";
             _logger.LogError(_lpReceive.Information);
             return false;
         }
@@ -423,7 +423,7 @@ public partial class BridgeManager
     private async Task SendToPlcMessage_LIFE(PlcMessage pm)
     {
         Telegram t = new Telegram();
-        t.Identifier = TelegramSendIdentifiers.LIFE.ToString();
+        t.Identifier = PlcMessageIdentifiers.LIFE.ToString();
         t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
         t.Receiver = OP!;
         t.Data = string.Empty;

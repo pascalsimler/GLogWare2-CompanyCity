@@ -6,6 +6,7 @@ public class Job : BaseTracking
     public string Type { get; set; } = null!;
     public string Status { get; set; } = null!;
 
+    public string? Bridge { get; set; } = null!;
     public string? SourcePlace { get; set; } = null!;
     public string? DestinationPlace { get; set; } = null!;
     public string? ActualPlace { get; set; } = null!;

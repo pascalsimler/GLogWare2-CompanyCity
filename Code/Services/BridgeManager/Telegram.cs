@@ -1,3 +1,4 @@
+using Gudel.GLogWare.Shared;
 using System.Text;
 
 namespace Gudel.GLogWare.BridgeManager;
@@ -55,15 +56,16 @@ public class Telegram
 
     public void Build()
     {
-        AsciiString = TelegramConstants.TELEGRAM_TEMPLATE;
-        AsciiString = AsciiString.Replace("[STX]", Convert.ToChar(TelegramConstants.STX).ToString());
-        AsciiString = AsciiString.Replace("[ETX]", Convert.ToChar(TelegramConstants.ETX).ToString());
-        AsciiString = AsciiString.Replace("[AckFlag]", AckFlag);
-        AsciiString = AsciiString.Replace("[Counter]", Counter);
-        AsciiString = AsciiString.Replace("[Receiver]", Receiver);
-        AsciiString = AsciiString.Replace("[Sender]", Sender);
-        AsciiString = AsciiString.Replace("[Identifier]", Identifier);
-        AsciiString = AsciiString.Replace("[Data]", Data.PadRight(216, '.'));
+        AsciiString =
+            Convert.ToChar(TelegramConstants.STX).ToString() +
+            ((AckFlag.Length >= 1) ? AckFlag.Substring(0, 1) : AckFlag.PadRight(1)) +
+            ((Counter.Length >= 1) ? Counter.Substring(0, 1) : Counter.PadRight(1)) +
+            ((Receiver.Length >= 8) ? Receiver.Substring(0, 8) : Receiver.PadRight(8)) +
+            ((Sender.Length >= 8) ? Sender.Substring(0, 8) : Sender.PadRight(8)) +
+            ((Identifier.Length >= 4) ? Identifier.Substring(0, 4) : Identifier.PadRight(4)) +
+            ((Data.Length >= 216) ? Data.Substring(0, 216) : Identifier.PadRight(216, '.')) +
+            Convert.ToChar(TelegramConstants.ETX).ToString()
+        ;
 
         Array.Clear(Bytes, 0, Bytes.Length);
         byte[] tmpBuf = Encoding.ASCII.GetBytes(AsciiString);
@@ -111,6 +113,45 @@ public class Telegram
         }
 
         return sb.ToString();
+    }
+
+    public void FromPlcMessage(PlcMessage pm)
+    {
+        Identifier = pm.Identifier.ToString();
+        Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
+        Receiver = BridgeManager.OP;
+
+        switch (pm.Identifier)
+        {
+            case PlcMessageIdentifiers.ORDS:
+                ORDS r = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
+                ORDSPosition p = r.PickPosition;
+                ORDSPosition d = r.DropPosition;
+                Data = 
+                    ((r.Jobid.Length >= 16) ? r.Jobid.Substring(0, 16) : r.Jobid.PadRight(16)) +
+                    $"{p.PositionType:0}" +
+                    ((p.ConveyorPlace.Length > 8) ? p.ConveyorPlace.Substring(0, 8) : p.ConveyorPlace.PadRight(8)) +
+                    $"{p.XCell:0000}" +
+                    $"{p.YCell:0000}" +
+                    $"{p.XPosition:000000}" +
+                    $"{p.YPosition:000000}" +
+                    $"{d.PositionType:0}" +
+                    ((d.ConveyorPlace.Length > 8) ? d.ConveyorPlace.Substring(0, 8) : d.ConveyorPlace.PadRight(8)) +
+                    $"{d.XCell:0000}" +
+                    $"{d.YCell:0000}" +
+                    $"{d.XPosition:000000}" +
+                    $"{p.YPosition:000000}"
+                ;
+                break;
+            default:
+                Data = string.Empty;
+                break;
+        };
+    }
+
+    public PlcMessage ToPlcMessage()
+    {
+        return null!;
     }
 
 }

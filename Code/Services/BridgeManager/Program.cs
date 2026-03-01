@@ -5,14 +5,14 @@ using Gudel.GLogWare.Shared;
 using Serilog;
 using Serilog.Enrichers.CallerInfo;
 
-BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
-if (BridgeManager.OP == null)
+string? OP = Environment.GetEnvironmentVariable("OP");
+if (OP == null)
 {
     Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
     return;
 }
-Console.WriteLine($"OP=[{BridgeManager.OP}]");
-BridgeManager.ServiceName = $"BridgeManager-{BridgeManager.OP}";
+Console.WriteLine($"OP=[{OP}]");
+BridgeManager.OP = OP;
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
@@ -41,7 +41,7 @@ if (enableEFCoreLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, BridgeManager.ServiceName),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, BridgeManager.ServiceName!),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -49,7 +49,9 @@ var logger = loggerConfig
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-logger.Information($"ServiceName=[{BridgeManager.ServiceName}]");
+logger.Information($"BridgeManager.OP=[{BridgeManager.OP}]");
+logger.Information($"BridgeManager.ServiceName=[{BridgeManager.ServiceName}]");
+logger.Information($"BridgeManager.ElementName=[{BridgeManager.ElementName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");

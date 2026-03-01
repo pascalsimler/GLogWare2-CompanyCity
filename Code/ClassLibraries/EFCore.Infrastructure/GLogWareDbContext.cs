@@ -9,6 +9,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     #region Entity Sets
     #region Tables
     #region Topology
+    public DbSet<Element> Elements => Set<Element>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<PlaceType> PlaceTypes => Set<PlaceType>();
     public DbSet<Place> Places => Set<Place>();
