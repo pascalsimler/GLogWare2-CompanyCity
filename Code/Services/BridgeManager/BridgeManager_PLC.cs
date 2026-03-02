@@ -461,9 +461,14 @@ public partial class BridgeManager
                     if (counter > 9) counter = 1;
                     t.Counter = $"{counter:0}";
                 }
+                t.Build();
+                _lastSentTelegram = t;
+                _watchdogRetry.Enabled = true;
             }
-
-            t.Build();
+            else if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
+            {
+                t.Build();
+            }
 
             if (_tcpClient != null)
             {
@@ -478,6 +483,7 @@ public partial class BridgeManager
                         LogPlc lpSend = new LogPlc();
                         InitLogPlc(lpSend);
                         lpSend.Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString();
+                        if (!isNew) lpSend.Information = "Retry !";
                         lpSend.Ackflag = t.AckFlag;
                         lpSend.Counter = t.Counter;
                         lpSend.Sender = t.Sender;
@@ -504,8 +510,7 @@ public partial class BridgeManager
 
         if (isNew)
         {
-            _lastSentTelegram = t;
-            _watchdogRetry.Enabled = true;
+           
         }
     }
     #endregion

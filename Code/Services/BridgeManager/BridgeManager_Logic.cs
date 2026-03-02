@@ -9,14 +9,19 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        var q = _db.Jobs
+        var q1 = _db.Resources.Where(r => r.Name == OP).FirstOrDefault();
+        if (q1 == null)
+        {
+            return false;
+        }
+
+        var q2 = _db.Jobs
             .Where(j => 
                 j.Bridge == OP &&
                 j.Status.StartsWith("GANTRY")
              )
             .FirstOrDefault();
-
-        if (q != null)
+        if (q2 != null)
         {
             return false;
         }
