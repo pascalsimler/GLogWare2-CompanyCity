@@ -6,11 +6,11 @@ namespace Gudel.GLogWare.BridgeManager;
 /// <summary>
 /// PLC telegram representation
 /// </summary>
-public class Telegram
+public class PlcTelegram
 {
-    public Telegram()
+    public PlcTelegram()
     {
-        Bytes = new byte[TelegramConstants.TELEGRAM_LENGTH];
+        Bytes = new byte[PlcTelegramConstants.TELEGRAM_LENGTH];
     }
 
     /// <summary>
@@ -53,18 +53,19 @@ public class Telegram
     /// </summary>
     public string Data{ get; set; } = string.Empty;
 
+    public string LogMsg { get; set; } = string.Empty;
 
     public void Build()
     {
         AsciiString =
-            Convert.ToChar(TelegramConstants.STX).ToString() +
+            Convert.ToChar(PlcTelegramConstants.STX).ToString() +
             ((AckFlag.Length >= 1) ? AckFlag.Substring(0, 1) : AckFlag.PadRight(1)) +
             ((Counter.Length >= 1) ? Counter.Substring(0, 1) : Counter.PadRight(1)) +
             ((Receiver.Length >= 8) ? Receiver.Substring(0, 8) : Receiver.PadRight(8)) +
             ((Sender.Length >= 8) ? Sender.Substring(0, 8) : Sender.PadRight(8)) +
             ((Identifier.Length >= 4) ? Identifier.Substring(0, 4) : Identifier.PadRight(4)) +
-            ((Data.Length >= 216) ? Data.Substring(0, 216) : Identifier.PadRight(216, '.')) +
-            Convert.ToChar(TelegramConstants.ETX).ToString()
+            ((Data.Length >= 216) ? Data.Substring(0, 216) : Data.PadRight(216, '.')) +
+            Convert.ToChar(PlcTelegramConstants.ETX).ToString()
         ;
 
         Array.Clear(Bytes, 0, Bytes.Length);
@@ -118,7 +119,7 @@ public class Telegram
     public void FromPlcMessage(PlcMessage pm)
     {
         Identifier = pm.Identifier.ToString();
-        Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
+        Sender = PlcTelegramConstants.GLOGWARE_IDENTIFIER;
         Receiver = BridgeManager.OP;
 
         switch (pm.Identifier)
@@ -148,10 +149,4 @@ public class Telegram
                 break;
         };
     }
-
-    public PlcMessage ToPlcMessage()
-    {
-        return null!;
-    }
-
 }

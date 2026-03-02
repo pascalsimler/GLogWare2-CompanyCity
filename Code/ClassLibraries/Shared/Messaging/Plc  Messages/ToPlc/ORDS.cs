@@ -2,12 +2,19 @@
 
 public class ORDS
 {
+    public string Bridge { get; set; } = string.Empty;
     public string Jobid { get; set; } = string.Empty;
+    public string Article { get; set; } = string.Empty;
+    public string Order { get; set; } = string.Empty;
     public ORDSPosition PickPosition { get; set; } = new ORDSPosition();
     public ORDSPosition DropPosition { get; set; } = new ORDSPosition();
+    public int InnerDiameter { get; set; }
+    public int OuterDiameter { get; set; }
+    public int Width { get; set; }
+    public int TireCount { get; set; }
 }
 
-public enum ORDSPositionType
+public enum ORDSPositionTypes
 {
     Undefined = 0,
     Conveyor = 1,
@@ -17,7 +24,7 @@ public enum ORDSPositionType
 
 public class ORDSPosition
 {
-    public ORDSPositionType PositionType { get; set; }
+    public ORDSPositionTypes PositionType { get; set; }
     public string ConveyorPlace { get; set; } = string.Empty;
     public int XCell { get; set; }
     public int YCell { get; set; }

@@ -15,11 +15,10 @@ public partial class BridgeManager
     private int _plcDelayRetry { get; set; } = 5000;
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
-    private Telegram _lastSentTelegram = null!;
-    private Telegram _ackTelegram = null!;
+    private PlcTelegram _lastSentTelegram = null!;
+    private PlcTelegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
     private LogPlc _lpReceive = null!;
-    private LogPlc _lpSend = null!;
     #endregion region
 
     #region Initialisation
@@ -48,8 +47,8 @@ public partial class BridgeManager
     {
         string information = string.Empty;
 
-        _lastSentTelegram = new Telegram();
-        _ackTelegram = new Telegram();
+        _lastSentTelegram = new PlcTelegram();
+        _ackTelegram = new PlcTelegram();
         _watchdogRetry = new System.Timers.Timer(_plcDelayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
@@ -152,7 +151,7 @@ public partial class BridgeManager
         int bytesRead = 0;
         int offset = 0;
         string information = string.Empty;
-        Telegram t = new Telegram();
+        PlcTelegram t = new PlcTelegram();
 
         try
         {
@@ -213,7 +212,7 @@ public partial class BridgeManager
         await Task.CompletedTask;
     }
 
-    private async Task ProcessTelegram(Telegram t)
+    private async Task ProcessTelegram(PlcTelegram t)
     {
         _lpReceive = new LogPlc();
         InitLogPlc(_lpReceive);
@@ -293,7 +292,7 @@ public partial class BridgeManager
         }
     }
 
-    private bool Validate(Telegram t)
+    private bool Validate(PlcTelegram t)
     {
         byte b;
 
@@ -314,7 +313,7 @@ public partial class BridgeManager
         _lpReceive.Identifier = t.Identifier;
 
         b = t.Bytes[0];
-        if (b != TelegramConstants.STX)
+        if (b != PlcTelegramConstants.STX)
         {
             _lpReceive.Information =
                 $"Telegramm has wrong start byte: " +
@@ -326,7 +325,7 @@ public partial class BridgeManager
         }
 
         b = t.Bytes[^1];
-        if (b != TelegramConstants.ETX)
+        if (b != PlcTelegramConstants.ETX)
         {
             _lpReceive.Information =
                 $"Telegramm has wrong end byte: " +
@@ -354,11 +353,11 @@ public partial class BridgeManager
             return false;
         }
 
-        if (t.Receiver != TelegramConstants.GLOGWARE_IDENTIFIER)
+        if (t.Receiver != PlcTelegramConstants.GLOGWARE_IDENTIFIER)
         {
             _lpReceive.Information =
                 $"Telegram has an invalid Receiver. " +
-                $"(Is=[{t.Receiver}]) != (Should=[{TelegramConstants.GLOGWARE_IDENTIFIER}]";
+                $"(Is=[{t.Receiver}]) != (Should=[{PlcTelegramConstants.GLOGWARE_IDENTIFIER}]";
             _logger.LogError(_lpReceive.Information);
             return false;
         }
@@ -385,15 +384,15 @@ public partial class BridgeManager
         return true;
     }
 
-    private async Task Handle_STAT(Telegram t)
+    private async Task Handle_STAT(PlcTelegram t)
     {
     }
 
-    private async Task Handle_COMP(Telegram t)
+    private async Task Handle_COMP(PlcTelegram t)
     {
     }
 
-    private async Task Handle_ALRM(Telegram t)
+    private async Task Handle_ALRM(PlcTelegram t)
     {
     }
     #endregion
@@ -422,19 +421,29 @@ public partial class BridgeManager
 
     private async Task SendToPlcMessage_LIFE(PlcMessage pm)
     {
-        Telegram t = new Telegram();
+        PlcTelegram t = new PlcTelegram();
         t.Identifier = PlcMessageIdentifiers.LIFE.ToString();
-        t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
-        t.Receiver = OP!;
+        t.Sender = PlcTelegramConstants.GLOGWARE_IDENTIFIER;
+        t.Receiver = OP;
         t.Data = string.Empty;
         await SendToPlc(t, true);
     }
 
     private async Task SendToPlcMessage_ORDS(PlcMessage pm)
     {
+        ORDS ords = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
+        (ORDSStruct ordsStruct, string logMsg) = ORDSStruct.FromORDS(ords);
+
+        PlcTelegram t = new PlcTelegram();
+        t.Identifier = PlcMessageIdentifiers.ORDS.ToString();
+        t.Sender = PlcTelegramConstants.GLOGWARE_IDENTIFIER;
+        t.Receiver = OP!;
+        t.Data = ordsStruct.ToData();
+        t.LogMsg = logMsg;
+        await SendToPlc(t, true); 
     }
 
-    private async Task SendToPlc(Telegram t, bool isNew = false)
+    private async Task SendToPlc(PlcTelegram t, bool isNew = false)
     {
         try
         {
@@ -464,6 +473,19 @@ public partial class BridgeManager
                     //_logger.LogInformation($"Hexa: {t.HexaDump()}");
                     NetworkStream stream = _tcpClient.GetStream();
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
+                    if (!new[] { PlcMessageIdentifiers.ACKN.ToString(), PlcMessageIdentifiers.LIFE.ToString() }.Contains(t.Identifier)) 
+                    {
+                        LogPlc lpSend = new LogPlc();
+                        InitLogPlc(lpSend);
+                        lpSend.Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString();
+                        lpSend.Ackflag = t.AckFlag;
+                        lpSend.Counter = t.Counter;
+                        lpSend.Sender = t.Sender;
+                        lpSend.Receiver = OP;
+                        lpSend.Identifier = t.Identifier;
+                        lpSend.Data = t.LogMsg;
+                        await _dbLoggerService.WriteLogPlcAsync(lpSend);
+                    }
                 }
                 else
                 {

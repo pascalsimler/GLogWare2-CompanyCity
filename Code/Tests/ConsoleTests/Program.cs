@@ -3,10 +3,6 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.Extensions.Configuration;
 
-JobTypeIdentifiers jt = JobTypeIdentifiers.RELOCATION;
-Console.WriteLine(jt.ToString());
-return;
-
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
