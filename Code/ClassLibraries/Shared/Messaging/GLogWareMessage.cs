@@ -24,6 +24,18 @@ public class GLogWareMessage
         return JsonSerializer.Serialize(this, options);
     }
 
+    public static string Serialize<T>(T o)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Converters = { new JsonStringEnumConverter() }
+        };
+
+        return JsonSerializer.Serialize(o, options);
+    }
+
     public static GLogWareMessage? DeSerialize(string jsonPayload)
     {
         var options = new JsonSerializerOptions

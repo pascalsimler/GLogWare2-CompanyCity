@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="GLogWareTelegram\FromGLogWare\" />
-    <Folder Include="GLogWareTelegram\ToGLogWare\" />
+    <Folder Include="Telegram\FromGLogWare\" />
   </ItemGroup>
 </Project>

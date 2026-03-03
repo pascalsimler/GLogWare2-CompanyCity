@@ -1,4 +1,5 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
+using Gudel.GLogWare.Shared;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Gudel.GLogWare.BridgeManager;
@@ -109,6 +110,38 @@ public partial class BridgeManager
 
         _lastJobType = JobTypeIdentifiers.PALLETIZING;
         return true;
+    }
+
+
+    private async Task Process_STAT(STATBridge stat)
+    {
+        string json = GLogWareMessage.Serialize<STATBridge>(stat);
+        _logger.LogInformation($"stat=[\r\n{json}\r\n]");
+        
+        var r = _db.Resources.Where(x => x.Name == stat.Bridge).FirstOrDefault();
+        if (r == null)
+        {
+            _logger.LogError($"Unknown resource [{stat.Bridge}]");
+            return;
+        }
+
+        r.Parked = stat.Parked;
+        r.Mode = (stat.WorkingMode) switch
+        {
+            STATBridgeWorkingModes.AUTOMATIC => nameof(ResourceModeIdentifiers.AUTOMATIC),
+            STATBridgeWorkingModes.MANUAL => nameof(ResourceModeIdentifiers.MANUAL),
+            STATBridgeWorkingModes.STOPPED => nameof(ResourceModeIdentifiers.STOPPED),
+            _ => nameof(ResourceModeIdentifiers.UNDEFINED)
+        };
+        r.Occupied = stat.GripperOccupied;
+        r.ErrorFlag = stat.ErrorFlag;
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task Process_COMP(COMP comp)
+    {
+        string json = GLogWareMessage.Serialize<COMP>(comp);
+        _logger.LogInformation($"comp=[\r\n{json}\r\n]");
     }
 
 }

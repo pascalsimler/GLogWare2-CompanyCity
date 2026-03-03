@@ -3,7 +3,12 @@
 public enum GLogWareMessageIdentifiers
 {
     WakeUp,
+
     FromPlc,
     ToPlc,
+
+    FromGLogWare,
+    ToGLogWare,
+
     Unknown
 }

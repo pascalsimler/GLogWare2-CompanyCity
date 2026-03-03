@@ -128,134 +128,29 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
         //_plcSendingReleased.WaitOne();
         //_plcSendingReleased.Reset();
 
-        string Msg = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-        _logger.LogInformation(Msg);
-
-        //PlcTelegram t = new PlcTelegram();
-        //t.Name = "ORDS";
-        //t.Sender = DriverConstant.GLOGWARE_IDENTIFIER;
-        //t.Receiver = _OP;
-        //t.Data = Msg;
-        //_plcCommunication.Send(t);
-    }
-
-    private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
-    {
-        _watchdogRetry.Enabled = false;
-        await SendToPlc(_lastSentTelegram, false);
-        _watchdogRetry.Enabled = true;
-    }
-
-    public async Task SendToPlc(GLogWareTelegram t, bool isNew = false)
-    {
         try
         {
-            if (isNew)
-            {
-                t.AckFlag = "1";
-                if (_lastSentTelegram.Counter == string.Empty)
-                {
-                    t.Counter = "0";
-                }
-                else
-                {
-                    int counter = int.Parse(_lastSentTelegram.Counter);
-                    counter++;
-                    if (counter > 9) counter = 1;
-                    t.Counter = $"{counter:0}";
-                }
-            }
+            string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+            _logger.LogInformation(payload);
 
-            t.Build();
-
-            if (_tcpClient != null)
+            GLogWareMessage m = GLogWareMessage.DeSerialize(payload)!;
+            switch (m.Identifier)
             {
-                if (_tcpClient.Connected)
-                {
-                    _logger.LogInformation(t.AsciiString);
-                    NetworkStream stream = _tcpClient.GetStream();
-                    await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
-                    if (isNew)
-                    {
-                        _lastSentTelegram = t;
-                        _watchdogRetry!.Enabled = true;
-                    }
-                }
-                else
-                {
-                    _logger.LogError($"_tcpClient is not connected !");
-                }
-            }
-            else
-            {
-                _logger.LogError($"_tcpClient is null !");
+                case GLogWareMessageIdentifiers.WakeUp:
+                    break;
+                case GLogWareMessageIdentifiers.ToGLogWare:
+                    PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await SendTelegram(pm);
+                    break;
+                case GLogWareMessageIdentifiers.FromGLogWare:
+                    break;
+                default:
+                    break;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error !");
+            _logger.LogError(ex, "Error processing GLogWareMessage");
         }
-    }
-
-    private bool Validate(GLogWareTelegram t)
-    {
-        byte b;
-
-        t.Parse();
-        //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
-        //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
-        //_logger.LogInformation($"Counter=[{t.Counter}]");
-        //_logger.LogInformation($"Receiver=[{t.Receiver}]");
-        //_logger.LogInformation($"Sender=[{t.Sender}]");
-        //_logger.LogInformation($"Identifier=[{t.Identifier}]");
-        //_logger.LogInformation($"Data=[{t.Data}]");
-        //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
-
-        b = t.Bytes[0];
-        if (b != GLogWareTelegramConstants.STX)
-        {
-            _logger.LogError($"Telegramm has wrong start byte: STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]");
-            return false;
-        }
-
-        b = t.Bytes[^1];
-        if (b != GLogWareTelegramConstants.ETX)
-        {
-            _logger.LogError($"Telegramm has wrong end byte: ETX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]");
-            return false;
-        }
-
-        if (!Regex.IsMatch(t.AckFlag, @"^[0-1]$"))
-        {
-            _logger.LogError($"Telegram has invalid AckFlag=[{t.AckFlag}]. Expected values are: [0]=Acknowledge not required, [1]=Acknowledge required");
-            return false;
-        }
-
-        if (!Regex.IsMatch(t.Counter, @"^[0-9]$"))
-        {
-            _logger.LogError($"Telegram has invalid Counter=[{t.Counter}]");
-            return false;
-        }
-
-        if (t.Receiver != OP)
-        {
-            _logger.LogError($"Telegram has an invalid Receiver. (Is=[{t.Receiver}]) != (Should=[{OP}]");
-            return false;
-        }
-
-        if (t.Sender != GLogWareTelegramConstants.GLOGWARE_IDENTIFIER)
-        {
-            _logger.LogError($"Telegram has an invalid Sender. (Is=[{t.Sender}]) != (Should=[{GLogWareTelegramConstants.GLOGWARE_IDENTIFIER}])");
-            return false;
-        }
-
-        //if (!Enum.TryParse<TelegramReceiveIdentifiers>(t.Identifier, out _))
-        //{
-        //    string validValues = string.Join("|", Enum.GetNames<TelegramReceiveIdentifiers>());
-        //    _logger.LogError($"Telegram has an invalid Identifier. (Is=[{t.Identifier}]) != (Should=[{validValues}])");
-        //    return false;
-        //}
-
-        return true;
     }
 }

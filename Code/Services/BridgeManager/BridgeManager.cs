@@ -143,7 +143,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
                     break;
                 case GLogWareMessageIdentifiers.ToPlc:
                     PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    await SendPlcMessage(pm);
+                    await SendTelegram(pm);
                     break;
                 case GLogWareMessageIdentifiers.FromPlc:
                     break;

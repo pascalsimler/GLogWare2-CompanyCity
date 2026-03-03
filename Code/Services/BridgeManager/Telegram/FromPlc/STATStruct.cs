@@ -11,81 +11,75 @@ public struct STATStruct
 
     public static STATStruct FromData(string data)
     {
-        STATStruct s = new STATStruct();
-        s.Parked = data.Substring(0, 1);
-        s.WorkingMode = data.Substring(1, 1);
-        s.GripperOccupied = data.Substring(2, 1);
-        s.ErrorFlag = data.Substring(3, 1);
+        STATStruct statStruct = new STATStruct();
+        statStruct.Parked = data.Substring(0, 1);
+        statStruct.WorkingMode = data.Substring(1, 1);
+        statStruct.GripperOccupied = data.Substring(2, 1);
+        statStruct.ErrorFlag = data.Substring(3, 1);
 
-        return s;
+        return statStruct;
     }
 
     public (STATBridge, string) ToSTAT(string Bridge)
     {
-        STATBridge s = new STATBridge();
-        string logMsg = string.Empty;
+        STATBridge stat = new STATBridge();
+        stat.Bridge = Bridge;
+
         string parked = string.Empty;
         string gripperOccupied = string.Empty;
         string errorFlag = string.Empty;
 
         if (Parked == "0")
         {
-            s.Parked = false;
+            stat.Parked = false;
             parked = "No";
         }
         else
         {
-            s.Parked = true;
+            stat.Parked = true;
             parked = "Yes";
         }
-          
 
-        switch (WorkingMode)
-        {
-            case "1":
-                s.WorkingMode = STATBridgeWorkingModes.AUTOMATIC;
-                break;
-            case "3":
-                s.WorkingMode = STATBridgeWorkingModes.MANUAL;
-                break;
-            case "2":
-            default:
-                s.WorkingMode = STATBridgeWorkingModes.STOPPED;
-                break;
-        }
+
+        stat.WorkingMode = (WorkingMode) switch {
+            "1" => STATBridgeWorkingModes.AUTOMATIC,
+            "3" => STATBridgeWorkingModes.MANUAL,
+            "2" => STATBridgeWorkingModes.STOPPED,
+            _ => STATBridgeWorkingModes.STOPPED
+        };
 
 
         if (GripperOccupied == "0")
         {
-            s.GripperOccupied = false;
+            stat.GripperOccupied = false;
             gripperOccupied = "No";
         }
         else
         {
-            s.GripperOccupied = true;
+            stat.GripperOccupied = true;
             gripperOccupied = "Yes";
         }
 
 
         if (ErrorFlag == "0")
         {
-            s.ErrorFlag = false;
+            stat.ErrorFlag = false;
             errorFlag = "No";
         }
         else
         {
-            s.ErrorFlag = true;
+            stat.ErrorFlag = true;
             errorFlag = "Yes";
         }
 
-        logMsg =
+        string logMsg =
             $"[ STATUS OF BRIDGE {Bridge} ]\r\n\r\n" +
             $"                      Parked: [{Parked}] - {parked}\r\n" +
-            $"                Working Mode: [{WorkingMode}] - {s.WorkingMode.ToString()}\r\n" +
-            $"               GripperStatus: [{GripperOccupied}] - {gripperOccupied}\r\n" +
+            $"                Working Mode: [{WorkingMode}] - {stat.WorkingMode.ToString()}\r\n" +
+            $"            Gripper Occupied: [{GripperOccupied}] - {gripperOccupied}\r\n" +
             $"                  Error Flag: [{ErrorFlag}] - {errorFlag}\r\n";
 
 
-        return (s, logMsg);
+        return (stat, logMsg);
     }
 }

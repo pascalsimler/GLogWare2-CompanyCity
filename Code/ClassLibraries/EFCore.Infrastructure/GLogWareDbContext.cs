@@ -34,7 +34,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<LogPlcCategory> LogPlcCategories => Set<LogPlcCategory>();
     public DbSet<LogPlcDirection> LogPlcDirections => Set<LogPlcDirection>();
     public DbSet<LogPlc> LogPlcs => Set<LogPlc>();
-    
+
     public DbSet<Protocol> Protocols => Set<Protocol>();
 
     public DbSet<StatisticCategory> StatisticCategories => Set<StatisticCategory>();
@@ -163,6 +163,19 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
         }
         return base.SaveChanges();
     }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in ChangeTracker.Entries<BaseTracking>())
+        {
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTime.Now;
+            }
+        }
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
     #endregion
 
 }

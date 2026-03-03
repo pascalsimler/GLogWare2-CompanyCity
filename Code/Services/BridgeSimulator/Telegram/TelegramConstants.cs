@@ -4,7 +4,7 @@ namespace Gudel.GLogWare.BridgeSimulator;
 /// <summary>
 /// Constants for the communication GLogWare-PLC
 /// </summary>
-public struct GLogWareTelegramConstants
+public struct TelegramConstants
 {
     /// <summary>
     /// Start of Text ASCII code
