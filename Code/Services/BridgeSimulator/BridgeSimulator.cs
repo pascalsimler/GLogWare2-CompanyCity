@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using Gudel.GLogWare.Shared;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
@@ -10,7 +11,7 @@ using System.Timers;
 
 namespace Gudel.GLogWare.BridgeSimulator;
 
-public class BridgeSimulator : IHostedService, IAsyncDisposable
+public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 {
     #region Public members
     public static string? OP = string.Empty;
@@ -23,15 +24,6 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-    // PLC
-    private int _plcPort { get; set; } = 7000;
-    private int _plcDelayRetry { get; set; } = 5000;
-    private TcpClient? _tcpClient = null;
-    private string _lastReceivedCounter = "0";
-    private Telegram _lastSentTelegram = null!;
-    private Telegram _ackTelegram = null!;
-    private System.Timers.Timer _watchdogRetry = null!;
-
     //MQTT
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
@@ -74,27 +66,20 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
 
     private void LoadConfiguration()
     {
-        _logger.LogInformation($"Enter ...");
+        LoadConfigurationMqtt();
+        LoadConfigurationGLogWare();
+    }
 
-        // MQTT Broker configuration
-        string mqttBrokerConfigPath = "MQTTBroker";
-        _mqttBrokerIp = _configuration[$"{mqttBrokerConfigPath}:Ip"] ?? _mqttBrokerIp;
-        if (int.TryParse(_configuration[$"{mqttBrokerConfigPath}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
-        _mqttBrokerRootTopic = _configuration[$"{mqttBrokerConfigPath}:RootTopic"] ?? _mqttBrokerRootTopic;
+    private void LoadConfigurationMqtt()
+    {
+        string path = "MQTTBroker";
+        _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
+        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
+        _mqttBrokerRootTopic = _configuration[$"{path}:RootTopic"] ?? _mqttBrokerRootTopic;
         _logger.LogInformation($"_mqttBrokerIp=[{_mqttBrokerIp}]");
         _logger.LogInformation($"_mqttBrokerPort=[{_mqttBrokerPort}]");
         _logger.LogInformation($"_mqttBrokerRootTopic=[{_mqttBrokerRootTopic}]");
-
-        // Gantry bridge configuration
-        string gantryBridgeConfigPath = $"GantryBridges:{OP}";
-        if (int.TryParse(_configuration[$"{gantryBridgeConfigPath}:Port"], out int tmpPlcPort)) _plcPort = tmpPlcPort;
-        if (int.TryParse(_configuration[$"{gantryBridgeConfigPath}:DelayRetry"], out int tmpPlcDelayRetry)) _plcDelayRetry = tmpPlcDelayRetry;
-        _logger.LogInformation($"_plcPort=[{_plcPort}]");
-        _logger.LogInformation($"_plcDelayRetry=[{_plcDelayRetry}]");
-
-        _logger.LogInformation($"Leave ...");
     }
-
 
     private async Task StartMqtt()
     {
@@ -154,142 +139,6 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
         //_plcCommunication.Send(t);
     }
 
-    private async Task TcpAcceptLoopAsync(CancellationToken token)
-    {
-        TcpListener listener = new TcpListener(IPAddress.Any, _plcPort);
-        listener.Start();
-        _logger.LogInformation($"Listening on port {_plcPort} ...");
-
-        _lastSentTelegram = new Telegram();
-        _ackTelegram = new Telegram();
-        _watchdogRetry = new System.Timers.Timer(_plcDelayRetry);
-        _watchdogRetry.Elapsed += OnWatchdogRetry!;
-        _watchdogRetry.AutoReset = true;
-        _watchdogRetry.Enabled = false;
-
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    _logger.LogInformation($"Waiting for a new incoming connection request!");
-                    _tcpClient = await listener.AcceptTcpClientAsync(token);
-                    _logger.LogInformation($"Client connected from {_tcpClient.Client.RemoteEndPoint} !");
-
-                    using NetworkStream stream = _tcpClient.GetStream();
-                    await TcpReceiveLoopAsync(stream, token);
-
-                    _logger.LogWarning($"Connection closed by the client !");
-                    _tcpClient.Dispose();
-                    _tcpClient = null;
-                }
-                catch (OperationCanceledException)
-                {
-                    break; // normal termination
-                }
-                catch (SocketException ex)
-                {
-                    _logger.LogWarning(ex, $"Socket error !");
-                }
-                catch (IOException ex)
-                {
-                    _logger.LogWarning(ex, $"Connection interrupted !");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Unexpected error !");
-                }
-            }
-        }
-        finally
-        {
-            listener.Stop();
-            _logger.LogInformation($"Listener stopped.");
-        }
-
-        await Task.CompletedTask;
-    }
-
-    private async Task TcpReceiveLoopAsync(NetworkStream stream, CancellationToken token)
-    {
-        int bytesRead = 0;
-        int offset = 0;
-        Telegram t = new Telegram();
-
-        try
-        {
-            while (true)
-            {
-                offset = 0;
-                Array.Clear(t.Bytes, 0, t.Bytes.Length);
-                while (offset < t.Bytes.Length)
-                {
-                    bytesRead = await stream.ReadAsync(t.Bytes, offset, t.Bytes.Length - offset, token);
-                    if (bytesRead == 0) break; // connection closed properly
-                    offset += bytesRead;
-                }
-                if (bytesRead == 0) break;
-
-                if (!Validate(t))
-                {
-                    _logger.LogInformation(t.HexaDump());
-                    continue;
-                }
-
-                _logger.LogInformation(t.AsciiString);
-                if (t.Identifier == TelegramReceiveIdentifiers.ACKN.ToString())
-                {
-                    if (t.Counter == _lastSentTelegram.Counter)
-                    {
-                        _watchdogRetry.Enabled = false;
-                        //if (sendingReleased != null)
-                        //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
-                    }
-                    else
-                    {
-                        _logger.LogError(
-                            $"Unexpected counter in ACKN: Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]");
-                    }
-                }
-                else
-                {
-                    _ackTelegram.Sender = t.Receiver;
-                    _ackTelegram.Receiver = t.Sender;
-                    _ackTelegram.Identifier = TelegramSendIdentifiers.ACKN.ToString();
-                    _ackTelegram.AckFlag = "0";
-                    _ackTelegram.Counter = t.Counter;
-                    _ackTelegram.Data = t.Data;
-                    await SendToPlc(_ackTelegram, false);
-                    if (t.Counter == _lastReceivedCounter && t.Counter != "0")
-                    {
-                        _logger.LogError($"Same counter as previous telegram --> No processing");
-                    }
-                    else
-                    {
-                        _lastReceivedCounter = t.Counter;
-                        //if (telegramReceived != null)
-                        //    telegramReceived.Invoke(this, new TelegramReceivedEventArgs(_receivedTelegram));
-                    }
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // normal stop
-        }
-        catch (IOException ex)
-        {
-            _logger.LogWarning(ex, "Connection interrupted (IO)");
-        }
-        catch (SocketException ex)
-        {
-            _logger.LogWarning(ex, "Socket error");
-        }
-
-        await Task.CompletedTask;
-    }
-
     private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
     {
         _watchdogRetry.Enabled = false;
@@ -297,7 +146,7 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
         _watchdogRetry.Enabled = true;
     }
 
-    public async Task SendToPlc(Telegram t, bool isNew = false)
+    public async Task SendToPlc(GLogWareTelegram t, bool isNew = false)
     {
         try
         {
@@ -348,7 +197,7 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
         }
     }
 
-    private bool Validate(Telegram t)
+    private bool Validate(GLogWareTelegram t)
     {
         byte b;
 
@@ -363,14 +212,14 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
         //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
 
         b = t.Bytes[0];
-        if (b != TelegramConstants.STX)
+        if (b != GLogWareTelegramConstants.STX)
         {
             _logger.LogError($"Telegramm has wrong start byte: STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]");
             return false;
         }
 
         b = t.Bytes[^1];
-        if (b != TelegramConstants.ETX)
+        if (b != GLogWareTelegramConstants.ETX)
         {
             _logger.LogError($"Telegramm has wrong end byte: ETX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]");
             return false;
@@ -394,18 +243,18 @@ public class BridgeSimulator : IHostedService, IAsyncDisposable
             return false;
         }
 
-        if (t.Sender != TelegramConstants.GLOGWARE_IDENTIFIER)
+        if (t.Sender != GLogWareTelegramConstants.GLOGWARE_IDENTIFIER)
         {
-            _logger.LogError($"Telegram has an invalid Sender. (Is=[{t.Sender}]) != (Should=[{TelegramConstants.GLOGWARE_IDENTIFIER}])");
+            _logger.LogError($"Telegram has an invalid Sender. (Is=[{t.Sender}]) != (Should=[{GLogWareTelegramConstants.GLOGWARE_IDENTIFIER}])");
             return false;
         }
 
-        if (!Enum.TryParse<TelegramReceiveIdentifiers>(t.Identifier, out _))
-        {
-            string validValues = string.Join("|", Enum.GetNames<TelegramReceiveIdentifiers>());
-            _logger.LogError($"Telegram has an invalid Identifier. (Is=[{t.Identifier}]) != (Should=[{validValues}])");
-            return false;
-        }
+        //if (!Enum.TryParse<TelegramReceiveIdentifiers>(t.Identifier, out _))
+        //{
+        //    string validValues = string.Join("|", Enum.GetNames<TelegramReceiveIdentifiers>());
+        //    _logger.LogError($"Telegram has an invalid Identifier. (Is=[{t.Identifier}]) != (Should=[{validValues}])");
+        //    return false;
+        //}
 
         return true;
     }

@@ -5,11 +5,11 @@ namespace Gudel.GLogWare.BridgeSimulator;
 /// <summary>
 /// GLogWare telegram representation
 /// </summary>
-public class Telegram
+public class GLogWareTelegram
 {
-    public Telegram()
+    public GLogWareTelegram()
     {
-        Bytes = new byte[TelegramConstants.TELEGRAM_LENGTH];
+        Bytes = new byte[GLogWareTelegramConstants.TELEGRAM_LENGTH];
     }
 
     /// <summary>
@@ -54,15 +54,16 @@ public class Telegram
 
     public void Build()
     {
-        AsciiString = TelegramConstants.TELEGRAM_TEMPLATE;
-        AsciiString = AsciiString.Replace("[STX]", Convert.ToChar(TelegramConstants.STX).ToString());
-        AsciiString = AsciiString.Replace("[ETX]", Convert.ToChar(TelegramConstants.ETX).ToString());
-        AsciiString = AsciiString.Replace("[AckFlag]", AckFlag);
-        AsciiString = AsciiString.Replace("[Counter]", Counter);
-        AsciiString = AsciiString.Replace("[Receiver]", Receiver);
-        AsciiString = AsciiString.Replace("[Sender]", Sender);
-        AsciiString = AsciiString.Replace("[Identifier]", Identifier);
-        AsciiString = AsciiString.Replace("[Data]", Data.PadRight(216, '.'));
+        AsciiString =
+            Convert.ToChar(GLogWareTelegramConstants.STX).ToString() +
+            ((AckFlag.Length >= 1) ? AckFlag.Substring(0, 1) : AckFlag.PadRight(1)) +
+            ((Counter.Length >= 1) ? Counter.Substring(0, 1) : Counter.PadRight(1)) +
+            ((Receiver.Length >= 8) ? Receiver.Substring(0, 8) : Receiver.PadRight(8)) +
+            ((Sender.Length >= 8) ? Sender.Substring(0, 8) : Sender.PadRight(8)) +
+            ((Identifier.Length >= 4) ? Identifier.Substring(0, 4) : Identifier.PadRight(4)) +
+            ((Data.Length >= 216) ? Data.Substring(0, 216) : Data.PadRight(216, '.')) +
+            Convert.ToChar(GLogWareTelegramConstants.ETX).ToString()
+        ;
 
         Array.Clear(Bytes, 0, Bytes.Length);
         byte[] tmpBuf = Encoding.ASCII.GetBytes(AsciiString);

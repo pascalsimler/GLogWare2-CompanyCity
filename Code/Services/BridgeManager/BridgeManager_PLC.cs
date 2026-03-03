@@ -9,10 +9,10 @@ namespace Gudel.GLogWare.BridgeManager;
 public partial class BridgeManager
 {
     #region Private members
-    private string _plcIp { get; set; } = "127.0.0.1";
-    private int _plcPort { get; set; } = 7000;
-    private int _plcDelayConnection { get; set; } = 5000;
-    private int _plcDelayRetry { get; set; } = 5000;
+    private string _ip { get; set; } = "127.0.0.1";
+    private int _port { get; set; } = 7000;
+    private int _delayConnection { get; set; } = 5000;
+    private int _delayRetry { get; set; } = 5000;
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
     private PlcTelegram _lastSentTelegram = null!;
@@ -25,14 +25,14 @@ public partial class BridgeManager
     private void LoadConfiguration_Plc()
     {
         string path = $"GantryBridges:{OP}";
-        _plcIp = _configuration[$"{path}:Ip"] ?? _plcIp;
-        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPlcPort)) _plcPort = tmpPlcPort;
-        if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpPlcDelayConnection)) _plcDelayConnection = tmpPlcDelayConnection;
-        if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpPlcDelayRetry)) _plcDelayRetry = tmpPlcDelayRetry;
-        _logger.LogInformation($"_plcIp=[{_plcIp}]");
-        _logger.LogInformation($"_plcPort=[{_plcPort}]");
-        _logger.LogInformation($"_plcDelayConnectionPlc=[{_plcDelayConnection}]");
-        _logger.LogInformation($"_plcDelayRetry=[{_plcDelayRetry}]");
+        _ip = _configuration[$"{path}:Ip"] ?? _ip;
+        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
+        if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpDelayConnection)) _delayConnection = tmpDelayConnection;
+        if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
+        _logger.LogInformation($"_ip=[{_ip}]");
+        _logger.LogInformation($"_port=[{_port}]");
+        _logger.LogInformation($"_delayConnectionPlc=[{_delayConnection}]");
+        _logger.LogInformation($"_delayRetry=[{_delayRetry}]");
     }
 
     private void InitLogPlc(LogPlc lp)
@@ -49,7 +49,7 @@ public partial class BridgeManager
 
         _lastSentTelegram = new PlcTelegram();
         _ackTelegram = new PlcTelegram();
-        _watchdogRetry = new System.Timers.Timer(_plcDelayRetry);
+        _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
         _watchdogRetry.Enabled = false;
@@ -60,9 +60,9 @@ public partial class BridgeManager
             {
                 _tcpClient = new TcpClient();
 
-                _logger.LogInformation($"Connecting to {_plcIp}:{_plcPort} ...");
-                await _tcpClient.ConnectAsync(_plcIp, _plcPort, token);
-                information = $"Connected to {_plcIp}:{_plcPort} !";
+                _logger.LogInformation($"Connecting to {_ip}:{_port} ...");
+                await _tcpClient.ConnectAsync(_ip, _port, token);
+                information = $"Connected to {_ip}:{_port} !";
                 _logger.LogInformation(information);
                 {
                     LogPlc lp = new LogPlc();
@@ -133,8 +133,8 @@ public partial class BridgeManager
 
             if (!token.IsCancellationRequested)
             {
-                _logger.LogInformation($"Reconnecting in {_plcDelayConnection} milliseconds ...");
-                await Task.Delay(TimeSpan.FromMilliseconds(_plcDelayConnection), token);
+                _logger.LogInformation($"Reconnecting in {_delayConnection} milliseconds ...");
+                await Task.Delay(TimeSpan.FromMilliseconds(_delayConnection), token);
             }
 
             if (_tcpClient != null)

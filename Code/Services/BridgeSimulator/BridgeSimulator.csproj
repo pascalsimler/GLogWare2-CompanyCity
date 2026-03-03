@@ -20,4 +20,9 @@
     <ProjectReference Include="..\..\ClassLibraries\EFCore.Application\EFCore.Application.csproj" />
     <ProjectReference Include="..\..\ClassLibraries\Shared\Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="GLogWareTelegram\FromGLogWare\" />
+    <Folder Include="GLogWareTelegram\ToGLogWare\" />
+  </ItemGroup>
 </Project>
