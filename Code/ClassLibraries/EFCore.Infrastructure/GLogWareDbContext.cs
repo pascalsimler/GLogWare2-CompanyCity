@@ -7,7 +7,9 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> options) : DbContext(options)
 {
     #region Entity Sets
+
     #region Tables
+    
     #region Topology
     public DbSet<ResourceMode> ResourceModes => Set<ResourceMode>();
     public DbSet<Resource> Resources => Set<Resource>();
@@ -46,10 +48,16 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<Dictionary> Dictionaries => Set<Dictionary>();
     #endregion
 
+    #region Parameter
+    public DbSet<ParameterType> ParameterTypes => Set<ParameterType>();
+    public DbSet<Parameter> Parameters => Set<Parameter>();
+    #endregion
+
     #region User Management
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     #endregion
+    
     #endregion
 
     #region Views

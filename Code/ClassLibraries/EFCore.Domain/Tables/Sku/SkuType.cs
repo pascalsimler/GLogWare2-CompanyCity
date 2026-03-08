@@ -7,6 +7,8 @@ public class SkuType : ISeedData<SkuType>
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 
+    public ICollection<Sku> Skus { get; set; } = new List<Sku>();
+
     public static IEnumerable<SkuType> SeedData()
     {
         return new List<SkuType>() {

@@ -11,21 +11,25 @@ public class PlaceConfiguration : IEntityTypeConfiguration<Place>
         entity.HasKey(e => e.Name);
 
         entity.Property(e => e.Name)
-              .HasMaxLength(16)
-              .IsUnicode(false)
-              .IsRequired()
-              .HasComment("Unique identifier for the place");
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .IsRequired()
+            .HasComment("Unique identifier for the place");
 
         entity.Property(e => e.Area)
-              .HasMaxLength(16)
-              .IsUnicode(false)
-              .HasComment("Foreign key referencing Area.Name");
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .HasComment("Foreign key referencing Area.Name");
 
         entity.Property(e => e.PlaceType)
-              .HasMaxLength(16)
-              .IsUnicode(false)
-              .HasComment("Foreign key referencing PlaceType.Name");
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .HasComment("Foreign key referencing PlaceType.Name");
 
+        entity.Property(e => e.Bridge)
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .HasComment("Foreign key referencing PlaceType.Name");
 
         // Table relations
         entity.HasOne(e => e.AreaRecord)

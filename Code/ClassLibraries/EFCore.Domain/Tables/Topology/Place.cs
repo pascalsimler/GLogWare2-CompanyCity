@@ -16,6 +16,8 @@ public class Place : BaseTracking, ISeedData<Place>
     public int Zone { get; set; }
     public int Distance { get; set; }
 
+    public string? Bridge { get; set; }
+
     public Area AreaRecord { get; set; } = null!;
     public PlaceType PlaceTypeRecord { get; set; } = null!;
 
@@ -46,6 +48,7 @@ public class Place : BaseTracking, ISeedData<Place>
                     p.G = g.ToString();
                     p.XCell = x.ToString();
                     p.YCell = y.ToString();
+                    p.Bridge = (x < 36) ? "OP7100BR": "OP7200BR";
                     places.Add(p);
                 }
             }

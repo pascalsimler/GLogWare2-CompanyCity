@@ -139,15 +139,13 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             GLogWareMessage m = GLogWareMessage.DeSerialize(payload)!;
             switch (m.Identifier)
             {
-                case GLogWareMessageIdentifiers.WakeUp:
-                    break;
                 case GLogWareMessageIdentifiers.ToPlc:
-                    PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    await SendTelegram(pm);
+                    PlcMessage pmTo = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await SendTelegram(pmTo);
                     break;
                 case GLogWareMessageIdentifiers.FromPlc:
-                    break;
-                default:
+                    PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await SimulatePlcTelegram(pmFrom);
                     break;
             }
         }
@@ -155,6 +153,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
+
+        await TryToStartNewOrder();
     }
 
     public async Task SendToMqtt(string topic, GLogWareMessage m)

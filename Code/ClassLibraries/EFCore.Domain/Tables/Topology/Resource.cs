@@ -4,13 +4,15 @@
 public class Resource : BaseTracking, ISeedData<Resource>
 {
     public string Name { get; set; } = null!;
-    public string Mode { get; set; } = null!;
-    public bool? Parked { get; set; }
-    public bool? Occupied { get; set; }
-    public bool? ErrorFlag { get; set; }
-    public bool? InfeedEnabled { get; set; }
-    public bool? OutfeedEnabled { get; set; }
-    public bool? RelocationEnabled { get; set; }
+    public string Mode { get; set; } = nameof(ResourceModeIdentifiers.UNDEFINED);
+    public string? Description { get; set; }
+    public bool IsOnline { get; set; } = false;
+    public bool Parked { get; set; } = false;
+    public bool Occupied { get; set; } = false;
+    public bool ErrorFlag { get; set; } = true;
+    public bool InfeedEnabled { get; set; } = true;
+    public bool OutfeedEnabled { get; set; } = true;
+    public bool RelocationEnabled { get; set; } = true;
 
     public ResourceMode ResourceModeRecord { get; set; } = null!;
 
@@ -19,53 +21,43 @@ public class Resource : BaseTracking, ISeedData<Resource>
         return new List<Resource> {
             new Resource { 
                 Name ="OP7100BR", 
-                Mode = nameof(ResourceModeIdentifiers.UNDEFINED),
-                Parked = false,
-                Occupied = false,
-                ErrorFlag = true,
-                InfeedEnabled = true,
-                OutfeedEnabled = true,
-                RelocationEnabled = true,
+                Description = "Bridge 1 of Gantry 1",
             },
             new Resource {
                 Name ="OP7200BR",
-                Mode = nameof(ResourceModeIdentifiers.UNDEFINED),
-                Parked = false,
-                Occupied = false,
-                ErrorFlag = true,
-                InfeedEnabled = true,
-                OutfeedEnabled = true,
-                RelocationEnabled = true,
+                Description = "Bridge 2 of Gantry 1",
             },
             new Resource {
                 Name ="OP7300BR",
-                Mode = nameof(ResourceModeIdentifiers.UNDEFINED),
-                Parked = false,
-                Occupied = false,
-                ErrorFlag = true,
-                InfeedEnabled = true,
-                OutfeedEnabled = true,
-                RelocationEnabled = true,
+                Description = "Bridge 3 of Gantry 1",
             },
             new Resource {
                 Name ="OP7400BR",
-                Mode = nameof(ResourceModeIdentifiers.UNDEFINED),
-                Parked = false,
-                Occupied = false,
-                ErrorFlag = true,
-                InfeedEnabled = true,
-                OutfeedEnabled = true,
-                RelocationEnabled = true,
+                Description = "Bridge 4 of Gantry 1",
             },
             new Resource {
                 Name ="OP7500BR",
-                Mode = nameof(ResourceModeIdentifiers.UNDEFINED),
-                Parked = false,
-                Occupied = false,
-                ErrorFlag = true,
-                InfeedEnabled = true,
-                OutfeedEnabled = true,
-                RelocationEnabled = true,
+                Description = "Bridge 5 of Gantry 1",
+            },
+             new Resource {
+                Name ="OP8100BR",
+                Description = "Bridge 1 of Gantry 2",
+            },
+            new Resource {
+                Name ="OP8200BR",
+                Description = "Bridge 2 of Gantry 2",
+            },
+            new Resource {
+                Name ="OP8300BR",
+                Description = "Bridge 3 of Gantry 2",
+            },
+            new Resource {
+                Name ="OP8400BR",
+                Description = "Bridge 4 of Gantry 2",
+            },
+            new Resource {
+                Name ="OP8500BR",
+                Description = "Bridge 5 of Gantry 2",
             },
         };
     }

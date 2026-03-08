@@ -12,31 +12,36 @@ public class SkuConfiguration : IEntityTypeConfiguration<Sku>
         entity.HasKey(e => e.Skuid);
 
         entity.Property(e => e.Skuid)
-              .HasMaxLength(16)
-              .IsUnicode(false)
-              .IsRequired()
-              .HasComment("Unique identifier of the Sku - It is its barcode");
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .IsRequired()
+            .HasComment("Unique identifier of the Sku - It is its barcode");
 
         entity.Property(e => e.Article)
-              .HasMaxLength(16)
-              .IsUnicode(false)
-              .HasComment("Foreign key referencing Article.ArticleNumber");
+            .HasMaxLength(16)
+            .IsUnicode(false)
+            .HasComment("Foreign key referencing Article.ArticleNumber");
 
         entity.Property(e => e.Place)
-              .HasMaxLength(16)
-              .IsUnicode (false)
-              .HasComment("Foreign key referencing Place.Name");
+            .HasMaxLength(16)
+            .IsUnicode (false)
+            .HasComment("Foreign key referencing Place.Name");
 
 
         // Table relations
+        entity.HasOne(e => e.SkuTypeRecord)
+            .WithMany(a => a.Skus)
+            .HasForeignKey(e => e.SkuType)
+            .OnDelete(DeleteBehavior.Restrict);
+
         entity.HasOne(e => e.ArticleRecord)
-              .WithMany(a => a.Skus)
-              .HasForeignKey(e => e.Article)
-              .OnDelete(DeleteBehavior.Restrict);
+            .WithMany(a => a.Skus)
+            .HasForeignKey(e => e.Article)
+            .OnDelete(DeleteBehavior.Restrict);
 
         entity.HasOne(e => e.PlaceRecord)
-              .WithMany(a => a.Skus)
-              .HasForeignKey(e => e.Place)
-              .OnDelete(DeleteBehavior.Restrict);
+            .WithMany(a => a.Skus)
+            .HasForeignKey(e => e.Place)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

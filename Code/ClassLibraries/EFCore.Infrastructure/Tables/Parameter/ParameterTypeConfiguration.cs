@@ -4,23 +4,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Gudel.GLogWare.EFCore.Infrastructure;
 
-public class JobTypeConfiguration : IEntityTypeConfiguration<JobType>
+public class ParameterTypeConfiguration : IEntityTypeConfiguration<ParameterType>
 {
-    public void Configure(EntityTypeBuilder<JobType> entity)
+    public void Configure(EntityTypeBuilder<ParameterType> entity)
     {
-        // Column properties
         entity.HasKey(e => e.Identifier);
 
         entity.Property(e => e.Identifier)
-            .HasMaxLength(32)
+            .HasMaxLength(16)
             .IsRequired()
             .IsUnicode(false)
-            .HasComment("Unique identifier for the JobStatus");
-
-        entity.Property(e => e.TranslationKey)
-            .HasMaxLength(32)
-            .IsUnicode(false)
-            .HasComment("Key for language translation");
+            .HasComment("Unique type indentifier");
 
         entity.Property(e => e.Description)
             .HasMaxLength(1024)
