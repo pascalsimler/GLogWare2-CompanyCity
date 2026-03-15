@@ -13,11 +13,13 @@ public partial class BridgeManager
     private int _port { get; set; } = 7000;
     private int _delayConnection { get; set; } = 5000;
     private int _delayRetry { get; set; } = 5000;
+    private int _delayLife { get; set; } = 30000;
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
     private Telegram _lastSentTelegram = null!;
     private Telegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
+    private System.Timers.Timer _watchdogLife = null!;
     private LogPlc _lpReceive = null!;
     #endregion region
 
@@ -29,10 +31,13 @@ public partial class BridgeManager
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
         if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpDelayConnection)) _delayConnection = tmpDelayConnection;
         if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
+        if (int.TryParse(_configuration[$"{path}:DelayLife"], out int tmpDelayLife)) _delayLife = tmpDelayLife;
+
         _logger.LogInformation($"_ip=[{_ip}]");
         _logger.LogInformation($"_port=[{_port}]");
         _logger.LogInformation($"_delayConnectionPlc=[{_delayConnection}]");
         _logger.LogInformation($"_delayRetry=[{_delayRetry}]");
+        _logger.LogInformation($"_delayLife=[{_delayLife}]");
     }
 
     private void InitLogPlc(LogPlc lp)
@@ -49,10 +54,16 @@ public partial class BridgeManager
 
         _lastSentTelegram = new Telegram();
         _ackTelegram = new Telegram();
+       
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
         _watchdogRetry.Enabled = false;
+
+        _watchdogLife = new System.Timers.Timer(_delayLife);
+        _watchdogLife.Elapsed += OnWatchdogLife!;
+        _watchdogLife.AutoReset = true;
+        _watchdogLife.Enabled = true;
 
         while (!token.IsCancellationRequested)
         {
@@ -89,46 +100,54 @@ public partial class BridgeManager
             {
                 information = $"Normal termination";
                 _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
+                {
+                    LogPlc lp = new LogPlc();
+                    InitLogPlc(lp);
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
+                    lp.Information = information;
+                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    await _dbLoggerService.WriteLogPlcAsync(lp);
+                }
                 break;
             }
             catch (SocketException ex)
             {
                 information = $"Socket error (Network or PLC inaccessible) !";
                 _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
+                {
+                    LogPlc lp = new LogPlc();
+                    InitLogPlc(lp);
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
+                    lp.Information = information;
+                    lp.Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}";
+                    await _dbLoggerService.WriteLogPlcAsync(lp);
+                }
             }
             catch (IOException ex)
             {
                 information = $"Connection interrupted !";
                 _logger.LogWarning(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
+                {
+                    LogPlc lp = new LogPlc();
+                    InitLogPlc(lp);
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
+                    lp.Information = information;
+                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    await _dbLoggerService.WriteLogPlcAsync(lp);
+                }
             }
             catch (Exception ex)
             {
                 information = $"Unexpected error !";
                 _logger.LogError(ex, information);
-                LogPlc lp = new LogPlc();
-                InitLogPlc(lp);
-                lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                lp.Information = information;
-                lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
-                await _dbLoggerService.WriteLogPlcAsync(lp);
+                {
+                    LogPlc lp = new LogPlc();
+                    InitLogPlc(lp);
+                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
+                    lp.Information = information;
+                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    await _dbLoggerService.WriteLogPlcAsync(lp);
+                }
             }
 
             if (!token.IsCancellationRequested)
@@ -411,6 +430,17 @@ public partial class BridgeManager
         _watchdogRetry.Enabled = false;
         await SendToPlc(_lastSentTelegram, false);
         _watchdogRetry.Enabled = true;
+    }
+
+    private async void OnWatchdogLife(object source, ElapsedEventArgs e)
+    {
+        if (_watchdogRetry.Enabled) return;
+        if (_tcpClient == null) return;
+        if (!_tcpClient.Connected) return;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = PlcMessageIdentifiers.LIFE;
+        await SendTelegram(pm);
     }
 
     private async Task SendTelegram(PlcMessage pm)
