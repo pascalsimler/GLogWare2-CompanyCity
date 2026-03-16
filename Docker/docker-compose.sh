@@ -1,1 +1,1 @@
-docker compose -p glogware-demo up -d
+docker compose -f docker-compose.yaml -p glogware-demo up -d

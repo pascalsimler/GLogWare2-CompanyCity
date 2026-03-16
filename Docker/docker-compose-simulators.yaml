@@ -7,8 +7,8 @@ services:
     ports:
       - "7100:7100"
     volumes:
-      - ${HOME_DIR}/config:${DOCKER_APP_DIR}/config
-      - ${HOME_DIR}/logfiles:${DOCKER_APP_DIR}/logfiles
+      - ${HOME_DIR}/Config:${DOCKER_APP_DIR}/Config
+      - ${HOME_DIR}/Logfiles:${DOCKER_APP_DIR}/Logfiles
   bridgesimulator-op7200br:
     image: bridgesimulator:latest
     container_name: BridgeSimulator-OP7200BR
@@ -17,6 +17,6 @@ services:
     ports:
       - "7200:7200"
     volumes:
-      - ${HOME_DIR}/config:${DOCKER_APP_DIR}/config
-      - ${HOME_DIR}/logfiles:${DOCKER_APP_DIR}/logfiles
+      - ${HOME_DIR}/Config:${DOCKER_APP_DIR}/Config
+      - ${HOME_DIR}/Logfiles:${DOCKER_APP_DIR}/Logfiles
  

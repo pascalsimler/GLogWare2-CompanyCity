@@ -1,1 +1,1 @@
-docker compose -p glogware-demo-simulators up -d
+docker compose -f docker-compose-simulators.yaml -p glogware-demo-simulators up -d
