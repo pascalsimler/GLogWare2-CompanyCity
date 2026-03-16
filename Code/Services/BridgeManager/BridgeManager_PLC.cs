@@ -58,12 +58,12 @@ public partial class BridgeManager
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
-        _watchdogRetry.Enabled = false;
+        _watchdogRetry.Stop();
 
         _watchdogLife = new System.Timers.Timer(_delayLife);
         _watchdogLife.Elapsed += OnWatchdogLife!;
         _watchdogLife.AutoReset = true;
-        _watchdogLife.Enabled = true;
+        _watchdogLife.Start();
 
         while (!token.IsCancellationRequested)
         {
@@ -252,7 +252,8 @@ public partial class BridgeManager
             {
                 if (t.Counter == _lastSentTelegram.Counter)
                 {
-                    _watchdogRetry.Enabled = false;
+                    _watchdogRetry.Stop();
+                    RestartTimer(_watchdogLife);
                     //if (sendingReleased != null)
                     //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
                 }
@@ -427,9 +428,9 @@ public partial class BridgeManager
     #region Send
     private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
     {
-        _watchdogRetry.Enabled = false;
+        _watchdogRetry.Stop();
         await SendToPlc(_lastSentTelegram, false);
-        _watchdogRetry.Enabled = true;
+        _watchdogRetry.Start();
     }
 
     private async void OnWatchdogLife(object source, ElapsedEventArgs e)
@@ -501,7 +502,7 @@ public partial class BridgeManager
                 }
                 t.Build();
                 _lastSentTelegram = t;
-                _watchdogRetry.Enabled = true;
+                _watchdogRetry.Start();
             }
             else if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
             {
@@ -550,6 +551,12 @@ public partial class BridgeManager
         {
            
         }
+    }
+
+    private void RestartTimer(System.Timers.Timer timer)
+    {
+        timer.Stop();
+        timer.Start();
     }
     #endregion
 }
