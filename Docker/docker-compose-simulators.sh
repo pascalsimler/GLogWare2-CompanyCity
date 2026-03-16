@@ -1,0 +1,1 @@
+docker compose -p glogware-demo-simulators up -d

@@ -5,31 +5,43 @@
   "ConnectionString_Oracle": "User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;",
   "ConnectionString_MySql": "server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*",
   "MQTTBroker": {
-    "Hostname": "mqtt.glogware.com",
+    "Ip": "mqtt.glogware.com",
     "Port": "1883",
     "RootTopic": "Company/City/GLogWare"
   },
   "GantryBridges": {
     "OP7100BR": {
-      "IP": "10.59.0.50",
+      "Ip": "ubuntuserver2404.glogware.com",
       "Port": 7100,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
+      "DelayLife": 30000,
       "Description": "First Bridge of Gantry 1"
     },
     "OP7200BR": {
-      "IP": "10.59.0.50",
+      "Ip": "ubuntuserver2404.glogware.com",
       "Port": 7200,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
+      "DelayLife": 30000,
       "Description": "Second Bridge of Gantry 2"
     }
   },
   "Conveyors": {
     "OP1000AL": {
-      "IP": "10.59.0.50",
+      "Ip": "10.59.0.1",
       "Port": 1000,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
+      "DelayLife": 30000,
       "Description": "Infeed Conveyors"
     },
     "OP2000AL": {
-      "IP": "10.59.0.50",
+      "Ip": "10.59.0.1",
       "Port": 2000,
+      "DelayConnection": 5000,
+      "DelayRetry": 5000,
+      "DelayLife": 30000,
       "Description": "Outfeed Conveyors"
     }
   }

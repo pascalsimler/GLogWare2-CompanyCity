@@ -1,18 +1,22 @@
 services:
-  bridgemanager-op7100br:
-    image: bridgemanager:latest
-    container_name: BridgeManager-OP7100BR
+ bridgesimulator-op7100br:
+    image: bridgesimulator:latest
+    container_name: BridgeSimulator-OP7100BR
     environment:
       OP: OP7100BR
+    ports:
+      - "7100:7100"
     volumes:
       - ${HOME_DIR}/config:${DOCKER_APP_DIR}/config
       - ${HOME_DIR}/logfiles:${DOCKER_APP_DIR}/logfiles
-  bridgemanager-op7200br:
-    image: bridgemanager:latest
-    container_name: BridgeManager-OP7200BR
+  bridgesimulator-op7200br:
+    image: bridgesimulator:latest
+    container_name: BridgeSimulator-OP7200BR
     environment:
       OP: OP7200BR
+    ports:
+      - "7200:7200"
     volumes:
       - ${HOME_DIR}/config:${DOCKER_APP_DIR}/config
       - ${HOME_DIR}/logfiles:${DOCKER_APP_DIR}/logfiles
-
+ 

@@ -1,1 +1,1 @@
-docker compose -p glogware_demo up -d
+docker compose -p glogware-demo up -d
