@@ -1,5 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.BridgeManager;
 
@@ -10,7 +11,9 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        _resource = _db.Resources.Where(x => x.Name == OP).FirstOrDefault();
+        _resource = _db.Resources.AsNoTracking()
+            .Where(x => x.Name == OP)
+            .FirstOrDefault();
         if (_resource == null)
         {
             _logger.LogError(
@@ -32,7 +35,7 @@ public partial class BridgeManager
             return false;
         }
 
-        var j = _db.Jobs
+        var j = _db.Jobs.AsNoTracking()
             .Where(j => 
                 j.Bridge == OP &&
                 j.Status.StartsWith("GANTRY")
@@ -73,6 +76,7 @@ public partial class BridgeManager
                 break;
         }
 
+        _logger.LogInformation($"No pending jobs available !");
         return false;
     }
 

@@ -16,6 +16,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "First Bridge of Gantry 1"
     },
     "OP7200BR": {
@@ -24,6 +25,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "Second Bridge of Gantry 2"
     }
   },
@@ -34,6 +36,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "Infeed Conveyors"
     },
     "OP2000AL": {
@@ -42,6 +45,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "Outfeed Conveyors"
     }
   }

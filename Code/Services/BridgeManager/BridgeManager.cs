@@ -7,6 +7,7 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
 using System.Text;
+using System.Timers;
 
 namespace Gudel.GLogWare.BridgeManager;
 
@@ -29,8 +30,11 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
+    private string _subscriptionTopic { get; set; } = string.Empty;
     private IManagedMqttClient? _mqttClient = null;
     private CancellationTokenSource? _cts;
+    private System.Timers.Timer _watchdogWakeup = null!;
+    private int _delayWakeup { get; set; } = 30000;
     #endregion
 
     public BridgeManager(
@@ -79,9 +83,12 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
         _mqttBrokerRootTopic = _configuration[$"{path}:RootTopic"] ?? _mqttBrokerRootTopic;
+        if (int.TryParse(_configuration[$"{path}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
+
         _logger.LogInformation($"_mqttBrokerIp=[{_mqttBrokerIp}]");
         _logger.LogInformation($"_mqttBrokerPort=[{_mqttBrokerPort}]");
         _logger.LogInformation($"_mqttBrokerRootTopic=[{_mqttBrokerRootTopic}]");
+        _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
     }
 
     private async Task StartMqtt()
@@ -112,25 +119,27 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             await Task.CompletedTask;
         };
 
-        string subscriptionTopic = $"{_mqttBrokerRootTopic}/GantryBridges/{OP}/Manager/Incoming";
-        _logger.LogInformation($"subscriptionTopic=[{subscriptionTopic}]");
+        _subscriptionTopic = $"{_mqttBrokerRootTopic}/GantryBridges/{OP}/Manager/Incoming";
+        _logger.LogInformation($"subscriptionTopic=[{_subscriptionTopic}]");
 
         var mqttSubscriptionTopics = new[] {
             new MqttTopicFilterBuilder()
-                .WithTopic(subscriptionTopic)
+                .WithTopic(_subscriptionTopic)
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
                 .Build()
         };
 
         await _mqttClient.SubscribeAsync(mqttSubscriptionTopics);
         await _mqttClient.StartAsync(mqttOptions);
+
+        _watchdogWakeup = new System.Timers.Timer(_delayWakeup);
+        _watchdogWakeup.Elapsed += OnWatchdogWakeup!;
+        _watchdogWakeup.AutoReset = true;
+        _watchdogWakeup.Start();
     }
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
-        //_plcSendingReleased.WaitOne();
-        //_plcSendingReleased.Reset();
-
         try
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
@@ -181,5 +190,12 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Exception");
         }
   
-    }  
+    }
+
+    private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
+    {
+        GLogWareMessage gm = new GLogWareMessage();
+        gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
+        await SendToMqtt(_subscriptionTopic, gm);
+    }
 }

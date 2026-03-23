@@ -21,6 +21,7 @@ public partial class BridgeManager
     private System.Timers.Timer _watchdogRetry = null!;
     private System.Timers.Timer _watchdogLife = null!;
     private LogPlc _lpReceive = null!;
+    private SemaphoreSlim semaphore = null!;
     #endregion region
 
     #region Initialisation
@@ -54,7 +55,9 @@ public partial class BridgeManager
 
         _lastSentTelegram = new Telegram();
         _ackTelegram = new Telegram();
-       
+
+        semaphore = new SemaphoreSlim(1);       
+    
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
@@ -64,6 +67,7 @@ public partial class BridgeManager
         _watchdogLife.Elapsed += OnWatchdogLife!;
         _watchdogLife.AutoReset = true;
         _watchdogLife.Start();
+
 
         while (!token.IsCancellationRequested)
         {
@@ -253,9 +257,7 @@ public partial class BridgeManager
                 if (t.Counter == _lastSentTelegram.Counter)
                 {
                     _watchdogRetry.Stop();
-                    RestartTimer(_watchdogLife);
-                    //if (sendingReleased != null)
-                    //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
+                    semaphore.Release();
                 }
                 else
                 {
@@ -488,6 +490,9 @@ public partial class BridgeManager
         {
             if (isNew)
             {
+                _logger.LogInformation("Before semaphore.WaitAsync");
+                await semaphore.WaitAsync();
+                _logger.LogInformation("After semaphore.WaitAsync");
                 t.AckFlag = "1";
                 if (_lastSentTelegram.Counter == string.Empty)
                 {
@@ -517,6 +522,7 @@ public partial class BridgeManager
                     //_logger.LogInformation($"Hexa: {t.HexaDump()}");
                     NetworkStream stream = _tcpClient.GetStream();
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
+                    RestartTimer(_watchdogLife);
                     if (!new[] { PlcMessageIdentifiers.ACKN.ToString(), PlcMessageIdentifiers.LIFE.ToString() }.Contains(t.Identifier)) 
                     {
                         LogPlc lpSend = new LogPlc();
@@ -545,11 +551,6 @@ public partial class BridgeManager
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error !");
-        }
-
-        if (isNew)
-        {
-           
         }
     }
 

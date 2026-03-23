@@ -205,6 +205,8 @@ public partial class BridgeSimulator
 
     public async Task SendToGLogWare(Telegram t, bool isNew = false)
     {
+        await Task.Delay(500);
+
         try
         {
             if (isNew)
