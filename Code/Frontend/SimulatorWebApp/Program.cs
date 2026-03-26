@@ -1,7 +1,6 @@
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
-using Serilog.Enrichers.CallerInfo;
 using Serilog.Events;
 using SimulatorWebApp.Components;
 using SimulatorWebApp.Services;
