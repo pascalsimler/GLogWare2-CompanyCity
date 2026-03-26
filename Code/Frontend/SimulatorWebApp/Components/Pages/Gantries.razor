@@ -6,8 +6,8 @@
 
 <div class="tab-container">
     <div class="tab-header">
-        <button class="tab @(activeTab == 0 ? "active" : "")" @onclick="() => SetTab(0)">Tab 1</button>
-        <button class="tab @(activeTab == 1 ? "active" : "")" @onclick="() => SetTab(1)">Tab 2</button>
+        <button class="tab @(activeTab == 0 ? "active" : "")" @onclick="() => SetTab(0)">STAT</button>
+        <button class="tab @(activeTab == 1 ? "active" : "")" @onclick="() => SetTab(1)">COMP</button>
         <button class="tab @(activeTab == 2 ? "active" : "")" @onclick="() => SetTab(2)">Tab 3</button>
     </div>
 
@@ -30,13 +30,14 @@
 @code {
     private int activeTab = 0;
 
-    void SetTab(int index)
+    private async Task SetTab(int index)
     {
         activeTab = index;
+        await SendMessage("Cruchotage/GlogWare", $"Switched to Tab=[{index}]");
     }
 
-    private async Task SendMessage()
+    private async Task SendMessage(string topic, string message)
     {
-        await MqttService.PublishAsync("test/topic", "Hello from Blazor!");
+        await MqttService.PublishAsync(topic, message);
     }
 }

@@ -23,19 +23,17 @@ builder.Configuration.AddJsonFile(
     optional: false,
     reloadOnChange: true);
 
-//string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{Namespace}::{Method}] {Message:lj}{NewLine}{Exception}";
-string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{Method}] {Message:lj}{NewLine}{Exception}";
-int enableEFCoreLogging = builder.Configuration.GetValue<int>("EnableEFCoreLogging", 0);
+string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod}] {Message:lj}{NewLine}{Exception}";
+int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .Enrich.WithCallerInfo(false, ConfigurationHelper.GetGudelNamespaces())
     .Enrich.With(new CustomLoggerEnricher());
 
-if (enableEFCoreLogging == 0)
+if (enableSystemLogging == 0)
 {
     loggerConfig
-        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning);
+        .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning);
 }
 
 var logger = loggerConfig

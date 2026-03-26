@@ -1,7 +1,51 @@
+using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Shared;
+using Serilog;
+using Serilog.Enrichers.CallerInfo;
+using Serilog.Events;
 using SimulatorWebApp.Components;
 using SimulatorWebApp.Services;
 
+string projectRootPath = ConfigurationHelper.GetProjectRootPath();
+Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile(
+    Path.Combine(ConfigurationHelper.GetConfigPath(projectRootPath), "config.json"),
+    optional: false,
+    reloadOnChange: true);
+
+string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod}] {Message:lj}{NewLine}{Exception}";
+int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
+var loggerConfig = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.With(new CustomLoggerEnricher());
+
+if (enableSystemLogging == 0)
+{
+    loggerConfig
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+    ;
+}
+
+var logger = loggerConfig
+    .WriteTo.Console(outputTemplate: logMessageTemplate)
+    .WriteTo.File(
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "SimulatorWebApp"),
+        flushToDiskInterval: TimeSpan.FromSeconds(1),
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: logMessageTemplate)
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
+logger.Information($"projectRootPath=[{projectRootPath}]");
+string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+logger.Information($"databaseProvider=[{databaseProvider}]");
+string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
+logger.Information($"connectionString=[{connectionString}]");
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
