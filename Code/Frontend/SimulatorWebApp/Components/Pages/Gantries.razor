@@ -1,0 +1,42 @@
+﻿@page "/gantries"
+@rendermode InteractiveServer
+
+<h3>Gantries</h3>
+<br />
+
+<div class="tab-container">
+    <div class="tab-header">
+        <button class="tab @(activeTab == 0 ? "active" : "")" @onclick="() => SetTab(0)">Tab 1</button>
+        <button class="tab @(activeTab == 1 ? "active" : "")" @onclick="() => SetTab(1)">Tab 2</button>
+        <button class="tab @(activeTab == 2 ? "active" : "")" @onclick="() => SetTab(2)">Tab 3</button>
+    </div>
+
+    <div class="tab-content">
+        @if (activeTab == 0)
+        {
+            <p>Content for Tab 1</p>
+        }
+        else if (activeTab == 1)
+        {
+            <p>Content for Tab 2</p>
+        }
+        else if (activeTab == 2)
+        {
+            <p>Content for Tab 3</p>
+        }
+    </div>
+</div>
+
+@code {
+    private int activeTab = 0;
+
+    void SetTab(int index)
+    {
+        activeTab = index;
+    }
+
+    private async Task SendMessage()
+    {
+        await MqttService.PublishAsync("test/topic", "Hello from Blazor!");
+    }
+}

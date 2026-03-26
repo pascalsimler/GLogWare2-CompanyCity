@@ -21,7 +21,7 @@ public partial class BridgeManager
     private System.Timers.Timer _watchdogRetry = null!;
     private System.Timers.Timer _watchdogLife = null!;
     private LogPlc _lpReceive = null!;
-    private SemaphoreSlim semaphore = null!;
+    private SemaphoreSlim _semaphoreSend = null!;
     #endregion region
 
     #region Initialisation
@@ -56,7 +56,7 @@ public partial class BridgeManager
         _lastSentTelegram = new Telegram();
         _ackTelegram = new Telegram();
 
-        semaphore = new SemaphoreSlim(1);       
+        _semaphoreSend = new SemaphoreSlim(1);       
     
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
@@ -257,7 +257,7 @@ public partial class BridgeManager
                 if (t.Counter == _lastSentTelegram.Counter)
                 {
                     _watchdogRetry.Stop();
-                    semaphore.Release();
+                    _semaphoreSend.Release();
                 }
                 else
                 {
@@ -300,18 +300,29 @@ public partial class BridgeManager
         }
         _lastReceivedCounter = t.Counter;
 
-        switch (t.Identifier)
+        await Lock();
+        try
         {
-            case nameof(PlcMessageIdentifiers.STAT):
-                await Handle_STAT(t);
-                break;
-            case nameof(PlcMessageIdentifiers.COMP):
-                await Handle_COMP(t);
-                break;
-            case nameof(PlcMessageIdentifiers.ALRM):
-                await Handle_ALRM(t);
-                break;
+            switch (t.Identifier)
+            {
+                case nameof(PlcMessageIdentifiers.STAT):
+                    await Handle_STAT(t);
+                    await SendWakeUp(_subscriptionTopic);
+                    break;
+                case nameof(PlcMessageIdentifiers.COMP):
+                    await Handle_COMP(t);
+                    await SendWakeUp(_subscriptionTopic);
+                    break;
+                case nameof(PlcMessageIdentifiers.ALRM):
+                    await Handle_ALRM(t);
+                    break;
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling PLC telegram");
+        }
+        Unlock();
     }
 
     private bool Validate(Telegram t)
@@ -490,9 +501,7 @@ public partial class BridgeManager
         {
             if (isNew)
             {
-                _logger.LogInformation("Before semaphore.WaitAsync");
-                await semaphore.WaitAsync();
-                _logger.LogInformation("After semaphore.WaitAsync");
+                await _semaphoreSend.WaitAsync();
                 t.AckFlag = "1";
                 if (_lastSentTelegram.Counter == string.Empty)
                 {
@@ -522,7 +531,6 @@ public partial class BridgeManager
                     //_logger.LogInformation($"Hexa: {t.HexaDump()}");
                     NetworkStream stream = _tcpClient.GetStream();
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
-                    RestartTimer(_watchdogLife);
                     if (!new[] { PlcMessageIdentifiers.ACKN.ToString(), PlcMessageIdentifiers.LIFE.ToString() }.Contains(t.Identifier)) 
                     {
                         LogPlc lpSend = new LogPlc();
@@ -536,6 +544,7 @@ public partial class BridgeManager
                         lpSend.Identifier = t.Identifier;
                         lpSend.Data = t.LogMsg;
                         await _dbLoggerService.WriteLogPlcAsync(lpSend);
+                        RestartTimer(_watchdogLife);
                     }
                 }
                 else

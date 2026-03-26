@@ -19,7 +19,6 @@ public struct COMPStruct
     public (COMP, string) ToCOMP(string Bridge)
     {
         COMP comp = new COMP();
-        comp.Bridge = Bridge;
         comp.Jobid = Jobid.Trim();
         comp.FeedbackCode = FeedbackCode;
 

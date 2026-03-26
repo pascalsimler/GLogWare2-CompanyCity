@@ -1,6 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
+using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.BridgeManager;
 
@@ -8,10 +8,11 @@ public partial class BridgeManager
 {
     private Resource? _resource;
     private JobTypeIdentifiers _lastJobType;
-
+    private GLogWareDbContext? _db = null;
+    
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        _resource = _db.Resources.AsNoTracking()
+        _resource = _db!.Resources
             .Where(x => x.Name == OP)
             .FirstOrDefault();
         if (_resource == null)
@@ -35,7 +36,7 @@ public partial class BridgeManager
             return false;
         }
 
-        var j = _db.Jobs.AsNoTracking()
+        var j = _db.Jobs
             .Where(j => 
                 j.Bridge == OP &&
                 j.Status.StartsWith("GANTRY")
@@ -101,7 +102,13 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
-        return false;
+        if (_resource!.OutfeedEnabled != true)
+        {
+            _logger.LogInformation(
+                $"Outfeeds are not enabled for that bridge !");
+            return false;
+        }
+        return true;
     }
 
     private async Task<bool> TryToStartOutputOrder()
@@ -114,7 +121,13 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
-        return false;
+        if (_resource!.RelocationEnabled != true)
+        {
+            _logger.LogInformation(
+                $"Relocations are not enabled for that bridge !");
+            return false;
+        }
+        return true;
     }
 
     private async Task<bool> TryToStartRelocationOrder()
@@ -160,10 +173,10 @@ public partial class BridgeManager
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
         _logger.LogInformation($"stat=[\r\n{json}\r\n]");
         
-        var r = _db.Resources.Where(x => x.Name == stat.Bridge).FirstOrDefault();
+        var r = _db!.Resources.Where(x => x.Name == OP).FirstOrDefault();
         if (r == null) 
         {
-            _logger.LogError($"Unknown resource [{stat.Bridge}]");
+            _logger.LogError($"Unknown resource [{OP}]");
             return;
         }
 
@@ -182,11 +195,13 @@ public partial class BridgeManager
 
     private async Task Process_COMP(COMP comp)
     {
+        _db = _factory.CreateDbContext();
+
         string json = GLogWareMessage.Serialize<COMP>(comp);
         _logger.LogInformation($"comp=[\r\n{json}\r\n]");
 
         var q = _db.Jobs.Where(x =>
-                    x.Bridge == comp.Bridge &&
+                    x.Bridge == OP &&
                     x.Status == JobStatusIdentifiers.BRIDGE_LOAD.ToString()
                 );
 

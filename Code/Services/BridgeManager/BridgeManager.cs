@@ -22,7 +22,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
-    private readonly GLogWareDbContext _db;
+    IDbContextFactory<GLogWareDbContext> _factory;
     private readonly DbLoggerService _dbLoggerService;
     #endregion
 
@@ -35,6 +35,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     private CancellationTokenSource? _cts;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
+    private SemaphoreSlim _semaphoreLock = null!;
     #endregion
 
     public BridgeManager(
@@ -45,13 +46,15 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     {
         _logger = logger;
         _configuration = configuration;
-        _db = factory.CreateDbContext();
+        _factory = factory;
         _dbLoggerService = dbLoggerService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         LoadConfiguration();
+
+        _semaphoreLock = new SemaphoreSlim(1);
 
         await StartMqtt();
 
@@ -153,8 +156,17 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
                     await SendTelegram(pmTo);
                     break;
                 case GLogWareMessageIdentifiers.FromPlc:
-                    PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    await SimulatePlcTelegram(pmFrom);
+                    await Lock();
+                    try
+                    {
+                        PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                        await SimulatePlcTelegram(pmFrom);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing GLogWareMessageIdentifiers.FromPlc");
+                    }
+                    Unlock();
                     break;
             }
         }
@@ -163,7 +175,16 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
 
-        await TryToStartNewOrder();
+        await Lock();
+        try
+        {
+            await TryToStartNewOrder();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception");
+        }
+        Unlock();
     }
 
     public async Task SendToMqtt(string topic, GLogWareMessage m)
@@ -194,8 +215,31 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
     {
+        await SendWakeUp(_subscriptionTopic);
+    }
+
+    private async Task SendWakeUp(string topic)
+    {
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         await SendToMqtt(_subscriptionTopic, gm);
+        RestartTimer(_watchdogWakeup);
+    }
+
+    private async Task Lock()
+    {
+        await _semaphoreLock.WaitAsync();
+
+        if (_db != null)
+        {
+            _db.Dispose();
+            _db = null;
+        }
+        _db = _factory.CreateDbContext();
+    }
+
+    private void Unlock()
+    {
+        _semaphoreLock.Release();
     }
 }

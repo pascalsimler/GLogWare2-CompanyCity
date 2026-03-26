@@ -23,7 +23,6 @@ public struct STATStruct
     public (STATBridge, string) ToSTAT(string Bridge)
     {
         STATBridge stat = new STATBridge();
-        stat.Bridge = Bridge;
 
         string parked = string.Empty;
         string gripperOccupied = string.Empty;
