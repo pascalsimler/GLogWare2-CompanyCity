@@ -56,7 +56,7 @@ public class MqttService
         await _client!.PublishAsync(message);
     }
 
-    public async Task SendPlcMessage(string topic, GLogWareMessage m)
+    public async Task SendMessage(string topic, GLogWareMessage m)
     {
         string payload = string.Empty;
 

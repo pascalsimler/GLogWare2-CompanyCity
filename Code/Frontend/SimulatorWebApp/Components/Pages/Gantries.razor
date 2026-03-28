@@ -96,7 +96,7 @@ else
         <div class="tab-content">
             @if (activeTabToPlc == 0)
             {
-                <EditForm Model="@stat" OnValidSubmit="() => SendToGLogWare(PlcMessageIdentifiers.ORDS)">
+                <EditForm Model="@stat" OnValidSubmit="() => SendToPlc(PlcMessageIdentifiers.ORDS)">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
@@ -284,10 +284,7 @@ else
 
     private async Task SetTabToPlc(int index) => activeTabToPlc = index;
 
-    private async Task SendMessage(string topic, string message) =>
-        await MqttService.PublishAsync(topic, message);
-
-    private async Task SendToPlc(PlcMessageIdentifiers identifier)
+    private async Task SendToGLogWare(PlcMessageIdentifiers identifier)
     {
         string topic = $"GantryBridges/{bridgeOP}/Simulation/Incoming";
         GLogWareMessage m = new GLogWareMessage();
@@ -303,10 +300,10 @@ else
         };
         m.Data = pm;
         
-        await MqttService.SendPlcMessage(topic, m);
+        await MqttService.SendMessage(topic, m);
     }
     
-    private async Task SendToGLogWare(PlcMessageIdentifiers identifier)
+    private async Task SendToPlc(PlcMessageIdentifiers identifier)
     {
         string topic = $"GantryBridges/{bridgeOP}/Manager/Incoming";
         GLogWareMessage m = new GLogWareMessage();
@@ -321,6 +318,6 @@ else
         };
         m.Data = pm;
         
-        await MqttService.SendPlcMessage(topic, m);
+        await MqttService.SendMessage(topic, m);
     }
 }
