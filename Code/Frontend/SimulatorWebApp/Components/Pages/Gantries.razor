@@ -4,40 +4,323 @@
 <h3>Gantries</h3>
 <br />
 
-<div class="tab-container">
-    <div class="tab-header">
-        <button class="tab @(activeTab == 0 ? "active" : "")" @onclick="() => SetTab(0)">STAT</button>
-        <button class="tab @(activeTab == 1 ? "active" : "")" @onclick="() => SetTab(1)">COMP</button>
-        <button class="tab @(activeTab == 2 ? "active" : "")" @onclick="() => SetTab(2)">Tab 3</button>
-    </div>
+<table>
+<tr>
+    <td>Bridge:</td>
+    <td>
+        <InputSelect @bind-Value="bridgeOP">
+            <option value="OP7100BR">OP7100BR</option>
+            <option value="OP7200BR">OP7200BR</option>
+        </InputSelect>
+    </td>
+    <td width="50px"></td>
+    <td>
+        <InputRadioGroup @bind-Value="direction">
+            <label style="margin-right:30px;">
+                <InputRadio Value="Direction.FromPlc" /> From Plc
+            </label>
+            <label>
+                <InputRadio Value="Direction.ToPlc" /> To Plc
+            </label>
+        </InputRadioGroup>
+    </td>
+</tr>
+</table>
 
-    <div class="tab-content">
-        @if (activeTab == 0)
-        {
-            <p>Content for Tab 1</p>
-        }
-        else if (activeTab == 1)
-        {
-            <p>Content for Tab 2</p>
-        }
-        else if (activeTab == 2)
-        {
-            <p>Content for Tab 3</p>
-        }
+<br />
+
+@if (direction == Direction.FromPlc)
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabFromPlc == 0 ? "active" : "")" @onclick="() => SetTabFromPlc(0)">STAT</button>
+            <button class="tab @(activeTabFromPlc == 1 ? "active" : "")" @onclick="() => SetTabFromPlc(1)">COMP</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabFromPlc == 0)
+            {
+                <EditForm Model="@stat" OnValidSubmit="() => SendToGLogWare(PlcMessageIdentifiers.STAT)">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-grid">
+
+                        <table width="100%">
+                            <tr>
+                                <td align="right">Parked:</td>
+                                <td align="left"><InputCheckbox @bind-Value="stat.Parked" /></td>
+                            </tr>
+                            <tr>
+                                <td align="right">Working Mode:</td>
+                                <td align="left">
+                                    <InputSelect @bind-Value="stat.WorkingMode">
+                                        <option value="AUTOMATIC">Automatic</option>
+                                        <option value="MANUAL">Manual</option>
+                                        <option value="STOPPED">Stopped</option>
+                                    </InputSelect>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">Gripper Occupied:</td>
+                                <td align="left"><InputCheckbox @bind-Value="stat.GripperOccupied" /></td>
+                            </tr>
+                            <tr>
+                                <td align="right">ErrorFlag:</td>
+                                <td align="left"><InputCheckbox @bind-Value="stat.ErrorFlag" /></td>
+                            </tr>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+                    <button type="submit">Send</button>
+                </EditForm>
+            }
+            else if (activeTabFromPlc == 1)
+            {
+                <p>Content for COMP</p>
+            }
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabToPlc == 0 ? "active" : "")" @onclick="() => SetTabToPlc(0)">ORDS</button>
+            <button class="tab @(activeTabToPlc == 1 ? "active" : "")" @onclick="() => SetTabToPlc(1)">DELT</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabToPlc == 0)
+            {
+                <EditForm Model="@stat" OnValidSubmit="() => SendToGLogWare(PlcMessageIdentifiers.ORDS)">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-grid">
+
+                        <table width="100%">
+                            <tr>
+                                <td align="center" colspan="2">
+                                    <b>Pick Position</b>
+                                </td>
+                                <td width="50px"></td>
+                                <td align="center" colspan="2">
+                                    <b>Drop Position</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    PosType:
+                                </td>
+                                <td align="right">
+                                    <InputSelect @bind-Value="ords.PickPosition.PositionType">
+                                        <option value="Undefined">Undefined</option>
+                                        <option value="Conveyor">Conveyor</option>
+                                        <option value="Store">Store</option>
+                                        <option value="Pallet">Pallet</option>
+                                    </InputSelect>
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    PosType:
+                                </td>
+                                <td align="right">
+                                    <InputSelect @bind-Value="ords.DropPosition.PositionType">
+                                        <option value="Undefined">Undefined</option>
+                                        <option value="Conveyor">Conveyor</option>
+                                        <option value="Store">Store</option>
+                                        <option value="Pallet">Pallet</option>
+                                    </InputSelect>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    Conveyor:
+                                </td>
+                                <td align="right">
+                                    <InputText @bind-Value="ords.PickPosition.ConveyorPlace"
+                                    style="width: 50px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    Conveyor:
+                                </td>
+                                <td align="right">
+                                    <InputText @bind-Value="ords.DropPosition.ConveyorPlace"
+                                    style="width: 50px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    XCell:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.PickPosition.XCell" 
+                                    max="73" style="width: 40px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    XCell:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.DropPosition.XCell" 
+                                    max="73" style="width: 40px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    YCell:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.PickPosition.YCell" 
+                                    max="17" style="width: 40px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    YCell:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.DropPosition.YCell" 
+                                    max="17" style="width: 40px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    XPos:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.PickPosition.XPosition"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    XPos:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.DropPosition.XPosition"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    YPos:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.PickPosition.YPosition"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    YPos:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.DropPosition.YPosition"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    ZOffset:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.PickPosition.ZOffset"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    ZOffset:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.DropPosition.ZOffset"
+                                    max="999999" style="width: 80px" />
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+                    <button type="submit">Send</button>
+                </EditForm>
+            }
+            else if (activeTabToPlc == 1)
+            {
+                <p>Content for DELT</p>
+            }
+        </div>
+    </div>
+}
 
 @code {
-    private int activeTab = 0;
-
-    private async Task SetTab(int index)
+    public enum Direction
     {
-        activeTab = index;
-        await SendMessage("Cruchotage/GlogWare", $"Switched to Tab=[{index}]");
+        FromPlc,
+        ToPlc
     }
 
-    private async Task SendMessage(string topic, string message)
+    private int activeTabFromPlc = 0;
+    private int activeTabToPlc = 0;
+    private string bridgeOP = "OP7100BR";
+    private Direction direction = Direction.FromPlc;
+    private STATBridge stat = null!;
+    private COMP comp = null!;
+    private ORDS ords =null!;
+
+    override protected void OnInitialized()
     {
+        stat = new STATBridge();
+        comp = new COMP();
+        ords = new ORDS();
+        ords.PickPosition = new ORDSPosition();
+        ords.DropPosition = new ORDSPosition();
+    }
+
+    private async Task SetTabFromPlc(int index) => activeTabFromPlc = index;
+
+    private async Task SetTabToPlc(int index) => activeTabToPlc = index;
+
+    private async Task SendMessage(string topic, string message) =>
         await MqttService.PublishAsync(topic, message);
+
+    private async Task SendToPlc(PlcMessageIdentifiers identifier)
+    {
+        string topic = $"GantryBridges/{bridgeOP}/Simulation/Incoming";
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = identifier;
+        pm.Data = identifier switch
+        {
+            PlcMessageIdentifiers.STAT => stat,
+            PlcMessageIdentifiers.COMP => comp,
+            _ => null
+        };
+        m.Data = pm;
+        
+        await MqttService.SendPlcMessage(topic, m);
+    }
+    
+    private async Task SendToGLogWare(PlcMessageIdentifiers identifier)
+    {
+        string topic = $"GantryBridges/{bridgeOP}/Manager/Incoming";
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.ToPlc;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = identifier;
+        pm.Data = identifier switch
+        {
+            PlcMessageIdentifiers.ORDS => ords,
+            _ => null
+        };
+        m.Data = pm;
+        
+        await MqttService.SendPlcMessage(topic, m);
     }
 }

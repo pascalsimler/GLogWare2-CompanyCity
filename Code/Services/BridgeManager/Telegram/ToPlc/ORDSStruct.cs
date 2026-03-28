@@ -26,7 +26,7 @@ public struct ORDSStruct
     public string Width;                         // Offset:116, Size: 002
     public string TireCount;
 
-    public static (ORDSStruct, string) FromORDS(ORDS o)
+    public static (ORDSStruct, string) FromORDS(string bridgeNr, ORDS o)
     {
         ORDSStruct os = new ORDSStruct();
         string logMsg = string.Empty;
@@ -71,7 +71,7 @@ public struct ORDSStruct
             movementType = "UNDEFINED    ";
 
         logMsg =
-            $"[  BRIDGE {o.Bridge} - {movementType} ]\r\n" +
+            $"[  BRIDGE {bridgeNr} - {movementType} ]\r\n" +
             $"\r\n" +
             $"                        Jobid: [{os.Jobid}]\r\n" +
             $"                      Article: [{os.Article}]\r\n" +

@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+﻿using Gudel.GLogWare.Shared;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
@@ -55,5 +54,27 @@ public class MqttService
             .Build();
 
         await _client!.PublishAsync(message);
+    }
+
+    public async Task SendPlcMessage(string topic, GLogWareMessage m)
+    {
+        string payload = string.Empty;
+
+        try
+        {
+            topic = $"{_configuration[$"MQTTBroker:RootTopic"]}/{topic}";
+            m.Sender = "Simulator";
+            payload = m.Serialize();
+
+            _logger.LogInformation($"topic=[{topic}]");
+            _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
+
+            await PublishAsync(topic, payload);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception");
+        }
+
     }
 }

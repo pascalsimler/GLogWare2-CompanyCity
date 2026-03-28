@@ -1,8 +1,9 @@
-﻿namespace Gudel.GLogWare.Shared;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Gudel.GLogWare.Shared;
 
 public class ORDS
 {
-    public string Bridge { get; set; } = string.Empty;
     public string Jobid { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
     public string Order { get; set; } = string.Empty;

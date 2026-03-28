@@ -484,7 +484,7 @@ public partial class BridgeManager
     private async Task SendTelegram_ORDS(PlcMessage pm)
     {
         ORDS ords = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
-        (ORDSStruct ordsStruct, string logMsg) = ORDSStruct.FromORDS(ords);
+        (ORDSStruct ordsStruct, string logMsg) = ORDSStruct.FromORDS(OP, ords);
 
         Telegram t = new Telegram();
         t.Identifier = PlcMessageIdentifiers.ORDS.ToString();

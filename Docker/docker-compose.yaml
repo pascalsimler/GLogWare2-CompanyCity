@@ -1,6 +1,6 @@
 x-volumes:
-  config: &config ${HOME_DIR}/Config:${DOCKER_APP_DIR}/Config
-  logfiles: &logfiles ${HOME_DIR}/Logfiles:${DOCKER_APP_DIR}/Logfiles
+  config: &config /home/glogware/GLogWare2/CompanyCity/Config:/app/Config
+  logfiles: &logfiles /home/glogware/GLogWare2/CompanyCity/Logfiles:/app/Logfiles
 
 x-tz-env: &tz-env
   TZ: Europe/Zurich
