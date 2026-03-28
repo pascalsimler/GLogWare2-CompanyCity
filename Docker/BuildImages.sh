@@ -1,6 +1,6 @@
 clear
 BACKEND_PATH=../Code/Services
-BACKEND_PATH=../Code/Frontend
+FRONTEND_PATH=../Code/Frontend
 REPOSITORY_PATH=repository
 SOLUTION_PATH=..
 
