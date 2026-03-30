@@ -80,7 +80,30 @@
             }
             else if (activeTabFromPlc == 1)
             {
-                <p>Content for COMP</p>
+                <EditForm Model="@stat" OnValidSubmit="() => SendToGLogWare(PlcMessageIdentifiers.COMP)">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-grid">
+
+                        <table width="100%">
+                            <tr>
+                                <td align="right">
+                                    Job-Id:
+                                </td>
+                                <td align="left">
+                                    <InputText @bind-Value="comp.Jobid"
+                                               style="width: 100px" />
+                                </td>
+                            </tr>
+                           
+                        </table>
+                    </div>
+
+                    <br />
+
+                    <button type="submit">Send</button>
+                </EditForm>
             }
         </div>
     </div>
@@ -103,6 +126,71 @@ else
                     <div class="form-grid">
 
                         <table width="100%">
+                            <tr>
+                                <td align="right">
+                                    Job-Id:
+                                </td>
+                                <td align="right">
+                                    <InputText @bind-Value="ords.Jobid"
+                                               style="width: 100px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    Inner ⌀:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.InnerDiameter"
+                                                 max="9999" style="width: 80px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    Article:
+                                </td>
+                                <td align="right">
+                                    <InputText @bind-Value="ords.Article"
+                                               style="width: 100px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    Outer ⌀:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.OuterDiameter"
+                                                 max="9999" style="width: 80px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    Order:
+                                </td>
+                                <td align="right">
+                                    <InputText @bind-Value="ords.Order"
+                                               style="width: 100px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td align="right">
+                                    Width:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.Width"
+                                                 max="9999" style="width: 80px" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    TireCount:
+                                </td>
+                                <td align="right">
+                                    <InputNumber @bind-Value="ords.TireCount"
+                                                 max="20" style="width: 40px" />
+                                </td>
+                                <td width="50px"></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr style="height: 30px;">
+                                <td colspan="5"></td>
+                            </tr>
                             <tr>
                                 <td align="center" colspan="2">
                                     <b>Pick Position</b>
@@ -274,10 +362,36 @@ else
     override protected void OnInitialized()
     {
         stat = new STATBridge();
-        comp = new COMP();
-        ords = new ORDS();
-        ords.PickPosition = new ORDSPosition();
-        ords.DropPosition = new ORDSPosition();
+        comp = new COMP() {
+            Jobid = "Job-Id",
+        };
+        ords = new ORDS() {
+            Jobid = "Job-Id",
+            Article = "ArticleNr",
+            Order = "OrderNr",
+            InnerDiameter = 760,
+            OuterDiameter = 830,
+            Width = 210,
+            TireCount = 3
+        };
+        ords.PickPosition = new ORDSPosition()
+        {
+            PositionType = ORDSPositionTypes.Conveyor,
+            ConveyorPlace = "1340",
+            XCell = 0, YCell = 0,
+            XPosition = 0, YPosition = 0,
+            ZOffset = 0
+        };
+        ords.DropPosition = new ORDSPosition()
+        {
+            PositionType = ORDSPositionTypes.Store,
+            ConveyorPlace = "0000",
+            XCell = 47,
+            YCell = 3,
+            XPosition = 54321,
+            YPosition = 2345,
+            ZOffset = 4567
+        };
     }
 
     private async Task SetTabFromPlc(int index) => activeTabFromPlc = index;
