@@ -43,7 +43,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     {
         LoadConfiguration();
 
-        InitSimulation();
+        await InitSimulation();
 
         await StartMqtt();
 

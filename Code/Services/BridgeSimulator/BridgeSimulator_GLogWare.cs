@@ -183,7 +183,7 @@ public partial class BridgeSimulator
         }
         _lastReceivedCounter = t.Counter;
 
-        ProcessGLogWareTelegram(t);
+        await ProcessGLogWareTelegram(t);
     }
 
     private async void OnWatchdogRetry(object source, ElapsedEventArgs e)

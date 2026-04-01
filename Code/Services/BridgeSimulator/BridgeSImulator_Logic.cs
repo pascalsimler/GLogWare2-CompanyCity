@@ -48,33 +48,41 @@ public partial class BridgeSimulator
         }
     }
 
-    private void ProcessGLogWareTelegram(Telegram t)
+    private async Task ProcessGLogWareTelegram(Telegram t)
     {
         switch (t.Identifier)
         {
             case nameof(PlcMessageIdentifiers.ORDS):
                 ORDSStruct ordsStruct = ORDSStruct.FromData(t.Data);
-                _currentORDS = ordsStruct.ToORDS();
-                _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
-                _orderExecutionTimer.Start();
+                if (_currentSTAT == null) break;
+                if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
+                {
+                    await SendCOMP(ordsStruct.Jobid, "0001");
+                    break;
+                }
+                if (_currentORDS != null)
+                {
+                    await SendCOMP(ordsStruct.Jobid, "0002");
+                    break;
+                }
+                if (_bridgeConfiguration.DelaySendCOMP > 0)
+                {
+                    _currentORDS = ordsStruct.ToORDS();
+                    _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
+                    _orderExecutionTimer.Start();
+                    break;
+                }
                 break;
         }
     }
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
-        COMP comp = new COMP();
+        if (_currentORDS == null) return;
 
-
-        PlcMessage pm = new PlcMessage();
-        pm.Identifier = PlcMessageIdentifiers.COMP;
-        pm.Data = comp;
-
-        GLogWareMessage m = new GLogWareMessage();
-        m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
-        m.Data = pm;
-
-        await SendGLogWareMessageToMqtt(_subscriptionTopic, m);
+        _orderExecutionTimer.Stop();
+        await SendCOMP(_currentORDS.Jobid, "0000");
+        _currentORDS = null;
     }
 
     private async Task SendCurrentSTAT()
@@ -84,6 +92,23 @@ public partial class BridgeSimulator
         PlcMessage pm = new PlcMessage();
         pm.Identifier = PlcMessageIdentifiers.STAT;
         pm.Data = _currentSTAT;
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
+        m.Data = pm;
+
+        await SendGLogWareMessageToMqtt(_subscriptionTopic, m);
+    }
+
+    private async Task SendCOMP(string jobId, string feedbackCode)
+    {
+        COMP comp = new COMP();
+        comp.Jobid = jobId;
+        comp.FeedbackCode = feedbackCode;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = PlcMessageIdentifiers.COMP;
+        pm.Data = comp;
+
         GLogWareMessage m = new GLogWareMessage();
         m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
         m.Data = pm;
