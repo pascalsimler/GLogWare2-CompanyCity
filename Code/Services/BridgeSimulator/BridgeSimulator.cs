@@ -24,6 +24,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
+    private string _subscriptionTopic { get; set; } = string.Empty;
     private IManagedMqttClient? _mqttClient = null;
 
     // Miscellaneous
@@ -41,6 +42,8 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         LoadConfiguration();
+
+        InitSimulation();
 
         await StartMqtt();
 
@@ -105,12 +108,12 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
             await Task.CompletedTask;
         };
 
-        string subscriptionTopic = $"{_mqttBrokerRootTopic}/GantryBridges/{OP}/Simulation/Incoming";
-        _logger.LogInformation($"subscriptionTopic=[{subscriptionTopic}]");
+        _subscriptionTopic = $"{_mqttBrokerRootTopic}/GantryBridges/{OP}/Simulation/Incoming";
+        _logger.LogInformation($"subscriptionTopic=[{_subscriptionTopic}]");
 
         var mqttSubscriptionTopics = new[] {
             new MqttTopicFilterBuilder()
-                .WithTopic(subscriptionTopic)
+                .WithTopic(_subscriptionTopic)
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
                 .Build()
         };
@@ -121,9 +124,6 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
-        //_plcSendingReleased.WaitOne();
-        //_plcSendingReleased.Reset();
-
         try
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
@@ -140,6 +140,10 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
                     break;
                 case GLogWareMessageIdentifiers.FromGLogWare:
                     break;
+                case GLogWareMessageIdentifiers.Configuration:
+                    BridgeConfiguration bc = GLogWareMessage.DeSerialize<BridgeConfiguration>(m.Data!.ToString()!)!;
+                    SetBridgeConfiguration(bc);
+                    break;
                 default:
                     break;
             }
@@ -148,5 +152,31 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
+    }
+
+    public async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
+    {
+        string payload = string.Empty;
+
+        try
+        {
+            m.Sender = ServiceName;
+            payload = m.Serialize();
+
+            _logger.LogInformation($"topic=[{topic}]");
+            _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
+
+            var mqttMessage = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(Encoding.UTF8.GetBytes(payload))
+                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
+                .Build();
+            await _mqttClient!.EnqueueAsync(mqttMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception");
+        }
+
     }
 }

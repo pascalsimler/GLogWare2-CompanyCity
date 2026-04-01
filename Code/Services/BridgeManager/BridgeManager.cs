@@ -187,7 +187,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         Unlock();
     }
 
-    public async Task SendToMqtt(string topic, GLogWareMessage m)
+    public async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
     {
         string payload = string.Empty;
 
@@ -222,7 +222,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     {
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
-        await SendToMqtt(_subscriptionTopic, gm);
+        await SendGLogWareMessageToMqtt(_subscriptionTopic, gm);
         RestartTimer(_watchdogWakeup);
     }
 

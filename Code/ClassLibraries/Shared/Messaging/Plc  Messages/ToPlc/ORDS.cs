@@ -13,6 +13,12 @@ public class ORDS
     public int OuterDiameter { get; set; }
     public int Width { get; set; }
     public int TireCount { get; set; }
+
+    public ORDS()
+    {
+        PickPosition = new ORDSPosition();
+        DropPosition = new ORDSPosition();
+    }
 }
 
 public enum ORDSPositionTypes
@@ -25,7 +31,7 @@ public enum ORDSPositionTypes
 
 public class ORDSPosition
 {
-    public ORDSPositionTypes PositionType { get; set; }
+    public ORDSPositionTypes PositionType { get; set; } = ORDSPositionTypes.Undefined;
     public string ConveyorPlace { get; set; } = string.Empty;
     public int XCell { get; set; }
     public int YCell { get; set; }

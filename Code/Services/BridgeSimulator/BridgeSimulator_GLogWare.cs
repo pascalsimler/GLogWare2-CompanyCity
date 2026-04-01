@@ -1,4 +1,5 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.BridgeManager;
+using Gudel.GLogWare.Shared;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -49,6 +50,8 @@ public partial class BridgeSimulator
                     _logger.LogInformation($"Waiting for a new incoming connection request!");
                     _tcpClient = await listener.AcceptTcpClientAsync(token);
                     _logger.LogInformation($"Client connected from {_tcpClient.Client.RemoteEndPoint} !");
+
+                    await SendCurrentSTAT();
 
                     using NetworkStream stream = _tcpClient.GetStream();
                     await TcpReceiveLoopAsync(stream, token);
@@ -141,8 +144,6 @@ public partial class BridgeSimulator
                 if (t.Counter == _lastSentTelegram.Counter)
                 {
                     _watchdogRetry.Enabled = false;
-                    //if (sendingReleased != null)
-                    //    sendingReleased.Invoke(this, new SendingReleasedEventArgs());
                 }
                 else
                 {
@@ -182,18 +183,7 @@ public partial class BridgeSimulator
         }
         _lastReceivedCounter = t.Counter;
 
-        //switch (t.Identifier)
-        //{
-        //    case nameof(PlcMessageIdentifiers.STAT):
-        //        await Handle_STAT(t);
-        //        break;
-        //    case nameof(PlcMessageIdentifiers.COMP):
-        //        await Handle_COMP(t);
-        //        break;
-        //    case nameof(PlcMessageIdentifiers.ALRM):
-        //        await Handle_ALRM(t);
-        //        break;
-        //}
+        ProcessGLogWareTelegram(t);
     }
 
     private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
@@ -205,8 +195,6 @@ public partial class BridgeSimulator
 
     public async Task SendToGLogWare(Telegram t, bool isNew = false)
     {
-        await Task.Delay(500);
-
         try
         {
             if (isNew)
@@ -341,6 +329,7 @@ public partial class BridgeSimulator
 
     private async Task SendTelegram(PlcMessage pm)
     {
+        ProcessPlcMessage(pm);
         switch (pm.Identifier)
         {
             case PlcMessageIdentifiers.STAT:
@@ -363,6 +352,7 @@ public partial class BridgeSimulator
         t.Receiver = TelegramConstants.GLOGWARE_IDENTIFIER;
         t.Sender = OP!;
         t.Data = statStruct.ToData();
+
         await SendToGLogWare(t, true);
     }
 
@@ -376,6 +366,7 @@ public partial class BridgeSimulator
         t.Receiver = TelegramConstants.GLOGWARE_IDENTIFIER;
         t.Sender = OP!;
         t.Data = compStruct.ToData();
+
         await SendToGLogWare(t, true);
     }
 }

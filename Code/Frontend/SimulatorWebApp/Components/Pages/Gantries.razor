@@ -96,13 +96,36 @@
                                                style="width: 100px" />
                                 </td>
                             </tr>
-                           
+                            <tr>
+                                <td align="right">Feedback Code:</td>
+                                <td align="left">
+                                    <InputSelect @bind-Value="comp.FeedbackCode">
+                                        <option value="0000">OK</option>
+                                        <option value="0001">Bridge not in Automatic</option>
+                                        <option value="0002">Job still active</option>
+                                        <option value="0003">Wrong data</option>
+                                        <option value="0011">Order not executable</option>
+                                    </InputSelect>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">Execution time:</td>
+                                <td align="left">
+                                    <InputSelect @bind-Value="SelectedExecutionValue">
+                                        <option value="0">Manually sent</option>
+                                        <option value="1000">1 second</option>
+                                        <option value="3000">3 seconds</option>
+                                        <option value="7000">7 seconds</option>
+                                        <option value="15000">15 seconds</option>
+                                    </InputSelect>
+                                </td>
+                            </tr>
                         </table>
                     </div>
 
                     <br />
 
-                    <button type="submit">Send</button>
+                    <button type="submit" disabled="@isCompSendButtonDisabled">Send</button>
                 </EditForm>
             }
         </div>
@@ -351,20 +374,43 @@ else
         ToPlc
     }
 
+    private string _selectedExecutionValue = "0";
+    private string SelectedExecutionValue
+    {
+        get => _selectedExecutionValue;
+        set
+        {
+            if (_selectedExecutionValue != value)
+            {
+                _selectedExecutionValue = value;
+
+                // fire-and-forget async call
+                _ = OnExecutionTimeChangedAsync(value);
+            }
+        }
+    }
+
     private int activeTabFromPlc = 0;
     private int activeTabToPlc = 0;
     private string bridgeOP = "OP7100BR";
     private Direction direction = Direction.FromPlc;
     private STATBridge stat = null!;
     private COMP comp = null!;
-    private ORDS ords =null!;
+    private ORDS ords = null!;
+    private BridgeConfiguration bridgeConfiguration = null!;
+    private bool isCompSendButtonDisabled = true;
 
     override protected void OnInitialized()
     {
         stat = new STATBridge();
         comp = new COMP() {
             Jobid = "Job-Id",
+            FeedbackCode = "0000"
         };
+        bridgeConfiguration = new BridgeConfiguration(){
+                DelaySendCOMP = 0
+        };
+
         ords = new ORDS() {
             Jobid = "Job-Id",
             Article = "ArticleNr",
@@ -394,6 +440,13 @@ else
         };
     }
 
+    private async Task OnExecutionTimeChangedAsync(string value)
+    {
+        bridgeConfiguration.DelaySendCOMP = int.Parse(value);
+        isCompSendButtonDisabled = (bridgeConfiguration.DelaySendCOMP == 0);
+        await SendConfiguration();
+    }
+
     private async Task SetTabFromPlc(int index) => activeTabFromPlc = index;
 
     private async Task SetTabToPlc(int index) => activeTabToPlc = index;
@@ -413,10 +466,10 @@ else
             _ => null
         };
         m.Data = pm;
-        
+
         await MqttService.SendMessage(topic, m);
     }
-    
+
     private async Task SendToPlc(PlcMessageIdentifiers identifier)
     {
         string topic = $"GantryBridges/{bridgeOP}/Manager/Incoming";
@@ -431,6 +484,16 @@ else
             _ => null
         };
         m.Data = pm;
+
+        await MqttService.SendMessage(topic, m);
+    }
+
+    private async Task SendConfiguration()
+    {
+        string topic = $"GantryBridges/{bridgeOP}/Simulation/Incoming";
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.Configuration;
+        m.Data = bridgeConfiguration;
         
         await MqttService.SendMessage(topic, m);
     }

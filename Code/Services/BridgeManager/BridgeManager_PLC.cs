@@ -416,8 +416,8 @@ public partial class BridgeManager
     private async Task Handle_STAT(Telegram t)
     {
         STATStruct statStruct = STATStruct.FromData(t.Data);
-        (STATBridge stat, string logMsg) = statStruct.ToSTAT(t.Sender);
-        _lpReceive.Data = logMsg;
+        STATBridge stat = statStruct.ToSTAT();
+        _lpReceive.Data = statStruct.ToLogMessage(t.Sender);
         await _dbLoggerService.WriteLogPlcAsync(_lpReceive);
 
         await Process_STAT(stat);
@@ -484,7 +484,8 @@ public partial class BridgeManager
     private async Task SendTelegram_ORDS(PlcMessage pm)
     {
         ORDS ords = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
-        (ORDSStruct ordsStruct, string logMsg) = ORDSStruct.FromORDS(OP, ords);
+        ORDSStruct ordsStruct = ORDSStruct.FromORDS(ords);
+        string logMsg = ordsStruct.ToLogMessage(OP);
 
         Telegram t = new Telegram();
         t.Identifier = PlcMessageIdentifiers.ORDS.ToString();

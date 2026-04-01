@@ -10,5 +10,7 @@ public enum GLogWareMessageIdentifiers
     FromGLogWare,
     ToGLogWare,
 
+    Configuration,
+
     Unknown
 }

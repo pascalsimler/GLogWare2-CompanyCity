@@ -16,6 +16,23 @@ public struct COMPStruct
         return compStruct;
     }
 
+    public string ToData()
+    {
+        return
+            Jobid +
+            FeedbackCode;
+    }
+
+    public static COMPStruct FromCOMP(COMP c)
+    {
+        COMPStruct cs = new COMPStruct();
+
+        cs.Jobid = (c.Jobid.Length >= 16) ? c.Jobid.Substring(0, 16) : c.Jobid.PadRight(16);
+        cs.FeedbackCode = (c.FeedbackCode.Length >= 4) ? c.FeedbackCode.Substring(0, 4) : c.FeedbackCode.PadRight(4);
+
+        return cs;
+    }
+
     public (COMP, string) ToCOMP(string Bridge)
     {
         COMP comp = new COMP();
