@@ -10,6 +10,8 @@
     <Project Path="Code/ClassLibraries/Shared/Shared.csproj" />
   </Folder>
   <Folder Name="/Code/Frontend/">
+    <Project Path="Code/Frontend/GLogWareWebApp/GLogWareWebApp.Client/GLogWareWebApp.Client.csproj" Id="4c4fec1e-f9ea-414a-8ed8-12ac4b6800b1" />
+    <Project Path="Code/Frontend/GLogWareWebApp/GLogWareWebApp/GLogWareWebApp.csproj" Id="f4f60587-9a17-4567-b226-b8313f9b2b73" />
     <Project Path="Code/Frontend/SimulatorWebApp/SimulatorWebApp.csproj" Id="196f99c2-87ef-487b-b71e-a8bb1a9dc72c" />
   </Folder>
   <Folder Name="/Code/Services/">

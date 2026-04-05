@@ -24,3 +24,13 @@ services:
     volumes:
       - *config
       - *logfiles
+  glogwarewebapp:
+     image: glogwarewebapp:latest
+     container_name: GLogWareWebApp
+     environment:
+       <<: *tz-env
+     ports:
+       - "82:8080"
+     volumes:
+       - *config
+       - *logfiles

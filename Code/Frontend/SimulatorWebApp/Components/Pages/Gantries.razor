@@ -398,7 +398,7 @@ else
     private COMP comp = null!;
     private ORDS ords = null!;
     private BridgeConfiguration bridgeConfiguration = null!;
-    private bool isCompSendButtonDisabled = true;
+    private bool isCompSendButtonDisabled = false;
 
     override protected void OnInitialized()
     {
@@ -443,7 +443,7 @@ else
     private async Task OnExecutionTimeChangedAsync(string value)
     {
         bridgeConfiguration.DelaySendCOMP = int.Parse(value);
-        isCompSendButtonDisabled = (bridgeConfiguration.DelaySendCOMP == 0);
+        isCompSendButtonDisabled = (bridgeConfiguration.DelaySendCOMP != 0);
         await SendConfiguration();
     }
 
