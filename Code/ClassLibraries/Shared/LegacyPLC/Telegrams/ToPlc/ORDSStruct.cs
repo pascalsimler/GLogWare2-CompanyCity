@@ -1,8 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Shared;
 
-namespace Gudel.GLogWare.BridgeManager;
-
-public struct ORDSStruct
+public struct ORDSStruct : ILegacyPlcStruct<ORDS, ORDSStruct>
 {
     public string Jobid;
     public string Article;
@@ -81,49 +79,49 @@ public struct ORDSStruct
             TireCount;
     }
 
-    public static ORDSStruct FromORDS(ORDS o)
+    public static ORDSStruct FromMessage(ORDS m)
     {
-        ORDSStruct os = new ORDSStruct();
+        ORDSStruct s = new ORDSStruct();
 
-        os.Jobid = (o.Jobid.Length >= 16) ? o.Jobid.Substring(0, 16) : o.Jobid.PadRight(16);
-        os.Article = ((o.Article.Length >= 16) ? o.Article.Substring(0, 16) : o.Article.PadRight(16));
-        os.Order = ((o.Order.Length >= 16) ? o.Order.Substring(0, 16) : o.Order.PadRight(16));
+        s.Jobid = (m.Jobid.Length >= 16) ? m.Jobid.Substring(0, 16) : m.Jobid.PadRight(16);
+        s.Article = ((m.Article.Length >= 16) ? m.Article.Substring(0, 16) : m.Article.PadRight(16));
+        s.Order = ((m.Order.Length >= 16) ? m.Order.Substring(0, 16) : m.Order.PadRight(16));
 
-        ORDSPosition pp = o.PickPosition;
-        os.PickType = $"{((int)pp.PositionType):0}";
-        os.PickConvoyer = (pp.ConveyorPlace.Length > 4) ? pp.ConveyorPlace.Substring(0, 4) : pp.ConveyorPlace.PadRight(4);
-        os.PickXCell = $"{pp.XCell:0000}";
-        os.PickYCell = $"{pp.YCell:0000}";
-        os.PickXPosition = $"{pp.XPosition:000000}";
-        os.PickYPosition = $"{pp.YPosition:000000}";
-        os.PickOffsetZ = $"{pp.ZOffset:0000}";
+        ORDSPosition pp = m.PickPosition;
+        s.PickType = $"{((int)pp.PositionType):0}";
+        s.PickConvoyer = (pp.ConveyorPlace.Length > 4) ? pp.ConveyorPlace.Substring(0, 4) : pp.ConveyorPlace.PadRight(4);
+        s.PickXCell = $"{pp.XCell:0000}";
+        s.PickYCell = $"{pp.YCell:0000}";
+        s.PickXPosition = $"{pp.XPosition:000000}";
+        s.PickYPosition = $"{pp.YPosition:000000}";
+        s.PickOffsetZ = $"{pp.ZOffset:0000}";
+        
+        ORDSPosition dp = m.DropPosition;
+        s.DropType = $"{((int)dp.PositionType):0}";
+        s.DropConvoyer = (dp.ConveyorPlace.Length > 4) ? dp.ConveyorPlace.Substring(0, 4) : dp.ConveyorPlace.PadRight(4);
+        s.DropXCell = $"{dp.XCell:0000}";
+        s.DropYCell = $"{dp.YCell:0000}";
+        s.DropXPosition = $"{dp.XPosition:000000}";
+        s.DropYPosition = $"{dp.YPosition:000000}";
+        s.DropOffsetZ = $"{dp.ZOffset:0000}";
 
-        ORDSPosition dp = o.DropPosition;
-        os.DropType = $"{((int)dp.PositionType):0}";
-        os.DropConvoyer = (dp.ConveyorPlace.Length > 4) ? dp.ConveyorPlace.Substring(0, 4) : dp.ConveyorPlace.PadRight(4);
-        os.DropXCell = $"{dp.XCell:0000}";
-        os.DropYCell = $"{dp.YCell:0000}";
-        os.DropXPosition = $"{dp.XPosition:000000}";
-        os.DropYPosition = $"{dp.YPosition:000000}";
-        os.DropOffsetZ = $"{dp.ZOffset:0000}";
+        s.InnerDiameter = $"{m.InnerDiameter:0000}";
+        s.OuterDiameter = $"{m.OuterDiameter:0000}";
+        s.Width = $"{m.Width:0000}";
+        s.TireCount = $"{m.TireCount:00}";
 
-        os.InnerDiameter = $"{o.InnerDiameter:0000}";
-        os.OuterDiameter = $"{o.OuterDiameter:0000}";
-        os.Width = $"{o.Width:0000}";
-        os.TireCount = $"{o.TireCount:00}";
-
-        return os;
+        return s;
     }
 
-    public ORDS ToORDS()
+    public ORDS ToMessage(string resourceNr)
     {
-        ORDS ords = new ORDS();
+        ORDS o = new ORDS();
 
-        ords.Jobid = Jobid.Trim();
-        ords.Article = Article.Trim();
-        ords.Order = Order.Trim();
+        o.Jobid = Jobid.Trim();
+        o.Article = Article.Trim();
+        o.Order = Order.Trim();
 
-        ORDSPosition pp = ords.PickPosition; 
+        ORDSPosition pp = o.PickPosition; 
         if (int.TryParse(PickType, out int intPickType) &&
             Enum.IsDefined(typeof(ORDSPositionTypes), intPickType))
         {
@@ -136,7 +134,7 @@ public struct ORDSStruct
         pp.YPosition = int.TryParse(PickYPosition, out int pickYPosition) ? pickYPosition : 0;
         pp.ZOffset = int.TryParse(PickOffsetZ, out int pickZOffset) ? pickZOffset : 0;
 
-        ORDSPosition dp = ords.DropPosition;
+        ORDSPosition dp = o.DropPosition;
         if (int.TryParse(DropType, out int intDropType) &&
             Enum.IsDefined(typeof(ORDSPositionTypes), intDropType))
         {
@@ -148,56 +146,56 @@ public struct ORDSStruct
         dp.YPosition = int.TryParse(DropYPosition, out int dropYPosition) ? dropYPosition : 0;
         dp.ZOffset = int.TryParse(DropOffsetZ, out int dropZOffset) ? dropZOffset : 0;
 
-        ords.InnerDiameter = int.TryParse(InnerDiameter, out int innerDiameter) ? innerDiameter : 0;
-        ords.OuterDiameter = int.TryParse(OuterDiameter, out int outerDiameter) ? outerDiameter : 0;
-        ords.Width = int.TryParse(Width, out int width) ? width : 0;
+        o.InnerDiameter = int.TryParse(InnerDiameter, out int innerDiameter) ? innerDiameter : 0;
+        o.OuterDiameter = int.TryParse(OuterDiameter, out int outerDiameter) ? outerDiameter : 0;
+        o.Width = int.TryParse(Width, out int width) ? width : 0;
 
-        ords.TireCount = int.TryParse(TireCount, out int tireCount) ? tireCount : 1;    
+        o.TireCount = int.TryParse(TireCount, out int tireCount) ? tireCount : 1;    
 
-        return ords;
+        return o;
     }
 
-    public string ToLogMessage(string bridgeNr)
+    public string ToLogMessage(string resourceNr)
     {
-        ORDS ords = ToORDS(); 
+        ORDS o = ToMessage(resourceNr); 
         
         string movementType = string.Empty;
         if (
-            ords.PickPosition.PositionType == ORDSPositionTypes.Conveyor && 
-            ords.DropPosition.PositionType == ORDSPositionTypes.Store
+            o.PickPosition.PositionType == ORDSPositionTypes.Conveyor && 
+            o.DropPosition.PositionType == ORDSPositionTypes.Store
         )
             movementType = "INPUT        ";
         else if (
-            ords.PickPosition.PositionType == ORDSPositionTypes.Store && 
-            ords.DropPosition.PositionType == ORDSPositionTypes.Conveyor
+            o.PickPosition.PositionType == ORDSPositionTypes.Store && 
+            o.DropPosition.PositionType == ORDSPositionTypes.Conveyor
         )
             movementType = "OUTPUT       ";
         else if (
-            ords.PickPosition.PositionType == ORDSPositionTypes.Store && 
-            ords.DropPosition.PositionType == ORDSPositionTypes.Store
+            o.PickPosition.PositionType == ORDSPositionTypes.Store && 
+            o.DropPosition.PositionType == ORDSPositionTypes.Store
         )
             movementType = "RELOCATION   ";
         else if (
-            ords.DropPosition.PositionType == ORDSPositionTypes.Pallet
+            o.DropPosition.PositionType == ORDSPositionTypes.Pallet
         )
             movementType = "PALLETIZATION";
         else
             movementType = "UNDEFINED    ";
 
         string logMsg =
-           $"[  BRIDGE {bridgeNr} - {movementType} ]\r\n" +
+           $"[  BRIDGE {resourceNr} - {movementType} ]\r\n" +
            $"\r\n" +
            $"                        Jobid: [{Jobid}]\r\n" +
            $"                      Article: [{Article}]\r\n" +
            $"                       Order : [{Order}]\r\n" +
            $"\r\n" +
-           $"                Pick location: [{PickType}]-{ords.PickPosition.PositionType.ToString()}\r\n" +
+           $"                Pick location: [{PickType}]-{o.PickPosition.PositionType.ToString()}\r\n" +
            $"                Pick conveyor: [{PickConvoyer}]\r\n" +
            $"                Pick Cell X-Y: [{PickXCell}]-[{PickYCell}]\r\n" +
            $"            Pick Position X-Y: [{PickXPosition}]-[{PickYPosition}]\r\n" +
            $"                Pick Offset-Z: [{PickOffsetZ}]\r\n" +
            $"\r\n" +
-           $"                Drop location: [{DropType}]-{ords.DropPosition.PositionType.ToString()}\r\n" +
+           $"                Drop location: [{DropType}]-{o.DropPosition.PositionType.ToString()}\r\n" +
            $"                Drop conveyor: [{DropConvoyer}]\r\n" +
            $"                Drop Cell X-Y: [{DropXCell}]-[{DropYCell}]\r\n" +
            $"            Drop Position X-Y: [{DropXPosition}]-[{DropYPosition}]\r\n" +

@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.BridgeManager;
-using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Shared;
 using System.Timers;
 
 namespace Gudel.GLogWare.BridgeSimulator;
@@ -48,7 +47,7 @@ public partial class BridgeSimulator
         }
     }
 
-    private async Task ProcessGLogWareTelegram(Telegram t)
+    private async Task ProcessGLogWareTelegram(LegacyPlcTelegram t)
     {
         switch (t.Identifier)
         {
@@ -67,7 +66,7 @@ public partial class BridgeSimulator
                 }
                 if (_bridgeConfiguration.DelaySendCOMP > 0)
                 {
-                    _currentORDS = ordsStruct.ToORDS();
+                    _currentORDS = ordsStruct.ToMessage(OP!);
                     _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
                     _orderExecutionTimer.Start();
                     break;

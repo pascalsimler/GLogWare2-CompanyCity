@@ -1,8 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Shared;
 
-namespace Gudel.GLogWare.BridgeManager;
-
-public struct COMPStruct
+public struct COMPStruct: ILegacyPlcStruct<COMP, COMPStruct>
 {     
     public string Jobid;            //Offset:000, Size: 016
     public string FeedbackCode;     //Offset:016, Size: 004
@@ -23,7 +21,7 @@ public struct COMPStruct
             FeedbackCode;
     }
 
-    public static COMPStruct FromCOMP(COMP c)
+    public static COMPStruct FromMessage(COMP c)
     {
         COMPStruct cs = new COMPStruct();
 
@@ -33,19 +31,28 @@ public struct COMPStruct
         return cs;
     }
 
-    public (COMP, string) ToCOMP(string Bridge)
+    public COMP ToMessage(string resourceNr)
+    {
+        COMP comp = new COMP();
+        comp.Jobid = Jobid.Trim();
+        comp.FeedbackCode = FeedbackCode;
+
+        return comp;
+    }
+
+    public string ToLogMessage(string elementNr)
     {
         COMP comp = new COMP();
         comp.Jobid = Jobid.Trim();
         comp.FeedbackCode = FeedbackCode;
 
         string logMsg =
-             $"[ ORDER COMPLETED {Bridge} ]\r\n" +
+             $"[ ORDER COMPLETED {elementNr} ]\r\n" +
              $"\r\n" +
              $"           JobId: [{Jobid}]\r\n" +
              $"   Feedback Code: [{FeedbackCode}]\r\n" +
              $"\r\n";
 
-        return (comp, logMsg);
+        return logMsg;
     }
 }

@@ -1,10 +1,10 @@
-namespace Gudel.GLogWare.BridgeManager;
+namespace Gudel.GLogWare.Shared;
 
 
 /// <summary>
 /// Constants for the communication GLogWare-PLC
 /// </summary>
-public struct TelegramConstants
+public struct LegacyPlcTelegramConstants
 {
     /// <summary>
     /// Start of Text ASCII code

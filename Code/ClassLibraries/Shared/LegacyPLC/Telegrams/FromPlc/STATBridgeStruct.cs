@@ -1,17 +1,15 @@
-﻿using Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Shared;
 
-namespace Gudel.GLogWare.BridgeManager;
-
-public struct STATStruct
+public struct STATBridgeStruct: ILegacyPlcStruct<STATBridge, STATBridgeStruct>
 {
     public string Parked;
     public string WorkingMode;
     public string GripperOccupied;
     public string ErrorFlag;
 
-    public static STATStruct FromData(string data)
+    public static STATBridgeStruct FromData(string data)
     {
-        STATStruct statStruct = new STATStruct();
+        STATBridgeStruct statStruct = new STATBridgeStruct();
         statStruct.Parked = data.Substring(0, 1);
         statStruct.WorkingMode = data.Substring(1, 1);
         statStruct.GripperOccupied = data.Substring(2, 1);
@@ -29,9 +27,9 @@ public struct STATStruct
             ErrorFlag;
     }
 
-    public static STATStruct FromSTAT(STATBridge s)
+    public static STATBridgeStruct FromMessage(STATBridge s)
     {
-        STATStruct ss = new STATStruct();
+        STATBridgeStruct ss = new STATBridgeStruct();
 
         ss.Parked = s.Parked ? "1" : "0";
         ss.WorkingMode = s.WorkingMode switch
@@ -47,7 +45,7 @@ public struct STATStruct
         return ss;
     }
 
-    public STATBridge ToSTAT()
+    public STATBridge ToMessage(string resourceNr)
     {
         STATBridge stat = new STATBridge();
 
@@ -65,16 +63,16 @@ public struct STATStruct
         return stat;
     }
 
-    public string ToLogMessage(string bridgeNr)
+    public string ToLogMessage(string resourceNr)
     {
-        STATBridge stat = ToSTAT();
+        STATBridge stat = ToMessage(resourceNr);
 
         string parked = (stat.Parked) ? "Yes" : "No";
         string gripperOccupied = (stat.GripperOccupied) ? "Yes" : "No";
         string errorFlag = (stat.ErrorFlag) ? "Yes" : "No";
 
         string logMsg =
-            $"[ STATUS OF BRIDGE {bridgeNr} ]\r\n\r\n" +
+            $"[ STATUS OF BRIDGE {resourceNr} ]\r\n\r\n" +
             $"                      Parked: [{Parked}] - {parked}\r\n" +
             $"                Working Mode: [{WorkingMode}] - {stat.WorkingMode.ToString()}\r\n" +
             $"            Gripper Occupied: [{GripperOccupied}] - {gripperOccupied}\r\n" +

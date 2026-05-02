@@ -1,6 +1,6 @@
 ﻿namespace Gudel.GLogWare.Shared;
 
-public class ORDS
+public partial class ORDS
 {
     public string Jobid { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;

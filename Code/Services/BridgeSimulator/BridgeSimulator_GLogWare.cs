@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.BridgeManager;
-using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Shared;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -14,8 +13,8 @@ public partial class BridgeSimulator
     private int _delayRetry { get; set; } = 5000;
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
-    private Telegram _lastSentTelegram = null!;
-    private Telegram _ackTelegram = null!;
+    private LegacyPlcTelegram _lastSentTelegram = null!;
+    private LegacyPlcTelegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
     #endregion
 
@@ -34,8 +33,8 @@ public partial class BridgeSimulator
         listener.Start();
         _logger.LogInformation($"Listening on port {_port} ...");
 
-        _lastSentTelegram = new Telegram();
-        _ackTelegram = new Telegram();
+        _lastSentTelegram = new LegacyPlcTelegram();
+        _ackTelegram = new LegacyPlcTelegram();
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetry!;
         _watchdogRetry.AutoReset = true;
@@ -91,7 +90,7 @@ public partial class BridgeSimulator
     {
         int bytesRead = 0;
         int offset = 0;
-        Telegram t = new Telegram();
+        LegacyPlcTelegram t = new LegacyPlcTelegram();
 
         try
         {
@@ -126,7 +125,7 @@ public partial class BridgeSimulator
         await Task.CompletedTask;
     }
 
-    private async Task ProcessTelegram(Telegram t)
+    private async Task ProcessTelegram(LegacyPlcTelegram t)
     {
         string logMsg = string.Empty;
 
@@ -193,7 +192,7 @@ public partial class BridgeSimulator
         _watchdogRetry.Enabled = true;
     }
 
-    public async Task SendToGLogWare(Telegram t, bool isNew = false)
+    public async Task SendToGLogWare(LegacyPlcTelegram t, bool isNew = false)
     {
         try
         {
@@ -244,7 +243,7 @@ public partial class BridgeSimulator
         }
     }
 
-    private bool Validate(Telegram t)
+    private bool Validate(LegacyPlcTelegram t)
     {
         string information = string.Empty;
         byte b;
@@ -260,7 +259,7 @@ public partial class BridgeSimulator
         //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
 
         b = t.Bytes[0];
-        if (b != TelegramConstants.STX)
+        if (b != LegacyPlcTelegramConstants.STX)
         {
             information =
                 $"Telegramm has wrong start byte: " +
@@ -270,7 +269,7 @@ public partial class BridgeSimulator
         }
 
         b = t.Bytes[^1];
-        if (b != TelegramConstants.ETX)
+        if (b != LegacyPlcTelegramConstants.ETX)
         {
             information =
                 $"Telegramm has wrong end byte: " +
@@ -305,11 +304,11 @@ public partial class BridgeSimulator
             return false;
         }
 
-        if (t.Sender != TelegramConstants.GLOGWARE_IDENTIFIER)
+        if (t.Sender != LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER)
         {
             information =
                 $"Telegram has an invalid Sender. " +
-                $"(Is=[{t.Sender}]) != (Should=[{TelegramConstants.GLOGWARE_IDENTIFIER}])";
+                $"(Is=[{t.Sender}]) != (Should=[{LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER}])";
             _logger.LogError(information);
             return false;
         }
@@ -345,11 +344,11 @@ public partial class BridgeSimulator
     private async Task SendTelegram_STAT(PlcMessage pm)
     {
         STATBridge stat = GLogWareMessage.DeSerialize<STATBridge>(pm.Data!.ToString()!)!;
-        STATStruct statStruct = STATStruct.FromSTAT(stat);
+        STATBridgeStruct statStruct = STATBridgeStruct.FromMessage(stat);
 
-        Telegram t = new Telegram();
+        LegacyPlcTelegram t = new LegacyPlcTelegram();
         t.Identifier = PlcMessageIdentifiers.STAT.ToString();
-        t.Receiver = TelegramConstants.GLOGWARE_IDENTIFIER;
+        t.Receiver = LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER;
         t.Sender = OP!;
         t.Data = statStruct.ToData();
 
@@ -359,11 +358,11 @@ public partial class BridgeSimulator
     private async Task SendTelegram_COMP(PlcMessage pm)
     {
         COMP comp = GLogWareMessage.DeSerialize<COMP>(pm.Data!.ToString()!)!;
-        COMPStruct compStruct = COMPStruct.FromCOMP(comp);
+        COMPStruct compStruct = COMPStruct.FromMessage(comp);
 
-        Telegram t = new Telegram();
+        LegacyPlcTelegram t = new LegacyPlcTelegram();
         t.Identifier = PlcMessageIdentifiers.COMP.ToString();
-        t.Receiver = TelegramConstants.GLOGWARE_IDENTIFIER;
+        t.Receiver = LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER;
         t.Sender = OP!;
         t.Data = compStruct.ToData();
 
