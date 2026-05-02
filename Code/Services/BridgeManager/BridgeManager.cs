@@ -14,9 +14,9 @@ namespace Gudel.GLogWare.BridgeManager;
 public partial class BridgeManager : IHostedService, IAsyncDisposable
 {
     #region Public members
-    public static string OP = string.Empty;
+    public static string? OP = string.Empty;
     public static string ServiceName => $"BridgeManager-{OP}";
-    public static string ElementName => OP.Substring(2, 4);
+    public static string ElementName => OP!.Substring(2, 4);
     #endregion
 
     #region Injected members

@@ -120,7 +120,7 @@ public class Telegram
     {
         Identifier = pm.Identifier.ToString();
         Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
-        Receiver = BridgeManager.OP;
+        Receiver = BridgeManager.OP!;
 
         switch (pm.Identifier)
         {

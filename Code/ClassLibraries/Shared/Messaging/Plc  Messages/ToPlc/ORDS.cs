@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Shared;
 
 public class ORDS
 {

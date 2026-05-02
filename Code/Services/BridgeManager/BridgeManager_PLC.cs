@@ -476,7 +476,7 @@ public partial class BridgeManager
         Telegram t = new Telegram();
         t.Identifier = PlcMessageIdentifiers.LIFE.ToString();
         t.Sender = TelegramConstants.GLOGWARE_IDENTIFIER;
-        t.Receiver = OP;
+        t.Receiver = OP!;
         t.Data = string.Empty;
         await SendToPlc(t, true);
     }
@@ -485,7 +485,7 @@ public partial class BridgeManager
     {
         ORDS ords = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
         ORDSStruct ordsStruct = ORDSStruct.FromORDS(ords);
-        string logMsg = ordsStruct.ToLogMessage(OP);
+        string logMsg = ordsStruct.ToLogMessage(OP!);
 
         Telegram t = new Telegram();
         t.Identifier = PlcMessageIdentifiers.ORDS.ToString();

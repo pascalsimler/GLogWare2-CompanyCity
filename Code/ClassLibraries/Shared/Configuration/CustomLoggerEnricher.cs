@@ -1,7 +1,6 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 

@@ -44,13 +44,19 @@ string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString(
 logger.Information($"databaseProvider=[{databaseProvider}]");
 string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
-
+string trigram = builder.Configuration[$"Project:Trigram"]!;
+logger.Information($"trigram=[{trigram}]");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<MqttService>();
+
+builder.Services.AddWindowsService(options =>
+{
+    options.ServiceName = $"{trigram}-SimulatorWebApp";
+});
 
 var app = builder.Build();
 

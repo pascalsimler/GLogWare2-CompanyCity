@@ -4,14 +4,13 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-string? OP = Environment.GetEnvironmentVariable("OP");
-if (OP == null)
+BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
+if (BridgeManager.OP == null)
 {
     Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
     return;
 }
-Console.WriteLine($"OP=[{OP}]");
-BridgeManager.OP = OP;
+Console.WriteLine($"OP=[{BridgeManager.OP}]");
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
@@ -53,13 +52,19 @@ logger.Information($"BridgeManager.ElementName=[{BridgeManager.ElementName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
-string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
+string connectionString = builder.Configuration[$"Database:ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
-
+string trigram = builder.Configuration[$"Project:Trigram"]!;
+logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddSingleton<DbLoggerService>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
 builder.Services.AddHostedService<BridgeManager>();
+
+builder.Services.AddWindowsService(options =>
+{
+    options.ServiceName = $"{trigram}-BridgeManager-{BridgeManager.OP}";
+});
 
 var host = builder.Build();
 host.Run();
