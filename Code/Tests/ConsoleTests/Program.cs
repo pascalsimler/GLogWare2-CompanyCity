@@ -35,7 +35,7 @@ while (true)
         Console.WriteLine(
             $"Name=[{a.Name}]" +
             $", CreatedAt=[{a.CreatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]" +
-            $", LastUpdateAt=[{a.LastUpdatedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]"
+            $", LastUpdateAt=[{a.ModifiedAt?.ToString("dd.MM.yyyy HH:mm:ss.fff")}]"
         );
     }
     Console.Write("Again (y/n) ? ");
@@ -52,7 +52,7 @@ var komArea = db.Areas.Where(a => a.Name == "GANTRY").FirstOrDefault();
 if (komArea != null)
 {
     komArea.Comments = DateTime.Now.ToString("HH:mm:ss");
-    komArea.LastUpdatedBy = "Cruchot";
+    komArea.ModifiedBy = "Cruchot";
 }
 
 db.SaveChanges();

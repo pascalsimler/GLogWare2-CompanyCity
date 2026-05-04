@@ -100,7 +100,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
                       .ValueGeneratedOnAdd()
                       .HasComment("User or process who created the record");
 
-                entity.Property(nameof(BaseTracking.LastUpdatedBy))
+                entity.Property(nameof(BaseTracking.ModifiedBy))
                       .HasMaxLength(50)
                       .HasDefaultValueSql("'GÜDEL'")
                       .ValueGeneratedOnAdd()
@@ -111,7 +111,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was created");
 
-                entity.Property(nameof(BaseTracking.LastUpdatedAt))
+                entity.Property(nameof(BaseTracking.ModifiedAt))
                       .HasDefaultValueSql(DatabaseProviderHelper.GetNowSql())
                       .ValueGeneratedOnAdd()
                       .HasComment("Date/time the record was updated for the last time");
@@ -166,7 +166,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
         {
             if (entry.State == EntityState.Modified)
             {
-                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTime.Now;
+                entry.Property(e => e.ModifiedAt).CurrentValue = DateTime.Now;
             }
         }
         return base.SaveChanges();
@@ -178,7 +178,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
         {
             if (entry.State == EntityState.Modified)
             {
-                entry.Property(e => e.LastUpdatedAt).CurrentValue = DateTime.Now;
+                entry.Property(e => e.ModifiedAt).CurrentValue = DateTime.Now;
             }
         }
         return await base.SaveChangesAsync(cancellationToken);
