@@ -1,0 +1,64 @@
+﻿<EditForm Model="@stat" OnValidSubmit="() => SendToGLogWare()">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-grid">
+
+        <table width="100%">
+            <tr>
+                <td align="right">Parked:</td>
+                <td align="left"><InputCheckbox @bind-Value="stat.Parked" /></td>
+            </tr>
+            <tr>
+                <td align="right">Working Mode:</td>
+                <td align="left">
+                    <InputSelect @bind-Value="stat.WorkingMode">
+                        <option value="AUTOMATIC">Automatic</option>
+                        <option value="MANUAL">Manual</option>
+                        <option value="STOPPED">Stopped</option>
+                    </InputSelect>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Gripper Occupied:</td>
+                <td align="left"><InputCheckbox @bind-Value="stat.GripperOccupied" /></td>
+            </tr>
+            <tr>
+                <td align="right">ErrorFlag:</td>
+                <td align="left"><InputCheckbox @bind-Value="stat.ErrorFlag" /></td>
+            </tr>
+        </table>
+
+    </div>
+
+    <br />
+
+    <button type="submit">Send</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public string? bridgeOP { get; set; }
+
+    private STATBridge stat = null!;
+
+    override protected void OnInitialized()
+    {
+        stat = new STATBridge();
+    }
+
+    private async Task SendToGLogWare()
+    {
+        string topic = $"GantryBridges/{bridgeOP}/Simulation/Incoming";
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = PlcMessageIdentifiers.STAT;
+        pm.Data = stat;
+        m.Data = pm;
+
+        await MqttService.SendMessage(topic, m);
+    }
+}

@@ -1,0 +1,93 @@
+﻿@page "/gantries"
+@using SimulatorWebApp.Components.Pages.Gantries.FromPlc
+@using SimulatorWebApp.Components.Pages.Gantries.ToPlc
+@rendermode InteractiveServer
+
+<h3>Gantries</h3>
+<br />
+
+<table>
+<tr>
+    <td>Bridge:</td>
+    <td>
+        <InputSelect @bind-Value="bridgeOP">
+            <option value="OP7100BR">OP7100BR</option>
+            <option value="OP7200BR">OP7200BR</option>
+        </InputSelect>
+    </td>
+    <td width="50px"></td>
+    <td>
+        <InputRadioGroup @bind-Value="direction">
+            <label style="margin-right:30px;">
+                <InputRadio Value="Direction.FromPlc" /> From Plc
+            </label>
+            <label>
+                <InputRadio Value="Direction.ToPlc" /> To Plc
+            </label>
+        </InputRadioGroup>
+    </td>
+</tr>
+</table>
+
+<br />
+
+@if (direction == Direction.FromPlc)
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabFromPlc == 0 ? "active" : "")" @onclick="() => SetTabFromPlc(0)">STAT</button>
+            <button class="tab @(activeTabFromPlc == 1 ? "active" : "")" @onclick="() => SetTabFromPlc(1)">COMP</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabFromPlc == 0)
+            {
+                <UcSTAT bridgeOP="@bridgeOP" />
+            }
+            else if (activeTabFromPlc == 1)
+            {
+                <UcCOMP bridgeOP="@bridgeOP" />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabToPlc == 0 ? "active" : "")" @onclick="() => SetTabToPlc(0)">ORDS</button>
+            <button class="tab @(activeTabToPlc == 1 ? "active" : "")" @onclick="() => SetTabToPlc(1)">DELT</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabToPlc == 0)
+            {
+                <UcORDS bridgeOP="@bridgeOP" />
+            }
+            else if (activeTabToPlc == 1)
+            {
+                <UcDELT bridgeOP="@bridgeOP" />
+            }
+        </div>
+    </div>
+}
+
+@code {
+    public enum Direction
+    {
+        FromPlc,
+        ToPlc
+    }
+
+    private int activeTabFromPlc = 0;
+    private int activeTabToPlc = 0;
+    private string bridgeOP = "OP7100BR";
+    private Direction direction = Direction.FromPlc;
+
+    override protected void OnInitialized()
+    {
+    }
+
+    private async Task SetTabFromPlc(int index) => activeTabFromPlc = index;
+    private async Task SetTabToPlc(int index) => activeTabToPlc = index;
+}

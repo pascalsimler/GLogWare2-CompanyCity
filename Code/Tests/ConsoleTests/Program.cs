@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Domain;
-using Gudel.GLogWare.EFCore.Infrastructure;
+﻿using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.Extensions.Configuration;
 
