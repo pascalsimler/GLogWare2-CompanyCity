@@ -114,37 +114,4 @@ public class LegacyPlcTelegram
 
         return sb.ToString();
     }
-
-    public void FromPlcMessage(PlcMessage pm)
-    {
-        Identifier = pm.Identifier.ToString();
-        Sender = LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER;
-
-        switch (pm.Identifier)
-        {
-            case PlcMessageIdentifiers.ORDS:
-                ORDS r = GLogWareMessage.DeSerialize<ORDS>(pm.Data!.ToString()!)!;
-                ORDSPosition p = r.PickPosition;
-                ORDSPosition d = r.DropPosition;
-                Data = 
-                    ((r.Jobid.Length >= 16) ? r.Jobid.Substring(0, 16) : r.Jobid.PadRight(16)) +
-                    $"{p.PositionType:0}" +
-                    ((p.ConveyorPlace.Length > 8) ? p.ConveyorPlace.Substring(0, 8) : p.ConveyorPlace.PadRight(8)) +
-                    $"{p.XCell:0000}" +
-                    $"{p.YCell:0000}" +
-                    $"{p.XPosition:000000}" +
-                    $"{p.YPosition:000000}" +
-                    $"{d.PositionType:0}" +
-                    ((d.ConveyorPlace.Length > 8) ? d.ConveyorPlace.Substring(0, 8) : d.ConveyorPlace.PadRight(8)) +
-                    $"{d.XCell:0000}" +
-                    $"{d.YCell:0000}" +
-                    $"{d.XPosition:000000}" +
-                    $"{p.YPosition:000000}"
-                ;
-                break;
-            default:
-                Data = string.Empty;
-                break;
-        };
-    }
 }
