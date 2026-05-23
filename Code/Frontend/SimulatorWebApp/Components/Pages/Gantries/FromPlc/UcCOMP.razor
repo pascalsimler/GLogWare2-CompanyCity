@@ -91,6 +91,8 @@
 
         PlcMessage pm = new PlcMessage();
         pm.Identifier = PlcMessageIdentifiers.COMP;
+        pm.Sender = bridgeOP!;
+        pm.Receiver = "GLOGWARE";
         pm.Data = comp;
         m.Data = pm;
 

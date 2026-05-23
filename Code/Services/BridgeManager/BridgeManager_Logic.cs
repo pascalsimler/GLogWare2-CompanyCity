@@ -151,23 +151,6 @@ public partial class BridgeManager
         return true;
     }
 
-    private async Task SimulatePlcTelegram(PlcMessage pm)
-    {
-        switch (pm.Identifier)
-        {
-            case PlcMessageIdentifiers.STAT:
-                STATBridge stat = GLogWareMessage.DeSerialize<STATBridge>(pm.Data!.ToString()!)!;
-                await Process_STAT(stat);
-                break;
-            case PlcMessageIdentifiers.COMP:
-                COMP comp = GLogWareMessage.DeSerialize<COMP>(pm.Data!.ToString()!)!;
-                await Process_COMP(comp);
-                break;
-            default:
-                break;
-        }
-    }
-
     private async Task Process_STAT(STATBridge stat)
     {
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
@@ -217,7 +200,7 @@ public partial class BridgeManager
 
         if (count != 1)
         {
-            _logger.LogError($"Anomaly: job count=[{count}] != [1] !");
+            _logger.LogError($"Found [{count}] jobs where an unique one is expected !");
             return;
         }
 

@@ -17,41 +17,34 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
-    private readonly IPlcDriver _simulatorDriver;
+    private readonly IPlcDriver _plcSimulatorDriver;
     #endregion
 
     #region Private members
-    //MQTT
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
     private string _subscriptionTopic { get; set; } = string.Empty;
     private IManagedMqttClient? _mqttClient = null;
-
-    // Miscellaneous
-    private CancellationTokenSource? _cts;
     #endregion
 
     public BridgeSimulator(
         ILogger<BridgeSimulator> logger,
         IConfiguration configuration,
-        IPlcDriver simulatorDriver)
+        IPlcDriver plcSimulatorDriver)
     {
         _logger = logger;
         _configuration = configuration;
-        _simulatorDriver = simulatorDriver;
+        _plcSimulatorDriver = plcSimulatorDriver;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         LoadConfiguration();
 
-        await InitSimulation();
-
         await StartMqtt();
 
-        //_cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        //_ = TcpAcceptLoopAsync(_cts.Token);
+        _ = StartPlcSimulatorDriverAsync(cancellationToken);
 
         await Task.CompletedTask;
     }
@@ -139,7 +132,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
                     break;
                 case GLogWareMessageIdentifiers.ToGLogWare:
                     PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    //await SendTelegram(pm);
+                    await _plcSimulatorDriver.SendAsync(pm);
                     break;
                 case GLogWareMessageIdentifiers.FromGLogWare:
                     break;

@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using System.Timers;
 
 namespace Gudel.GLogWare.LegacyPlcDriver;
@@ -16,9 +15,10 @@ public class LegacyPlcDriver: IPlcDriver
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
+    private GLogWareDbContext _db = null!;
     #endregion
 
-    #region Event handlers
+#region Event handlers
     public event EventHandler<PlcMessageAcknowledgedEventArgs>? MessageAcknowledged;
     public event EventHandler<PlcMessageReceivedEventArgs>? MessageReceived;
     #endregion
@@ -30,10 +30,11 @@ public class LegacyPlcDriver: IPlcDriver
     private int _delayConnection { get; set; } = 5000;
     private int _delayRetry { get; set; } = 5000;
     private int _delayLife { get; set; } = 30000;
+    private string _validSenders { get; set; } = string.Empty;
+    private string _validIdentifiers { get; set; } = string.Empty;
     #endregion
 
     #region Private members
-    private CancellationTokenSource? _cts;
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
     private LegacyPlcTelegram _lastSentTelegram = null!;
@@ -44,6 +45,7 @@ public class LegacyPlcDriver: IPlcDriver
     private SemaphoreSlim _semaphoreSend = null!;
     #endregion region
 
+    #region Constructor
     public LegacyPlcDriver(
         ILogger<LegacyPlcDriver> logger,
         IConfiguration configuration,
@@ -53,32 +55,64 @@ public class LegacyPlcDriver: IPlcDriver
         _configuration = configuration;
         _dbContextFactory = dbContextFactory;
     }
+    #endregion
 
-    public void LoadConfiguration(string op, string path)
+    #region Public methods
+    public void LoadConfiguration(string path)
     {
-        _op = op;
-
+        _op = path.Substring(path.LastIndexOf(':') + 1);
         _ip = _configuration[$"{path}:Ip"] ?? _ip;
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
         if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpDelayConnection)) _delayConnection = tmpDelayConnection;
         if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
         if (int.TryParse(_configuration[$"{path}:DelayLife"], out int tmpDelayLife)) _delayLife = tmpDelayLife;
+        _validIdentifiers = _configuration[$"{path}:ValidPlcIdentifiers"] ?? string.Empty;
+        _validSenders = _configuration[$"{path}:ValidSenders"] ?? string.Empty;
 
+        _logger.LogInformation($"_op=[{_op}]");
         _logger.LogInformation($"_ip=[{_ip}]");
         _logger.LogInformation($"_port=[{_port}]");
         _logger.LogInformation($"_delayConnectionPlc=[{_delayConnection}]");
         _logger.LogInformation($"_delayRetry=[{_delayRetry}]");
         _logger.LogInformation($"_delayLife=[{_delayLife}]");
+        _logger.LogInformation($"_validIdentifiers=[{_validIdentifiers}]");
+        _logger.LogInformation($"_validSenders=[{_validSenders}]");
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _ = TcpConnectLoopAsync(_cts.Token);
+        CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _ = TcpConnectLoopAsync(cts.Token);
 
         await Task.CompletedTask;
     }
 
+    public async Task SendAsync(PlcMessage plcMessage)
+    {
+        LegacyPlcTelegram t = new LegacyPlcTelegram();
+        t.Identifier = plcMessage.Identifier.ToString();
+        t.Sender = plcMessage.Sender;
+        t.Receiver = plcMessage.Receiver;
+        switch (plcMessage.Identifier)
+        {
+            case PlcMessageIdentifiers.LIFE:
+                t.Data = string.Empty;
+                break;
+            case PlcMessageIdentifiers.ORDS:
+                ORDS ords = GLogWareMessage.DeSerialize<ORDS>(plcMessage.Data!.ToString()!)!;
+                ORDSStruct ordsStruct = ORDSStruct.FromMessage(ords);
+                t.Data = ordsStruct.ToData();
+                t.LogMsg = ordsStruct.ToLogMessage(t.Receiver);
+                break;
+            default:
+                t.Data = string.Empty;
+                break;
+        }
+        await SendToPlcAsync(t, true);
+    }
+    #endregion
+
+    #region Private method
     private async Task TcpConnectLoopAsync(CancellationToken token)
     {
         string information = string.Empty;
@@ -89,14 +123,14 @@ public class LegacyPlcDriver: IPlcDriver
         _semaphoreSend = new SemaphoreSlim(1);
 
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
-        _watchdogRetry.Elapsed += OnWatchdogRetry!;
+        _watchdogRetry.Elapsed += OnWatchdogRetryAsync!;
         _watchdogRetry.AutoReset = true;
         _watchdogRetry.Stop();
 
-        _watchdogLife = new System.Timers.Timer(_delayLife);
-        _watchdogLife.Elapsed += OnWatchdogLife!;
-        _watchdogLife.AutoReset = true;
-        _watchdogLife.Start();
+        //_watchdogLife = new System.Timers.Timer(_delayLife);
+        //_watchdogLife.Elapsed += OnWatchdogLifeAsync!;
+        //_watchdogLife.AutoReset = true;
+        //_watchdogLife.Start();
 
         while (!token.IsCancellationRequested)
         {
@@ -218,7 +252,7 @@ public class LegacyPlcDriver: IPlcDriver
                     break;
                 }
 
-                await ProcessTelegram(t);
+                await ProcessTelegramAsync(t);
             }
         }
         catch (OperationCanceledException ex)
@@ -255,12 +289,12 @@ public class LegacyPlcDriver: IPlcDriver
         await Task.CompletedTask;
     }
 
-    private async Task ProcessTelegram(LegacyPlcTelegram t)
+    private async Task ProcessTelegramAsync(LegacyPlcTelegram t)
     {
         _lpReceive = new LogPlc();
         _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString();
 
-        if (!Validate(t))
+        if (!ValidateTelegram(t))
         {
             _lpReceive.Data = t.HexaDump();
             _logger.LogWarning(_lpReceive.Data);
@@ -277,6 +311,8 @@ public class LegacyPlcDriver: IPlcDriver
                 {
                     _watchdogRetry.Stop();
                     _semaphoreSend.Release();
+                    PlcMessageAcknowledgedEventArgs args = new PlcMessageAcknowledgedEventArgs();
+                    MessageAcknowledged?.Invoke(this, args);
                 }
                 else
                 {
@@ -305,7 +341,7 @@ public class LegacyPlcDriver: IPlcDriver
         _ackTelegram.AckFlag = "0";
         _ackTelegram.Counter = t.Counter;
         _ackTelegram.Data = t.Data;
-        await SendToPlc(_ackTelegram, false);
+        await SendToPlcAsync(_ackTelegram, false);
 
         if (t.Counter == _lastReceivedCounter && t.Counter != "0")
         {
@@ -362,7 +398,7 @@ public class LegacyPlcDriver: IPlcDriver
         }
     }
 
-    private bool Validate(LegacyPlcTelegram t)
+    private bool ValidateTelegram(LegacyPlcTelegram t)
     {
         byte b;
 
@@ -402,7 +438,7 @@ public class LegacyPlcDriver: IPlcDriver
             return false;
         }
 
-        if (!Regex.IsMatch(t.AckFlag, @"^[0-1]$"))
+        if (!"0|1".Split("|").Contains(t.AckFlag))
         {
             _lpReceive.Information =
                 $"Telegram has invalid AckFlag=[{t.AckFlag}]. " +
@@ -411,7 +447,7 @@ public class LegacyPlcDriver: IPlcDriver
             return false;
         }
 
-        if (!Regex.IsMatch(t.Counter, @"^[0-9]$"))
+        if (!char.IsDigit(t.Counter[0]))
         {
             _lpReceive.Information =
                 $"Telegram has invalid Counter=[{t.Counter}]";
@@ -428,71 +464,50 @@ public class LegacyPlcDriver: IPlcDriver
             return false;
         }
 
-        if (t.Sender != _op)
+        if (_validSenders != string.Empty)
         {
-            _lpReceive.Information =
-                $"Telegram has an invalid Sender. " +
-                $"(Is=[{t.Sender}]) != (Should=[{_op}])";
-            _logger.LogError(_lpReceive.Information);
-            return false;
+            if (!_validSenders.Split('|').Contains(t.Sender))
+            {
+                _lpReceive.Information =
+                    $"Telegram has an invalid Sender. " +
+                    $"(Is=[{t.Sender}]) != (Should=[{_validSenders}])";
+                _logger.LogError(_lpReceive.Information);
+                return false;
+            }
         }
 
-        string validIdentifiers = @"\b(ACKN|STAT|ALRM|COMP)\b";
-        if (!Regex.IsMatch(t.Identifier, validIdentifiers))
+        if (_validIdentifiers != string.Empty)
         {
-            _lpReceive.Information =
-                $"Telegram has an invalid Identifier. " +
-                $"(Is=[{t.Identifier}]) != (Should=[{validIdentifiers}])";
-            _logger.LogError(_lpReceive.Information);
-            return false;
+            if (!_validIdentifiers.Split('|').Contains(t.Identifier))
+            {
+                _lpReceive.Information =
+                    $"Telegram has an invalid Identifier. " +
+                    $"(Is=[{t.Identifier}]) != (Should=[{_validIdentifiers}])";
+                _logger.LogError(_lpReceive.Information);
+                return false;
+            }
         }
 
         return true;
     }
 
-    public async Task SendAsync(PlcMessage plcMessage)
+    private async void OnWatchdogRetryAsync(object source, ElapsedEventArgs e)
     {
-        LegacyPlcTelegram t = new LegacyPlcTelegram();
-        t.Identifier = plcMessage.Identifier.ToString();
-        t.Sender = plcMessage.Sender;
-        t.Receiver = plcMessage.Receiver;
-        switch (plcMessage.Identifier)
-        {
-            case PlcMessageIdentifiers.LIFE:
-                t.Data = string.Empty;
-                break;
-            case PlcMessageIdentifiers.ORDS:
-                ORDS ords = GLogWareMessage.DeSerialize<ORDS>(plcMessage.Data!.ToString()!)!;
-                ORDSStruct ordsStruct = ORDSStruct.FromMessage(ords);
-                t.Data = ordsStruct.ToData();
-                t.LogMsg = ordsStruct.ToLogMessage(t.Receiver);
-                break;
-            default:
-                t.Data = string.Empty;
-                break;
-        }
-        await SendToPlc(t, true);
+        await SendToPlcAsync(_lastSentTelegram, false);
     }
 
-    private async void OnWatchdogRetry(object source, ElapsedEventArgs e)
-    {
-        _watchdogRetry.Stop();
-        await SendToPlc(_lastSentTelegram, false);
-        _watchdogRetry.Start();
-    }
+    //private async void OnWatchdogLifeAsync(object source, ElapsedEventArgs e)
+    //{
+    //    if (_watchdogRetry.Enabled) return;
+    //    if (_tcpClient == null) return;
+    //    if (!_tcpClient.Connected) return;
 
-    private async void OnWatchdogLife(object source, ElapsedEventArgs e)
-    {
-        if (_watchdogRetry.Enabled) return;
-        if (_tcpClient == null) return;
-        if (!_tcpClient.Connected) return;
+    //    PlcMessage pm = new PlcMessage();
+    //    pm.Identifier = PlcMessageIdentifiers.LIFE;
+    //    await SendTelegram(pm);
+    //}
 
-        PlcMessage pm = new PlcMessage();
-        pm.Identifier = PlcMessageIdentifiers.LIFE;
-        //await SendTelegram(pm);
-    }
-
-    private async Task SendToPlc(LegacyPlcTelegram t, bool isNew = false)
+    private async Task SendToPlcAsync(LegacyPlcTelegram t, bool isNew = false)
     {
         try
         {
@@ -573,6 +588,7 @@ public class LegacyPlcDriver: IPlcDriver
             logPlc.Category = (_op.Substring(_op.Length-2)) switch
             {
                 "BR" => nameof(LogPlcCategoryIdentifiers.GANTRY),
+                "PA" => nameof(LogPlcCategoryIdentifiers.PALLETIZER),
                 _ => nameof(LogPlcCategoryIdentifiers.UNCATEGORIZED)
             };
             db.LogPlcs.Add(logPlc);
@@ -584,5 +600,5 @@ public class LegacyPlcDriver: IPlcDriver
             // swallow intentionally
         }
     }
-
+    #endregion
 }

@@ -1,9 +1,17 @@
 {
-  "EnableEFCoreLogging": 0,
-  "ConnectionString_Postgres": "Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-  "ConnectionString_SqlServer": "Server=sqlserver.glogware.com;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
-  "ConnectionString_Oracle": "User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;",
-  "ConnectionString_MySql": "server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*",
+  "Project": {
+    "Company": "Company",
+    "City": "City",
+    "Description": "GLogWare is a software solution designed to optimize and manage logistics operations within a company. It provides real-time tracking, inventory management, and data analytics to enhance efficiency and decision-making in the supply chain.",
+    "Trigram": "CCI"
+  },
+  "EnableSystemLogging": 0,
+  "Database": {
+    "ConnectionString_Postgres": "Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+    "ConnectionString_SqlServer": "Server=sqlserver.glogware.com;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+    "ConnectionString_Oracle": "User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;",
+    "ConnectionString_MySql": "server=tidb.glogware.com;port=4000;database=GLogWare_CompanyCity;user=root;password="
+  },
   "MQTTBroker": {
     "Ip": "mqtt.glogware.com",
     "Port": "1883",
@@ -11,19 +19,27 @@
   },
   "GantryBridges": {
     "OP7100BR": {
-      "Ip": "ubuntuserver2404.glogware.com",
+      "Ip": "10.59.0.1",
       "Port": 7100,
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
+      "ValidSenders": "OP7100BR",
+      "ValidPlcIdentifiers": "ACKN|STAT|ALRM|COMP",
+      "ValidGLogWareIdentifiers": "ACKN|LIFE|ORDS",
       "Description": "First Bridge of Gantry 1"
     },
     "OP7200BR": {
-      "Ip": "ubuntuserver2404.glogware.com",
+      "Ip": "10.59.0.1",
       "Port": 7200,
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
+      "ValidSenders": "OP7200BR",
+      "ValidPlcIdentifiers": "ACKN|STAT|ALRM|COMP",
+      "ValidGLogWareIdentifiers": "ACKN|LIFE|ORDS",
       "Description": "Second Bridge of Gantry 2"
     }
   },
@@ -34,6 +50,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "Infeed Conveyors"
     },
     "OP2000AL": {
@@ -42,6 +59,7 @@
       "DelayConnection": 5000,
       "DelayRetry": 5000,
       "DelayLife": 30000,
+      "DelayWakeup": 30000,
       "Description": "Outfeed Conveyors"
     }
   }

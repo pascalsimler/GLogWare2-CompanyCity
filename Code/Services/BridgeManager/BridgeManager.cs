@@ -31,7 +31,6 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
     private string _subscriptionTopic { get; set; } = string.Empty;
     private IManagedMqttClient? _mqttClient = null;
-    private CancellationTokenSource? _cts;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
     private SemaphoreSlim _semaphoreLock = null!;
@@ -57,8 +56,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
         await StartMqtt();
 
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _ = _plcDriver.StartAsync(cancellationToken);
+        _ = StartPlcDriverAsync(cancellationToken);
 
         await Task.CompletedTask;
     }
@@ -159,7 +157,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
                     try
                     {
                         PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                        await SimulatePlcTelegram(pmFrom);
+                        await ProcessPlcMessage(pmFrom);
                     }
                     catch (Exception ex)
                     {
@@ -222,7 +220,6 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         await SendGLogWareMessageToMqtt(_subscriptionTopic, gm);
-        //RestartTimer(_watchdogWakeup);
     }
 
     private async Task Lock()

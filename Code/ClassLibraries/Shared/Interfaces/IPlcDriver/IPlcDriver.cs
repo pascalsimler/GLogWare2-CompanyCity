@@ -2,7 +2,7 @@
 
 public interface IPlcDriver
 {
-    void LoadConfiguration(string op, string path);
+    void LoadConfiguration(string path);
     Task StartAsync(CancellationToken cancellationToken);
     Task SendAsync(PlcMessage plcMessage);
 
