@@ -1,5 +1,4 @@
 using Gudel.GLogWare.Services.DemoService;
-using Gudel.GLogWare.EFCore.Application;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
@@ -45,10 +44,8 @@ logger.Information($"databaseProvider=[{databaseProvider}]");
 string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
 
-
-builder.Services.AddSingleton<DemoService>();
-builder.Services.AddSingleton<DbLoggerService>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
+builder.Services.AddSingleton<DemoService>();
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

@@ -1,6 +1,6 @@
 using Gudel.GLogWare.BridgeSimulator;
-using Gudel.GLogWare.EFCore.Application;
 using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.LegacyPlcDriver;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
@@ -55,7 +55,7 @@ logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
-builder.Services.AddSingleton<DbLoggerService>();
+builder.Services.AddSingleton<IPlcDriver, LegacyPlcSimulatorDriver>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
 builder.Services.AddHostedService<BridgeSimulator>();
 

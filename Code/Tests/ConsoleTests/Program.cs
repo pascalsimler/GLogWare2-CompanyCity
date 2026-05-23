@@ -1,5 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 Console.WriteLine(DateTimeOffset.Now);
@@ -15,7 +16,7 @@ var configuration = new ConfigurationBuilder()
           optional: false,
           reloadOnChange: true)
       .Build();
-string connectionString = configuration[$"ConnectionString_{databaseProvider}"]!;
+string connectionString = configuration[$"Database:ConnectionString_{databaseProvider}"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
 GLogWareDbContext db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString);
@@ -29,7 +30,7 @@ Console.WriteLine("DbContext successfully created");
 while (true)
 {
     Console.WriteLine("----------------------");
-    foreach (var a in db.Areas)
+    foreach (var a in db.Places.Where(p => p.ModifiedBy == "CRUCHOT"))
     {
         Console.WriteLine(
             $"Name=[{a.Name}]" +
@@ -42,16 +43,10 @@ while (true)
     if (choice.ToLower() != "y") break;
 }
 
-//Place pl = new Place();
-//pl.Name = "KOM-1-1";
-//pl.AreaName = "KOM";
-//db.Places.Add(pl);
-
-var komArea = db.Areas.Where(a => a.Name == "GANTRY").FirstOrDefault();
-if (komArea != null)
-{
-    komArea.Comments = DateTime.Now.ToString("HH:mm:ss");
-    komArea.ModifiedBy = "Cruchot";
-}
-
-db.SaveChanges();
+await db.Places
+    .Where(x => x.XCell == "2")
+    .ExecuteUpdateAsync(setters => setters
+        .SetProperty(x => x.ModifiedBy, x => "FOUGASSE")
+        .SetProperty(x => x.ModifiedAt, x => DateTime.Now)
+    );
+await db.SaveChangesAsync();

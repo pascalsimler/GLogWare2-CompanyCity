@@ -8,11 +8,11 @@ public partial class BridgeManager
 {
     private Resource? _resource;
     private JobTypeIdentifiers _lastJobType;
-    private GLogWareDbContext? _db = null;
+    private GLogWareDbContext _db = null!;
     
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        _resource = _db!.Resources
+        _resource = _db.Resources
             .Where(x => x.Name == OP)
             .FirstOrDefault();
         if (_resource == null)
@@ -22,7 +22,7 @@ public partial class BridgeManager
             return false;
         }
 
-        if (_resource.IsOnline != true)
+        if (!_resource.IsOnline)
         {
             _logger.LogInformation(
                 $"Communication with PLC of the bridge is currently offline !");
@@ -83,7 +83,7 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartInputOrder()
     {
-        if (_resource!.InfeedEnabled != true)
+        if (!_resource!.InfeedEnabled)
         {
             _logger.LogInformation(
                 $"Infeeds are not enabled for that bridge !");
@@ -102,7 +102,7 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
-        if (_resource!.OutfeedEnabled != true)
+        if (!_resource!.OutfeedEnabled)
         {
             _logger.LogInformation(
                 $"Outfeeds are not enabled for that bridge !");
@@ -121,7 +121,7 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
-        if (_resource!.RelocationEnabled != true)
+        if (!_resource!.RelocationEnabled)
         {
             _logger.LogInformation(
                 $"Relocations are not enabled for that bridge !");
@@ -173,7 +173,7 @@ public partial class BridgeManager
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
         _logger.LogInformation($"stat=[\r\n{json}\r\n]");
         
-        var r = _db!.Resources.Where(x => x.Name == OP).FirstOrDefault();
+        var r = _db.Resources.Where(x => x.Name == OP).FirstOrDefault();
         if (r == null) 
         {
             _logger.LogError($"Unknown resource [{OP}]");
@@ -195,7 +195,7 @@ public partial class BridgeManager
 
     private async Task Process_COMP(COMP comp)
     {
-        _db = _factory.CreateDbContext();
+        _db = _dbContextFactory.CreateDbContext();
 
         string json = GLogWareMessage.Serialize<COMP>(comp);
         _logger.LogInformation($"comp=[\r\n{json}\r\n]");

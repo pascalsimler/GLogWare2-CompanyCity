@@ -17,6 +17,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
+    private readonly IPlcDriver _simulatorDriver;
     #endregion
 
     #region Private members
@@ -33,10 +34,12 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public BridgeSimulator(
         ILogger<BridgeSimulator> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IPlcDriver simulatorDriver)
     {
         _logger = logger;
         _configuration = configuration;
+        _simulatorDriver = simulatorDriver;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -47,8 +50,8 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
         await StartMqtt();
 
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _ = TcpAcceptLoopAsync(_cts.Token);
+        //_cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        //_ = TcpAcceptLoopAsync(_cts.Token);
 
         await Task.CompletedTask;
     }
@@ -65,11 +68,11 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     private void LoadConfiguration()
     {
-        LoadConfigurationMqtt();
-        LoadConfigurationGLogWare();
+        LoadMqttConfiguration();
+        LoadGLogWareConfiguration();
     }
 
-    private void LoadConfigurationMqtt()
+    private void LoadMqttConfiguration()
     {
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
@@ -136,7 +139,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
                     break;
                 case GLogWareMessageIdentifiers.ToGLogWare:
                     PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    await SendTelegram(pm);
+                    //await SendTelegram(pm);
                     break;
                 case GLogWareMessageIdentifiers.FromGLogWare:
                     break;

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Gudel.GLogWare.Shared;
+namespace Gudel.GLogWare.LegacyPlcDriver;
 
 /// <summary>
 /// PLC telegram representation

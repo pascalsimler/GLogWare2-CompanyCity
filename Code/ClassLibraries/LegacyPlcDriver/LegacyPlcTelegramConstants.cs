@@ -1,4 +1,4 @@
-namespace Gudel.GLogWare.Shared;
+namespace Gudel.GLogWare.LegacyPlcDriver;
 
 
 /// <summary>
@@ -12,12 +12,12 @@ public struct LegacyPlcTelegramConstants
     public const byte STX = 0x02;
 
     /// <summary>
-    /// End of Text ASCII Code
+    /// End of Text ASCII code
     /// </summary>
     public const byte ETX = 0x03;
 
     /// <summary>
-    /// Fixed dize telegram length for the GLogWare-PLC data exchange
+    /// Fixed size telegram length for the GLogWare-PLC data exchange
     /// </summary>
     public const int TELEGRAM_LENGTH = 240;
 

@@ -1,4 +1,6 @@
-﻿namespace Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Shared;
+
+namespace Gudel.GLogWare.LegacyPlcDriver;
 
 public struct COMPStruct: ILegacyPlcStruct<COMP, COMPStruct>
 {     

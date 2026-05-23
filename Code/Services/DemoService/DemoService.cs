@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Application;
-using Gudel.GLogWare.EFCore.Domain;
+﻿using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
@@ -12,18 +11,15 @@ namespace Gudel.GLogWare.Services.DemoService;
 public class DemoService
 {
     private readonly ILogger _logger;
-    private readonly IDbContextFactory<GLogWareDbContext> _factory;
-    private readonly DbLoggerService _dbLoggerService;
+    private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
     private IManagedMqttClient _mqttClient = null!;
 
     public DemoService(
         ILogger<DemoService> logger,
-        DbLoggerService dbLoggerService,
-        IDbContextFactory<GLogWareDbContext> factory)
+        IDbContextFactory<GLogWareDbContext> dbContextFactory)
     {
         _logger = logger;
-        _dbLoggerService = dbLoggerService;
-        _factory = factory;
+        _dbContextFactory = dbContextFactory;
     }
 
     public void SetMqttClient(IManagedMqttClient mqttClient)
@@ -37,10 +33,10 @@ public class DemoService
         {
             string logMsg = $"topic=[{topic}], message=[{message}]";
             _logger.LogInformation(logMsg);
-            await using var db = await _factory.CreateDbContextAsync();
+            await using var db = await _dbContextFactory.CreateDbContextAsync();
             Protocol protocol = new Protocol();
             protocol.Message = logMsg;
-            await _dbLoggerService.WriteProtocolAsync(protocol);
+            //await _dbLoggerService.WriteProtocolAsync(protocol);
             await Task.Delay(5000);
             await SendToMqtt($"{topic}-Response", message);
         }
@@ -55,7 +51,7 @@ public class DemoService
         try
         {
             _logger.LogInformation($"Timer fired at {DateTime.Now}");
-            using var db = await _factory.CreateDbContextAsync();
+            using var db = await _dbContextFactory.CreateDbContextAsync();
             {
                 foreach (var area in db.Areas)
                 {
@@ -63,7 +59,7 @@ public class DemoService
                     _logger.LogInformation(logMsg);
                     Protocol protocol = new Protocol();
                     protocol.Message = logMsg;
-                    await _dbLoggerService.WriteProtocolAsync(protocol);
+                    //await _dbLoggerService.WriteProtocolAsync(protocol);
                     await Task.Delay(1000);
                 }
             }

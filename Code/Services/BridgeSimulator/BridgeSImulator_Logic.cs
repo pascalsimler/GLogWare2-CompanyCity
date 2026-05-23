@@ -47,33 +47,33 @@ public partial class BridgeSimulator
         }
     }
 
-    private async Task ProcessGLogWareTelegram(LegacyPlcTelegram t)
-    {
-        switch (t.Identifier)
-        {
-            case nameof(PlcMessageIdentifiers.ORDS):
-                ORDSStruct ordsStruct = ORDSStruct.FromData(t.Data);
-                if (_currentSTAT == null) break;
-                if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
-                {
-                    await SendCOMP(ordsStruct.Jobid, "0001");
-                    break;
-                }
-                if (_currentORDS != null)
-                {
-                    await SendCOMP(ordsStruct.Jobid, "0002");
-                    break;
-                }
-                if (_bridgeConfiguration.DelaySendCOMP > 0)
-                {
-                    _currentORDS = ordsStruct.ToMessage(OP!);
-                    _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
-                    _orderExecutionTimer.Start();
-                    break;
-                }
-                break;
-        }
-    }
+    //private async Task ProcessGLogWareTelegram(LegacyPlcTelegram t)
+    //{
+    //    switch (t.Identifier)
+    //    {
+    //        case nameof(PlcMessageIdentifiers.ORDS):
+    //            ORDSStruct ordsStruct = ORDSStruct.FromData(t.Data);
+    //            if (_currentSTAT == null) break;
+    //            if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
+    //            {
+    //                await SendCOMP(ordsStruct.Jobid, "0001");
+    //                break;
+    //            }
+    //            if (_currentORDS != null)
+    //            {
+    //                await SendCOMP(ordsStruct.Jobid, "0002");
+    //                break;
+    //            }
+    //            if (_bridgeConfiguration.DelaySendCOMP > 0)
+    //            {
+    //                _currentORDS = ordsStruct.ToMessage(OP!);
+    //                _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
+    //                _orderExecutionTimer.Start();
+    //                break;
+    //            }
+    //            break;
+    //    }
+    //}
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {

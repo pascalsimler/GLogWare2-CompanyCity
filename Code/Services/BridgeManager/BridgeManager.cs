@@ -1,5 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Application;
-using Gudel.GLogWare.EFCore.Infrastructure;
+﻿using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
@@ -22,8 +21,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
-    IDbContextFactory<GLogWareDbContext> _factory;
-    private readonly DbLoggerService _dbLoggerService;
+    private readonly IPlcDriver _plcDriver;
+    private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
     #endregion
 
     #region Private members
@@ -41,13 +40,13 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     public BridgeManager(
         ILogger<BridgeManager> logger,
         IConfiguration configuration,
-        IDbContextFactory<GLogWareDbContext> factory,
-        DbLoggerService dbLoggerService)
+        IPlcDriver plcDriver,
+        IDbContextFactory<GLogWareDbContext> dbContextFactory)
     {
         _logger = logger;
         _configuration = configuration;
-        _factory = factory;
-        _dbLoggerService = dbLoggerService;
+        _plcDriver = plcDriver;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -59,7 +58,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         await StartMqtt();
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _ = TcpConnectLoopAsync(_cts.Token);
+        _ = _plcDriver.StartAsync(cancellationToken);
 
         await Task.CompletedTask;
     }
@@ -76,11 +75,11 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private void LoadConfiguration()
     {
-        LoadConfiguration_Mqtt();
-        LoadConfiguration_Plc();
+        LoadMqttConfiguration();
+        LoadPlcConfiguration();
     }
 
-    private void LoadConfiguration_Mqtt()
+    private void LoadMqttConfiguration()
     {
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
@@ -153,7 +152,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             {
                 case GLogWareMessageIdentifiers.ToPlc:
                     PlcMessage pmTo = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                    await SendTelegram(pmTo);
+                    await _plcDriver.SendAsync(pmTo);
                     break;
                 case GLogWareMessageIdentifiers.FromPlc:
                     await Lock();
@@ -223,7 +222,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         await SendGLogWareMessageToMqtt(_subscriptionTopic, gm);
-        RestartTimer(_watchdogWakeup);
+        //RestartTimer(_watchdogWakeup);
     }
 
     private async Task Lock()
@@ -233,9 +232,9 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         if (_db != null)
         {
             _db.Dispose();
-            _db = null;
+            _db = null!;
         }
-        _db = _factory.CreateDbContext();
+        _db = _dbContextFactory.CreateDbContext();
     }
 
     private void Unlock()

@@ -4,8 +4,8 @@ namespace Gudel.GLogWare.Shared;
 
 public class PlcMessage
 {
-    public string? Sender { get; set; }
-    public string? Receiver { get; set; }
+    public string Sender { get; set; } = string.Empty;
+    public string Receiver { get; set; } = string.Empty;
     [JsonRequired]
     public PlcMessageIdentifiers Identifier { get; set; }
     public object? Data { get; set; }

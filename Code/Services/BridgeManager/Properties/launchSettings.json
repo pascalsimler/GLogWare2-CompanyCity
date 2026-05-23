@@ -13,6 +13,14 @@
       "environmentVariables": {
         "OP": "OP7100BR"
       }
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "OP": "OP7100BR"
+      },
+      "distributionName": ""
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"
