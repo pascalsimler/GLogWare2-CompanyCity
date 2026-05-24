@@ -18,9 +18,8 @@ public class LegacyPlcDriver: IPlcDriver
     private GLogWareDbContext _db = null!;
     #endregion
 
-#region Event handlers
-    public event EventHandler<PlcMessageAcknowledgedEventArgs>? MessageAcknowledged;
-    public event EventHandler<PlcMessageReceivedEventArgs>? MessageReceived;
+    #region Event handlers
+    public event EventHandler<DriverNotificationEventArgs>? DriverNotification;
     #endregion
 
     #region Driver parameters
@@ -40,7 +39,7 @@ public class LegacyPlcDriver: IPlcDriver
     private LegacyPlcTelegram _lastSentTelegram = null!;
     private LegacyPlcTelegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
-    private System.Timers.Timer _watchdogLife = null!;
+    //private System.Timers.Timer _watchdogLife = null!;
     private LogPlc _lpReceive = null!;
     private SemaphoreSlim _semaphoreSend = null!;
     #endregion region
@@ -115,6 +114,8 @@ public class LegacyPlcDriver: IPlcDriver
     #region Private method
     private async Task TcpConnectLoopAsync(CancellationToken token)
     {
+        DriverNotificationEventArgs driverNotificationEventArgs = null!;
+
         string information = string.Empty;
         
         _lastSentTelegram = new LegacyPlcTelegram();
@@ -148,6 +149,9 @@ public class LegacyPlcDriver: IPlcDriver
                     lp.Information = information;
                     await WriteLogPlcAsync(lp);
                 }
+                driverNotificationEventArgs = new DriverNotificationEventArgs();
+                driverNotificationEventArgs.notificationType = DriverNotificationType.Online;
+                DriverNotification?.Invoke(this, driverNotificationEventArgs);
 
                 using NetworkStream stream = _tcpClient.GetStream();
                 await TcpReceiveLoopAsync(stream, token);
@@ -210,6 +214,9 @@ public class LegacyPlcDriver: IPlcDriver
                     await WriteLogPlcAsync(lp);
                 }
             }
+            driverNotificationEventArgs = new DriverNotificationEventArgs();
+            driverNotificationEventArgs.notificationType = DriverNotificationType.Offline;
+            DriverNotification?.Invoke(this, driverNotificationEventArgs);
 
             if (!token.IsCancellationRequested)
             {
@@ -311,8 +318,9 @@ public class LegacyPlcDriver: IPlcDriver
                 {
                     _watchdogRetry.Stop();
                     _semaphoreSend.Release();
-                    PlcMessageAcknowledgedEventArgs args = new PlcMessageAcknowledgedEventArgs();
-                    MessageAcknowledged?.Invoke(this, args);
+                    DriverNotificationEventArgs driverNotificationEventArgs = new DriverNotificationEventArgs();
+                    driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSentAcknowledged;
+                    DriverNotification?.Invoke(this, driverNotificationEventArgs);
                 }
                 else
                 {
@@ -387,9 +395,10 @@ public class LegacyPlcDriver: IPlcDriver
             await WriteLogPlcAsync(_lpReceive);
             if (plcMessage.Data != null)
             {
-                PlcMessageReceivedEventArgs args = new PlcMessageReceivedEventArgs();
-                args.plcMessage = plcMessage;
-                MessageReceived?.Invoke(this, args);
+                DriverNotificationEventArgs driverNotificationEventArgs = new DriverNotificationEventArgs();
+                driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramReceived;
+                driverNotificationEventArgs.plcMessage = plcMessage;
+                DriverNotification?.Invoke(this, driverNotificationEventArgs);
             }
         }
         catch (Exception ex)
@@ -555,7 +564,7 @@ public class LegacyPlcDriver: IPlcDriver
                         lpSend.Identifier = t.Identifier;
                         lpSend.Data = t.LogMsg;
                         await WriteLogPlcAsync(lpSend);
-                        RestartTimer(_watchdogLife);
+                        //RestartTimer(_watchdogLife);
                     }
                 }
                 else

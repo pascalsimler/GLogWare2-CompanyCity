@@ -5,6 +5,7 @@ namespace Gudel.GLogWare.BridgeManager;
 public partial class BridgeManager
 {
     #region Private members
+    private DriverNotificationType _driverState;
     #endregion region
 
     private void LoadPlcConfiguration()
@@ -14,17 +15,37 @@ public partial class BridgeManager
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)
     {
-        _plcDriver.MessageReceived += OnPlcMessageReceived;
-        _plcDriver.MessageAcknowledged += OnPlcMessageAcknowledged;
+        _plcDriver.DriverNotification += OnPlcDriverNotification;
         await _plcDriver.StartAsync(cancellationToken);
     }
 
-    private async void OnPlcMessageReceived(object? sender, PlcMessageReceivedEventArgs e)
+    private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        await ProcessPlcMessage(e.plcMessage);  
+        if (e.notificationType == DriverNotificationType.TelegramReceived)
+        {
+            await ProcessPlcMessage(e.plcMessage);
+            return;
+        }
+
+        _driverState = e.notificationType;
+        switch (_driverState)
+        {
+            case DriverNotificationType.Online:
+                _logger.LogInformation($"PLC is now ONLINE");
+                break;
+            case DriverNotificationType.Offline:
+                _logger.LogInformation($"PLC is now OFFLINE");
+                break;
+            case DriverNotificationType.TelegramSent:
+                _logger.LogInformation($"PLC has a telegram to send");
+                break;
+            case DriverNotificationType.TelegramSentAcknowledged:
+                _logger.LogInformation($"PLC acknowledged the sent telegram");
+                break;
+        }
     }
 
-    private async void OnPlcMessageAcknowledged(object? sender, PlcMessageAcknowledgedEventArgs e)
+    private async void OnPlcMessageAcknowledged(object? sender, DriverNotificationEventArgs e)
     {
     }
 

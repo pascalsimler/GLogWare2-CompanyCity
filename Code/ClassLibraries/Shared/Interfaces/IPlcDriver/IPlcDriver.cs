@@ -6,6 +6,5 @@ public interface IPlcDriver
     Task StartAsync(CancellationToken cancellationToken);
     Task SendAsync(PlcMessage plcMessage);
 
-    event EventHandler<PlcMessageAcknowledgedEventArgs>? MessageAcknowledged;
-    event EventHandler<PlcMessageReceivedEventArgs>? MessageReceived;
+    event EventHandler<DriverNotificationEventArgs>? DriverNotification;
 }

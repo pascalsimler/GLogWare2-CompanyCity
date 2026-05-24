@@ -1,20 +1,49 @@
+set -e
+
+esc=$'\033'
+b="${esc}[30;107m"
+r="${esc}[0m"
+
+pathBackend="../Code/Services"
+pathFrontend="../Code/Frontend"
+pathRepository="repository"
+pathSolution=".."
+
+images=(
+  "demoservice:$pathBackend/DemoService"
+  "bridgemanager:$pathBackend/BridgeManager"
+  "bridgesimulator:$pathBackend/BridgeSimulator"
+  "simulatorwebapp:$pathFrontend/SimulatorWebApp"
+  "glogwarewebapp:$pathFrontend/GLogWareWebApp/GLogWareWebApp"
+)
+
 clear
-BACKEND_PATH=../Code/Services
-FRONTEND_PATH=../Code/Frontend
-REPOSITORY_PATH=repository
-SOLUTION_PATH=..
+rm -f "$pathRepository"/*.tar 2>/dev/null || true
 
-rm ${REPOSITORY_PATH}/*.tar
+choice="Z"
 
-docker build -f ${BACKEND_PATH}/DemoService/Dockerfile --force-rm -t demoservice ${SOLUTION_PATH}
-docker build -f ${BACKEND_PATH}/BridgeManager/Dockerfile --force-rm -t bridgemanager ${SOLUTION_PATH}
-docker build -f ${BACKEND_PATH}/BridgeSimulator/Dockerfile --force-rm -t bridgesimulator ${SOLUTION_PATH}
+for item in "${images[@]}"; do
 
-docker build -f ${FRONTEND_PATH}/SimulatorWebApp/Dockerfile --force-rm -t simulatorwebapp ${SOLUTION_PATH}
-docker build -f ${FRONTEND_PATH}/GLogWareWebApp/GLogWareWebApp/Dockerfile --force-rm -t glogwarewebapp ${SOLUTION_PATH}
+  name="${item%%:*}"
+  path="${item#*:}"
 
-docker image save demoservice:latest -o ${REPOSITORY_PATH}/demoservice.tar
-docker image save bridgemanager:latest -o ${REPOSITORY_PATH}/bridgemanager.tar
-docker image save bridgesimulator:latest -o ${REPOSITORY_PATH}/bridgesimulator.tar
-docker image save simulatorwebapp:latest -o ${REPOSITORY_PATH}/simulatorwebapp.tar
-docker image save glogwarewebapp:latest -o ${REPOSITORY_PATH}/glogwarewebapp.tar
+  if [[ "$choice" != "A" && "$choice" != "I" ]]; then
+    while true; do
+      echo -e "Do you want to build the ${b}[${name}]${r} image? (${b}[Y]${r}=Yes, ${b}[N]${r}=No, ${b}[A]${r}=Yes to all, ${b}[I]${r}=No to all)"
+      read -r choice
+      choice=${choice^^}
+
+      if [[ "$choice" == "Y" || "$choice" == "N" || "$choice" == "A" || "$choice" == "I" ]]; then
+        break
+      fi
+    done
+  fi
+
+  echo -e "${b}[${name}]${r} image ..."
+
+  if [[ "$choice" == "Y" || "$choice" == "A" ]]; then
+    docker build -f "$path/Dockerfile" --force-rm -t "$name" "$pathSolution"
+    docker image save "$name:latest" -o "$pathRepository/$name.tar"
+  fi
+
+done

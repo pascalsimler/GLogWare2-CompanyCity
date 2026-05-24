@@ -1,9 +1,4 @@
-﻿using Gudel.GLogWare.LegacyPlcDriver;
-using Gudel.GLogWare.Shared;
-using System.Net;
-using System.Net.Sockets;
-using System.Text.RegularExpressions;
-using System.Timers;
+﻿using Gudel.GLogWare.Shared;
 
 namespace Gudel.GLogWare.BridgeSimulator;
 
@@ -19,16 +14,11 @@ public partial class BridgeSimulator
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)
     {
-        _plcSimulatorDriver.MessageReceived += OnPlcMessageReceived;
-        _plcSimulatorDriver.MessageAcknowledged += OnPlcMessageAcknowledged;
+        _plcSimulatorDriver.DriverNotification += OnPlcDriverNotification;
         await _plcSimulatorDriver.StartAsync(cancellationToken);
     }
 
-    private async void OnPlcMessageReceived(object? sender, PlcMessageReceivedEventArgs e)
-    {
-    }
-
-    private async void OnPlcMessageAcknowledged(object? sender, PlcMessageAcknowledgedEventArgs e)
+    private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
     }
 

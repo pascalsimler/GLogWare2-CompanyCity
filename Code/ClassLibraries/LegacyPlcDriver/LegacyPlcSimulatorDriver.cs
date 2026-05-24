@@ -31,8 +31,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     #endregion
 
     #region Event handlers
-    public event EventHandler<PlcMessageAcknowledgedEventArgs>? MessageAcknowledged;
-    public event EventHandler<PlcMessageReceivedEventArgs>? MessageReceived;
+    public event EventHandler<DriverNotificationEventArgs>? DriverNotification;
     #endregion
 
     #region Constructor
