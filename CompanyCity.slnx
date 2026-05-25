@@ -19,6 +19,8 @@
     <Project Path="Code/Services/BridgeManager/BridgeManager.csproj" />
     <Project Path="Code/Services/BridgeSimulator/BridgeSimulator.csproj" Id="c27bede6-2c99-4057-a8f7-bd0bd7fe45d2" />
     <Project Path="Code/Services/DemoService/DemoService.csproj" Id="69da6fc9-a188-447a-b8e1-9cd17a1198ac" />
+    <Project Path="Code/Services/JobManager/JobManager.csproj" Id="a66985a8-e462-4c68-be46-766fbaa9b78d" />
+    <Project Path="Code/Services/Reserve/Reserve.csproj" Id="30116604-df23-4e66-9a9a-4e327727c0eb" />
   </Folder>
   <Folder Name="/Code/Tests/">
     <File Path="Code/Tests/readme.txt" />

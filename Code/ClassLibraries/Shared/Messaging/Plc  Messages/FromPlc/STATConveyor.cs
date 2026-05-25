@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Shared;
 
 public class STATConveyor
 {

@@ -2,7 +2,7 @@
 
 namespace Gudel.GLogWare.LegacyPlcDriver;
 
-public struct ORDSStruct : ILegacyPlcStruct<ORDS, ORDSStruct>
+public struct ORDSStruct: ILegacyPlcStruct<ORDS, ORDSStruct>
 {
     public string Jobid;
     public string Article;

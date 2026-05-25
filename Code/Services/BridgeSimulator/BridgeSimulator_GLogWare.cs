@@ -1,6 +1,6 @@
 ﻿using Gudel.GLogWare.Shared;
 
-namespace Gudel.GLogWare.BridgeSimulator;
+namespace Gudel.GLogWare.Services.BridgeSimulator;
 
 public partial class BridgeSimulator
 {
@@ -9,17 +9,22 @@ public partial class BridgeSimulator
 
     private void LoadGLogWareConfiguration()
     {
+        using var _ = _logger.LogMethodScope();
+
         _plcSimulatorDriver.LoadConfiguration($"GantryBridges:{OP}");
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)
     {
+        using var _ = _logger.LogMethodScope();
+
         _plcSimulatorDriver.DriverNotification += OnPlcDriverNotification;
         await _plcSimulatorDriver.StartAsync(cancellationToken);
     }
 
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
     }
 
     //private async Task SendTelegram(PlcMessage pm)

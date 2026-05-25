@@ -5,7 +5,7 @@ using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
 using System.Text;
 
-namespace Gudel.GLogWare.BridgeSimulator;
+namespace Gudel.GLogWare.Services.BridgeSimulator;
 
 public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 {
@@ -40,10 +40,11 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        using var _1 = _logger.LogMethodScope();
+
         LoadConfiguration();
 
         await StartMqtt();
-
         _ = StartPlcSimulatorDriverAsync(cancellationToken);
 
         await Task.CompletedTask;
@@ -51,22 +52,31 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        using var _ = _logger.LogMethodScope();
+
         await Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
+        using var _ = _logger.LogMethodScope();
+
         await Task.CompletedTask;
     }
 
     private void LoadConfiguration()
     {
+        using var _ = _logger.LogMethodScope();
+
         LoadMqttConfiguration();
         LoadGLogWareConfiguration();
+        InitSimulation();
     }
 
     private void LoadMqttConfiguration()
     {
+        using var _ = _logger.LogMethodScope();
+
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
@@ -78,6 +88,8 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     private async Task StartMqtt()
     {
+        using var _ = _logger.LogMethodScope();
+
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
 
         var mqttOptions = new ManagedMqttClientOptionsBuilder()
@@ -120,6 +132,8 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
+
         try
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
@@ -152,14 +166,13 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
     {
-        string payload = string.Empty;
+        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation($"topic=[{topic}]");
 
         try
         {
             m.Sender = ServiceName;
-            payload = m.Serialize();
-
-            _logger.LogInformation($"topic=[{topic}]");
+            string payload = m.Serialize();
             _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
 
             var mqttMessage = new MqttApplicationMessageBuilder()

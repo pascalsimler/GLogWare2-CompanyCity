@@ -8,14 +8,13 @@ using MQTTnet.Protocol;
 using System.Text;
 using System.Timers;
 
-namespace Gudel.GLogWare.BridgeManager;
+namespace Gudel.GLogWare.Services.BridgeManager;
 
 public partial class BridgeManager : IHostedService, IAsyncDisposable
 {
     #region Public members
     public static string? OP = string.Empty;
     public static string ServiceName => $"BridgeManager-{OP}";
-    public static string ElementName => OP!.Substring(2, 4);
     #endregion
 
     #region Injected members
@@ -23,13 +22,17 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     private readonly IConfiguration _configuration;
     private readonly IPlcDriver _plcDriver;
     private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
+    private GLogWareDbContext _db = null!;
     #endregion
 
-    #region Private members
+    #region Mqtt parameters
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
     private string _subscriptionTopic { get; set; } = string.Empty;
+    #endregion
+
+    #region Private members
     private IManagedMqttClient? _mqttClient = null;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
@@ -50,6 +53,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        using var _1 = _logger.LogMethodScope();
+
         LoadConfiguration();
 
         _semaphoreLock = new SemaphoreSlim(1);
@@ -63,22 +68,30 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        using var _ = _logger.LogMethodScope();
+
         await Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
+        using var _ = _logger.LogMethodScope();
+
         await Task.CompletedTask;
     }
 
     private void LoadConfiguration()
     {
+        using var _ = _logger.LogMethodScope();
+
         LoadMqttConfiguration();
         LoadPlcConfiguration();
     }
 
     private void LoadMqttConfiguration()
     {
+        using var _ = _logger.LogMethodScope();
+
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpMqttBrokerPort)) _mqttBrokerPort = tmpMqttBrokerPort;
@@ -93,6 +106,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private async Task StartMqtt()
     {
+        using var _ = _logger.LogMethodScope();
+
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
 
         var mqttOptions = new ManagedMqttClientOptionsBuilder()
@@ -140,6 +155,9 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
+
+        await Lock();
         try
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
@@ -148,22 +166,16 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             GLogWareMessage m = GLogWareMessage.DeSerialize(payload)!;
             switch (m.Identifier)
             {
+                case GLogWareMessageIdentifiers.WakeUp:
+                    await TryToStartNewOrder();
+                    break;
                 case GLogWareMessageIdentifiers.ToPlc:
                     PlcMessage pmTo = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
                     await _plcDriver.SendAsync(pmTo);
                     break;
                 case GLogWareMessageIdentifiers.FromPlc:
-                    await Lock();
-                    try
-                    {
-                        PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
-                        await ProcessPlcMessage(pmFrom);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error processing GLogWareMessageIdentifiers.FromPlc");
-                    }
-                    Unlock();
+                    PlcMessage pmFrom = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await ProcessPlcMessage(pmFrom);
                     break;
             }
         }
@@ -171,29 +183,18 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
-
-        await Lock();
-        try
-        {
-            await TryToStartNewOrder();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Exception");
-        }
         Unlock();
     }
 
     public async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
     {
-        string payload = string.Empty;
-
+        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation($"topic=[{topic}]");
+     
         try
         {
             m.Sender = ServiceName;
-            payload = m.Serialize();
-
-            _logger.LogInformation($"topic=[{topic}]");
+            string payload = m.Serialize();
             _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
 
             var mqttMessage = new MqttApplicationMessageBuilder()
@@ -212,11 +213,15 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
+        
         await SendWakeUp(_subscriptionTopic);
     }
 
     private async Task SendWakeUp(string topic)
     {
+        using var _ = _logger.LogMethodScope();
+
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         await SendGLogWareMessageToMqtt(_subscriptionTopic, gm);
@@ -224,6 +229,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private async Task Lock()
     {
+        using var _ = _logger.LogMethodScope();
+
         await _semaphoreLock.WaitAsync();
 
         if (_db != null)
@@ -236,6 +243,8 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private void Unlock()
     {
+        using var _ = _logger.LogMethodScope();
+        
         _semaphoreLock.Release();
     }
 }

@@ -1,17 +1,17 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
-using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 
-namespace Gudel.GLogWare.BridgeManager;
+namespace Gudel.GLogWare.Services.BridgeManager;
 
 public partial class BridgeManager
 {
     private Resource? _resource;
     private JobTypeIdentifiers _lastJobType;
-    private GLogWareDbContext _db = null!;
     
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         _resource = _db.Resources
             .Where(x => x.Name == OP)
             .FirstOrDefault();
@@ -52,6 +52,8 @@ public partial class BridgeManager
 
     private async Task<bool> TryToStartNewOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!await VerifyGeneralConditionsToStartOrder()) return false;
 
         _logger.LogInformation($"_lastJobType=[{_lastJobType.ToString()}]");
@@ -77,12 +79,13 @@ public partial class BridgeManager
                 break;
         }
 
-        _logger.LogInformation($"No pending jobs available !");
         return false;
     }
 
     private async Task<bool> VerifyConditionsToStartInputOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!_resource!.InfeedEnabled)
         {
             _logger.LogInformation(
@@ -94,6 +97,8 @@ public partial class BridgeManager
 
     private async Task<bool> TryToStartInputOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!await VerifyConditionsToStartInputOrder()) return false;
 
         _lastJobType = JobTypeIdentifiers.INFEED;
@@ -102,6 +107,8 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!_resource!.OutfeedEnabled)
         {
             _logger.LogInformation(
@@ -113,6 +120,8 @@ public partial class BridgeManager
 
     private async Task<bool> TryToStartOutputOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!await VerifyConditionsToStartOutputOrder()) return false;
 
         _lastJobType = JobTypeIdentifiers.OUTFEED;
@@ -121,6 +130,8 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!_resource!.RelocationEnabled)
         {
             _logger.LogInformation(
@@ -132,6 +143,8 @@ public partial class BridgeManager
 
     private async Task<bool> TryToStartRelocationOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!await VerifyConditionsToStartRelocationOrder()) return false;
 
         _lastJobType = JobTypeIdentifiers.RELOCATION;
@@ -140,11 +153,15 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartPalletizingOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         return false;
     }
 
     private async Task<bool> TryToStartPalletizingOrder()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (!await VerifyConditionsToStartPalletizingOrder()) return false;
 
         _lastJobType = JobTypeIdentifiers.PALLETIZING;
@@ -153,6 +170,8 @@ public partial class BridgeManager
 
     private async Task Process_STAT(STATBridge stat)
     {
+        using var _ = _logger.LogMethodScope();
+
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
         _logger.LogInformation($"stat=[\r\n{json}\r\n]");
         
@@ -178,7 +197,7 @@ public partial class BridgeManager
 
     private async Task Process_COMP(COMP comp)
     {
-        _db = _dbContextFactory.CreateDbContext();
+        using var _ = _logger.LogMethodScope();
 
         string json = GLogWareMessage.Serialize<COMP>(comp);
         _logger.LogInformation($"comp=[\r\n{json}\r\n]");

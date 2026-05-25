@@ -7,6 +7,8 @@ $pathRepository = "repository"
 $pathSolution = ".."
 $images = @(
     [tuple]::Create("demoservice", "$pathBackend\DemoService"), 
+    [tuple]::Create("jobmanager", "$pathBackend\JobManager"), 
+    [tuple]::Create("reserve", "$pathBackend\Reserve"), 
     [tuple]::Create("bridgemanager", "$pathBackend\BridgeManager"), 
     [tuple]::Create("bridgesimulator", "$pathBackend\BridgeSimulator"), 
     [tuple]::Create("simulatorwebapp", "$pathFrontend\SimulatorWebApp"), 

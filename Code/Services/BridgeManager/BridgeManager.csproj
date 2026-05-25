@@ -7,8 +7,8 @@
     <UserSecretsId>dotnet-BridgeManager-39a31397-f3ee-4f93-903c-5a174aac6e4d</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
-    <AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>Gudel.GLogWare.Services.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Gudel.GLogWare.Services.$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

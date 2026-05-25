@@ -1,7 +1,7 @@
 ﻿using Gudel.GLogWare.Shared;
 using System.Timers;
 
-namespace Gudel.GLogWare.BridgeSimulator;
+namespace Gudel.GLogWare.Services.BridgeSimulator;
 
 public partial class BridgeSimulator
 {
@@ -10,8 +10,10 @@ public partial class BridgeSimulator
     private ORDS? _currentORDS = null;
     private System.Timers.Timer _orderExecutionTimer = null!;
 
-    private async Task InitSimulation()
+    private void InitSimulation()
     {
+        using var _ = _logger.LogMethodScope();
+
         _bridgeConfiguration = new BridgeConfiguration()
         {
             DelaySendCOMP = 1000
@@ -31,12 +33,16 @@ public partial class BridgeSimulator
 
     private void SetBridgeConfiguration(BridgeConfiguration bc)
     {
+        using var _ = _logger.LogMethodScope();
+
         _bridgeConfiguration = bc;
         _logger.LogInformation($"DelaySendCOMP=[{_bridgeConfiguration.DelaySendCOMP}]");
     }
 
     private void ProcessPlcMessage(PlcMessage pm)
     {
+        using var _ = _logger.LogMethodScope();
+
         switch (pm.Identifier)
         {
             case PlcMessageIdentifiers.STAT:
@@ -77,6 +83,8 @@ public partial class BridgeSimulator
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
+
         if (_currentORDS == null) return;
 
         _orderExecutionTimer.Stop();
@@ -86,6 +94,8 @@ public partial class BridgeSimulator
 
     private async Task SendCurrentSTAT()
     {
+        using var _ = _logger.LogMethodScope();
+
         if (_currentSTAT == null) return;
 
         PlcMessage pm = new PlcMessage();
@@ -100,6 +110,8 @@ public partial class BridgeSimulator
 
     private async Task SendCOMP(string jobId, string feedbackCode)
     {
+        using var _ = _logger.LogMethodScope();
+
         COMP comp = new COMP();
         comp.Jobid = jobId;
         comp.FeedbackCode = feedbackCode;

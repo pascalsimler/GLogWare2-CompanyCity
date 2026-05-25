@@ -47,6 +47,9 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     #region Public methods
     public void LoadConfiguration(string path)
     {
+        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation($"path=[{path}]");
+
         _op = path.Substring(path.LastIndexOf(':') + 1);
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
         if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
@@ -60,6 +63,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        using var _1 = _logger.LogMethodScope();
+
         CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _ = TcpAcceptLoopAsync(cts.Token);
 
@@ -68,6 +73,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
     public async Task SendAsync(PlcMessage plcMessage)
     {
+        using var _ = _logger.LogMethodScope();
+
         LegacyPlcTelegram t = new LegacyPlcTelegram();
         t.Identifier = plcMessage.Identifier.ToString();
         t.Sender = plcMessage.Sender;
@@ -95,6 +102,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     #region Private methods
     private async Task TcpAcceptLoopAsync(CancellationToken token)
     {
+        using var _ = _logger.LogMethodScope();
+
         TcpListener listener = new TcpListener(IPAddress.Any, _port);
         listener.Start();
         _logger.LogInformation($"Listening on port {_port} ...");
@@ -158,6 +167,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         int offset = 0;
         LegacyPlcTelegram t = new LegacyPlcTelegram();
 
+        using var _ = _logger.LogMethodScope();
+
         try
         {
             while (true)
@@ -193,6 +204,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
     private async Task ProcessTelegramAsync(LegacyPlcTelegram t)
     {
+        using var _ = _logger.LogMethodScope();
+
         string logMsg = string.Empty;
 
         if (!ValidateTelegram(t))
@@ -255,6 +268,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     {
         string information = string.Empty;
         byte b;
+        
+        using var _ = _logger.LogMethodScope();
 
         t.Parse();
         //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
@@ -338,6 +353,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
     private async Task SendToGLogWareAsync(LegacyPlcTelegram t, bool isNew = false)
     {
+        using var _ = _logger.LogMethodScope();
+
         try
         {
             if (isNew)
@@ -389,6 +406,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
     private async void OnWatchdogRetryAsync(object source, ElapsedEventArgs e)
     {
+        using var _ = _logger.LogMethodScope();
+
         await SendToGLogWareAsync(_lastSentTelegram, false);
     }
     #endregion

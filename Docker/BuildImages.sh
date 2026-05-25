@@ -11,6 +11,8 @@ pathSolution=".."
 
 images=(
   "demoservice:$pathBackend/DemoService"
+  "jobmanager:$pathBackend/JobManager"
+  "reserve:$pathBackend/Reserve"
   "bridgemanager:$pathBackend/BridgeManager"
   "bridgesimulator:$pathBackend/BridgeSimulator"
   "simulatorwebapp:$pathFrontend/SimulatorWebApp"

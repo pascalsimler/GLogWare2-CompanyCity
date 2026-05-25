@@ -1,17 +1,8 @@
 using Gudel.GLogWare.EFCore.Infrastructure;
-using Gudel.GLogWare.LegacyPlcDriver;
-using Gudel.GLogWare.Services.BridgeSimulator;
+using Gudel.GLogWare.Services.JobManager;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-BridgeSimulator.OP = Environment.GetEnvironmentVariable("OP");
-if (BridgeSimulator.OP == null)
-{
-    Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
-    return;
-}
-Console.WriteLine($"OP=[{BridgeSimulator.OP}]");
-BridgeSimulator.ServiceName = $"BridgeSimulator-{BridgeSimulator.OP}";
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
@@ -32,13 +23,14 @@ if (enableSystemLogging == 0)
 {
     loggerConfig
         .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning);
+        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+    ;
 }
 
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, BridgeSimulator.ServiceName),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "JobManager"),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -46,7 +38,6 @@ var logger = loggerConfig
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-logger.Information($"ServiceName=[{BridgeSimulator.ServiceName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
@@ -55,13 +46,12 @@ logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
-builder.Services.AddSingleton<IPlcDriver, LegacyPlcSimulatorDriver>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
-builder.Services.AddHostedService<BridgeSimulator>();
+builder.Services.AddHostedService<JobManager>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeSimulator-{BridgeSimulator.OP}";
+    options.ServiceName = $"{trigram}-JobManager";
 });
 
 var host = builder.Build();

@@ -3,7 +3,6 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-Worker.ServiceName = "DemoService";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
 
@@ -30,7 +29,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, Worker.ServiceName),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "DemoService"),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -43,10 +42,16 @@ string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString(
 logger.Information($"databaseProvider=[{databaseProvider}]");
 string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
+string trigram = builder.Configuration[$"Project:Trigram"]!;
+logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddGLogWareDbContextFactory(connectionString);
-builder.Services.AddSingleton<DemoService>();
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<DemoService>();
+
+builder.Services.AddWindowsService(options =>
+{
+    options.ServiceName = $"{trigram}-DemoService";
+});
 
 var host = builder.Build();
 host.Run();

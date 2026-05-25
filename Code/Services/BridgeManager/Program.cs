@@ -1,6 +1,6 @@
-using Gudel.GLogWare.BridgeManager;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.LegacyPlcDriver;
+using Gudel.GLogWare.Services.BridgeManager;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
@@ -48,7 +48,6 @@ builder.Logging.AddSerilog(logger);
 
 logger.Information($"BridgeManager.OP=[{BridgeManager.OP}]");
 logger.Information($"BridgeManager.ServiceName=[{BridgeManager.ServiceName}]");
-logger.Information($"BridgeManager.ElementName=[{BridgeManager.ElementName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
