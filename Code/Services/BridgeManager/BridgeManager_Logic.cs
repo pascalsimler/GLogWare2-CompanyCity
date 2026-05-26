@@ -10,140 +10,227 @@ public partial class BridgeManager
     
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        _resource = _db.Resources
-            .Where(x => x.Name == OP)
-            .FirstOrDefault();
-        if (_resource == null)
+        bool rValue = true;
+        while (rValue)
         {
-            _logger.LogError(
-                $"Resouce.Name=[{OP}] does not exist !");
-            return false;
+            _resource = _db.Resources
+                .Where(x => x.Name == OP)
+                .FirstOrDefault();
+            if (_resource == null)
+            {
+                _logger.LogError(
+                    $"Resouce.Name=[{OP}] does not exist !");
+                rValue = false;
+                break;
+            }
+
+            if (!_resource.IsOnline)
+            {
+                _logger.LogInformation(
+                    $"Communication with PLC of the bridge is currently offline !");
+                rValue = false;
+                break;
+            }
+
+            if (_resource.Mode != nameof(ResourceModeIdentifiers.AUTOMATIC))
+            {
+                _logger.LogInformation(
+                    $"Bridge is in mode=[{_resource.Mode}]!=[{nameof(ResourceModeIdentifiers.AUTOMATIC)}]");
+                rValue = false;
+                break;
+            }
+
+            var j = _db.Jobs
+                .Where(j =>
+                    j.Bridge == OP &&
+                    j.Status.StartsWith("GANTRY")
+                 )
+                .FirstOrDefault();
+            if (j != null)
+            {
+                rValue = false;
+                break;
+            }
+
+            break;
         }
 
-        if (!_resource.IsOnline)
-        {
-            _logger.LogInformation(
-                $"Communication with PLC of the bridge is currently offline !");
-            return false;
-        }
-
-        if (_resource.Mode != nameof(ResourceModeIdentifiers.AUTOMATIC))
-        {
-            _logger.LogInformation(
-                $"Bridge is in mode=[{_resource.Mode}]!=[{nameof(ResourceModeIdentifiers.AUTOMATIC)}]");
-            return false;
-        }
-
-        var j = _db.Jobs
-            .Where(j => 
-                j.Bridge == OP &&
-                j.Status.StartsWith("GANTRY")
-             )
-            .FirstOrDefault();
-        if (j != null)
-        {
-            return false;
-        }
-
-        return true;
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> TryToStartNewOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!await VerifyGeneralConditionsToStartOrder()) return false;
-
-        _logger.LogInformation($"_lastJobType=[{_lastJobType.ToString()}]");
-        switch (_lastJobType)
+        bool rValue = true;
+        while (rValue)
         {
-            case JobTypeIdentifiers.INFEED:
-                if (await TryToStartOutputOrder()) return true;
-                if (await TryToStartRelocationOrder()) return true;
-                if (await TryToStartInputOrder()) return true;
+            if (!await VerifyGeneralConditionsToStartOrder())
+            {
+                rValue = false;
                 break;
-            case JobTypeIdentifiers.OUTFEED:
-                if (await TryToStartInputOrder()) return true;
-                if (await TryToStartRelocationOrder()) return true;
-                if (await TryToStartOutputOrder()) return true;
-                break;
-            case JobTypeIdentifiers.RELOCATION:
-                if (await TryToStartInputOrder()) return true;
-                if (await TryToStartOutputOrder()) return true;
-                if (await TryToStartRelocationOrder()) return true;
-                break;
-            case JobTypeIdentifiers.PALLETIZING:
-                if (await TryToStartPalletizingOrder()) return true;
-                break;
+            }
+
+            _logger.LogInformation($"_lastJobType=[{_lastJobType.ToString()}]");
+            switch (_lastJobType)
+            {
+                case JobTypeIdentifiers.INFEED:
+                    if (await TryToStartOutputOrder()) break;
+                    if (await TryToStartRelocationOrder()) break;
+                    if (await TryToStartInputOrder()) break;
+                    rValue = false;
+                    break;
+                case JobTypeIdentifiers.OUTFEED:
+                    if (await TryToStartInputOrder()) break;
+                    if (await TryToStartRelocationOrder()) break;
+                    if (await TryToStartOutputOrder()) break;
+                    rValue = false;
+                    break;
+                case JobTypeIdentifiers.RELOCATION:
+                    if (await TryToStartInputOrder()) break;
+                    if (await TryToStartOutputOrder()) break;
+                    if (await TryToStartRelocationOrder()) break;
+                    rValue = false;
+                    break;
+                case JobTypeIdentifiers.PALLETIZING:
+                    if (await TryToStartPalletizingOrder()) break;
+                    rValue = false;
+                    break;
+                default:
+                    rValue = false;
+                    break;
+            }
+
+            break;
         }
 
-        return false;
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> VerifyConditionsToStartInputOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!_resource!.InfeedEnabled)
+        bool rValue = true;
+        while (rValue)
         {
-            _logger.LogInformation(
-                $"Infeeds are not enabled for that bridge !");
-            return false;
+            if (!_resource!.InfeedEnabled)
+            {
+                _logger.LogInformation(
+                    $"Infeeds are not enabled for that bridge !");
+                rValue = false;
+                break;
+            }
+
+            break;
         }
-        return true;
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> TryToStartInputOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!await VerifyConditionsToStartInputOrder()) return false;
+        bool rValue = true;
+        while (rValue)
+        {
+            if (!await VerifyConditionsToStartInputOrder())
+            {
+                rValue = false;
+                break;
+            }
 
-        _lastJobType = JobTypeIdentifiers.INFEED;
-        return true;
+            _lastJobType = JobTypeIdentifiers.INFEED;
+
+            break;
+        }
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!_resource!.OutfeedEnabled)
+        bool rValue = true;
+        while (rValue)
         {
-            _logger.LogInformation(
-                $"Outfeeds are not enabled for that bridge !");
-            return false;
+            if (!_resource!.OutfeedEnabled)
+            {
+                _logger.LogInformation(
+                    $"Outfeeds are not enabled for that bridge !");
+                rValue = false;
+                break;
+            }
+
+            break;
         }
-        return true;
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> TryToStartOutputOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!await VerifyConditionsToStartOutputOrder()) return false;
+        bool rValue = true;
+        while (rValue)
+        {
+            if (!await VerifyConditionsToStartOutputOrder())
+            {
+                rValue = false;
+                break;
+            }
 
-        _lastJobType = JobTypeIdentifiers.OUTFEED;
-        return true;
+            _lastJobType = JobTypeIdentifiers.OUTFEED;
+
+            break;
+        }
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (!_resource!.RelocationEnabled)
+        bool rValue = true;
+        while (rValue)
         {
-            _logger.LogInformation(
-                $"Relocations are not enabled for that bridge !");
-            return false;
+            if (!_resource!.RelocationEnabled)
+            {
+                _logger.LogInformation(
+                    $"Relocations are not enabled for that bridge !");
+                rValue = false;
+                break;
+            }
+
+            break;
         }
-        return true;
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> TryToStartRelocationOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         if (!await VerifyConditionsToStartRelocationOrder()) return false;
 
@@ -153,14 +240,22 @@ public partial class BridgeManager
 
     private async Task<bool> VerifyConditionsToStartPalletizingOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        return false;
+        bool rValue = true;
+        while (rValue)
+        {
+            break;
+        }
+
+        _logger.LogInformation($"rValue=[{rValue}]");
+        _logger.LogInformation(LogMessages.LeaveMethod);
+        return rValue;
     }
 
     private async Task<bool> TryToStartPalletizingOrder()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         if (!await VerifyConditionsToStartPalletizingOrder()) return false;
 
@@ -170,7 +265,7 @@ public partial class BridgeManager
 
     private async Task Process_STAT(STATBridge stat)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
         _logger.LogInformation($"stat=[\r\n{json}\r\n]");
@@ -193,11 +288,13 @@ public partial class BridgeManager
         r.Occupied = stat.GripperOccupied;
         r.ErrorFlag = stat.ErrorFlag;
         await _db.SaveChangesAsync();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task Process_COMP(COMP comp)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         string json = GLogWareMessage.Serialize<COMP>(comp);
         _logger.LogInformation($"comp=[\r\n{json}\r\n]");
@@ -217,43 +314,20 @@ public partial class BridgeManager
             count++;
         }
 
-        if (count != 1)
+        if (count == 1)
+        {
+            var job = q.FirstOrDefault();
+            if (comp.FeedbackCode == "0000")
+            {
+                job!.Status = JobStatusIdentifiers.BRIDGE_LOAD_END.ToString();
+            }
+            await _db.SaveChangesAsync();
+        }
+        else
         {
             _logger.LogError($"Found [{count}] jobs where an unique one is expected !");
-            return;
         }
 
-        var job = q.FirstOrDefault();
-        if (comp.FeedbackCode == "0000")
-        {
-            job!.Status = JobStatusIdentifiers.BRIDGE_LOAD_END.ToString();
-        }
-
-        await _db.SaveChangesAsync();
-  
-/*
-    bewRT:= getBewRT_BasedOnJobId(sJobId);
-
-        IF iFeedbackCode = '0000' THEN
-
-            bewRT.SPS_FEHLER := NULL;
-        bewRT.STATUS_BEW := pack_Global.BEWSTATUS__GANTRY_LOAD_END;
-        ELSE
-
-            bewRT.SPS_FEHLER := iFeedbackCode;
-        END IF;
-
-        SELECT DECODE(iFeedbackCode,
-
-            '0000', '',
-			'Unknown FeedbackCode=[' || iFeedbackCode || ']'
-		)
-		INTO sInfo
-
-        FROM DUAL;
-
-        bewRT.INFO := sInfo;
-        pack_bew.UpdateBew(bewRT);
-*/
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 }

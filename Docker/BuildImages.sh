@@ -13,6 +13,7 @@ images=(
   "demoservice:$pathBackend/DemoService"
   "jobmanager:$pathBackend/JobManager"
   "reserve:$pathBackend/Reserve"
+  "garbage:$pathBackend/Garbage"
   "bridgemanager:$pathBackend/BridgeManager"
   "bridgesimulator:$pathBackend/BridgeSimulator"
   "simulatorwebapp:$pathFrontend/SimulatorWebApp"

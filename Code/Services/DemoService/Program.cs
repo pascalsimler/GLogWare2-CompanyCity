@@ -16,6 +16,7 @@ string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod
 int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .Enrich.FromLogContext()
     .Enrich.With(new CustomLoggerEnricher());
 
 if (enableSystemLogging == 0)
@@ -40,7 +41,7 @@ builder.Logging.AddSerilog(logger);
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
-string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
+string connectionString = builder.Configuration[$"Database:ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");

@@ -1,16 +1,8 @@
 using Gudel.GLogWare.EFCore.Infrastructure;
-using Gudel.GLogWare.LegacyPlcDriver;
-using Gudel.GLogWare.Services.BridgeManager;
+using Gudel.GLogWare.Services.Garbage;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
-if (BridgeManager.OP == null)
-{
-    Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
-    return;
-}
-Console.WriteLine($"OP=[{BridgeManager.OP}]");
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
@@ -25,7 +17,6 @@ string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod
 int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .Enrich.FromLogContext()
     .Enrich.With(new CustomLoggerEnricher());
 
 if (enableSystemLogging == 0)
@@ -39,7 +30,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, BridgeManager.ServiceName!),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "Garbage"),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -47,8 +38,6 @@ var logger = loggerConfig
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-logger.Information($"BridgeManager.OP=[{BridgeManager.OP}]");
-logger.Information($"BridgeManager.ServiceName=[{BridgeManager.ServiceName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
 string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
@@ -58,12 +47,11 @@ string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddGLogWareDbContextFactory(connectionString);
-builder.Services.AddSingleton<IPlcDriver, LegacyPlcDriver>();
-builder.Services.AddHostedService<BridgeManager>();
+builder.Services.AddHostedService<Garbage>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeManager-{BridgeManager.OP}";
+    options.ServiceName = $"{trigram}-Garbage";
 });
 
 var host = builder.Build();

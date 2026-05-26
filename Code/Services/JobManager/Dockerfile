@@ -26,4 +26,4 @@ RUN dotnet publish "./JobManager.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "JobManager.dll"]
+ENTRYPOINT ["dotnet", "Gudel.GLogWare.Services.JobManager.dll"]

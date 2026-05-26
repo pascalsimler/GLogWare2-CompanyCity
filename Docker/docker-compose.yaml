@@ -24,6 +24,30 @@ services:
     volumes:
       - *config
       - *logfiles
+  jobmanager:
+    image: jobmanager:latest
+    container_name: JobManager
+    environment:
+      <<: *tz-env
+    volumes:
+      - *config
+      - *logfiles
+  reserve:
+    image: reserve:latest
+    container_name: Reserve
+    environment:
+      <<: *tz-env
+    volumes:
+      - *config
+      - *logfiles
+  garbage:
+    image: garbage:latest
+    container_name: Garbage
+    environment:
+      <<: *tz-env
+    volumes:
+      - *config
+      - *logfiles
   glogwarewebapp:
      image: glogwarewebapp:latest
      container_name: GLogWareWebApp

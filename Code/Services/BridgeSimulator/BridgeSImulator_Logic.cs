@@ -12,7 +12,7 @@ public partial class BridgeSimulator
 
     private void InitSimulation()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _bridgeConfiguration = new BridgeConfiguration()
         {
@@ -33,7 +33,7 @@ public partial class BridgeSimulator
 
     private void SetBridgeConfiguration(BridgeConfiguration bc)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _bridgeConfiguration = bc;
         _logger.LogInformation($"DelaySendCOMP=[{_bridgeConfiguration.DelaySendCOMP}]");
@@ -41,7 +41,7 @@ public partial class BridgeSimulator
 
     private void ProcessPlcMessage(PlcMessage pm)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         switch (pm.Identifier)
         {
@@ -83,7 +83,7 @@ public partial class BridgeSimulator
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         if (_currentORDS == null) return;
 
@@ -94,7 +94,7 @@ public partial class BridgeSimulator
 
     private async Task SendCurrentSTAT()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         if (_currentSTAT == null) return;
 
@@ -110,7 +110,7 @@ public partial class BridgeSimulator
 
     private async Task SendCOMP(string jobId, string feedbackCode)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         COMP comp = new COMP();
         comp.Jobid = jobId;

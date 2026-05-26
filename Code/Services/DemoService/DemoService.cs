@@ -48,7 +48,7 @@ public partial class DemoService : IHostedService, IAsyncDisposable
 
     private void LoadConfiguration()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
@@ -60,11 +60,13 @@ public partial class DemoService : IHostedService, IAsyncDisposable
         _logger.LogInformation($"_mqttBrokerPort=[{_mqttBrokerPort}]");
         _logger.LogInformation($"_mqttBrokerRootTopic=[{_mqttBrokerRootTopic}]");
         _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task StartMqtt()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
 
@@ -92,6 +94,9 @@ public partial class DemoService : IHostedService, IAsyncDisposable
             await Task.CompletedTask;
         };
 
+        _subscriptionTopic = $"{_mqttBrokerRootTopic}/DemoService/Incoming";
+        _logger.LogInformation($"subscriptionTopic=[{_subscriptionTopic}]");
+
         MqttTopicFilter[] mqttSubscriptionTopics = new[] {
             new MqttTopicFilterBuilder()
                 .WithTopic(_subscriptionTopic)
@@ -102,15 +107,12 @@ public partial class DemoService : IHostedService, IAsyncDisposable
         await _mqttClient.SubscribeAsync(mqttSubscriptionTopics);
         await _mqttClient.StartAsync(mqttOptions);
 
-        _watchdogWakeup = new System.Timers.Timer(_delayWakeup);
-        _watchdogWakeup.Elapsed += OnWatchdogWakeup!;
-        _watchdogWakeup.AutoReset = true;
-        _watchdogWakeup.Start();
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await Lock();
         try
@@ -131,11 +133,13 @@ public partial class DemoService : IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
         Unlock();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
         _logger.LogInformation($"topic=[{topic}]");
 
         try
@@ -154,70 +158,88 @@ public partial class DemoService : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Exception");
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        ////#region Timer
-        ////_timer = new System.Timers.Timer(2000);
-        ////_timer.Elapsed += OnTimer;
-        ////_timer.AutoReset = true;
-        ////_timer.Enabled = true;
-        ////#endregion
+        LoadConfiguration();
 
+        _semaphoreLock = new SemaphoreSlim(1);
+
+        await StartMqtt();
+
+        _watchdogWakeup = new System.Timers.Timer(_delayWakeup);
+        _watchdogWakeup.Elapsed += OnWatchdogWakeup!;
+        _watchdogWakeup.AutoReset = true;
+        _watchdogWakeup.Start();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     { 
-        using var _ = _logger.LogMethodScope();
-        
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
     private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await SendWakeUp(_subscriptionTopic);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task SendWakeUp(string topic)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         await SendGLogWareMessageToMqtt(_subscriptionTopic, gm);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task Lock()
     {
-        using var _ = _logger.LogMethodScope();
-
+        _logger.LogInformation(LogMessages.EnterMethod);
+        
+        _watchdogWakeup.Stop();
         await _semaphoreLock.WaitAsync();
-
         if (_db != null)
         {
             _db.Dispose();
             _db = null!;
         }
         _db = _dbContextFactory.CreateDbContext();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private void Unlock()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _semaphoreLock.Release();
+        _watchdogWakeup.Start();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 }

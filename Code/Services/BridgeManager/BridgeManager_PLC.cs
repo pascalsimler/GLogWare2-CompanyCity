@@ -10,14 +10,14 @@ public partial class BridgeManager
 
     private void LoadPlcConfiguration()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _plcDriver.LoadConfiguration($"GantryBridges:{OP}");
     }
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
         
         _plcDriver.DriverNotification += OnPlcDriverNotification;
         await _plcDriver.StartAsync(cancellationToken);
@@ -25,7 +25,7 @@ public partial class BridgeManager
 
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
         _logger.LogInformation($"notificationType=[{e.notificationType}]");
 
         if (e.notificationType == DriverNotificationType.TelegramReceived)
@@ -54,7 +54,7 @@ public partial class BridgeManager
 
     private async Task ProcessPlcMessage(PlcMessage pm)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await Lock();
         try

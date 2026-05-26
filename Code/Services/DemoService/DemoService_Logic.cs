@@ -1,24 +1,35 @@
-﻿namespace Gudel.GLogWare.Services.DemoService;
+﻿using Gudel.GLogWare.EFCore.Domain;
+using Gudel.GLogWare.Shared;
+
+namespace Gudel.GLogWare.Services.DemoService;
 
 public partial class DemoService
 {
+    private int _counter = 0;
+
     private async Task DoWork()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
-        //try
-        //{
-        //    string logMsg = $"topic=[{topic}], message=[{message}]";
-        //    _logger.LogInformation(logMsg);
-        //    Protocol protocol = new Protocol();
-        //    protocol.Message = logMsg;
-        //    //await _dbLoggerService.WriteProtocolAsync(protocol);
-        //    await Task.Delay(5000);
-        //    await SendToMqtt($"{topic}-Response", message);
-        //}
-        //catch (Exception ex)
-        //{
-        //    _logger.LogError(ex.Message);
-        //}
+        try
+        {
+            _counter++;
+            string logMsg = $"Counter=[{_counter}]";
+            _logger.LogInformation(logMsg);
+            Protocol protocol = new Protocol();
+            protocol.Message = logMsg;
+            _db.Protocols.Add(protocol);
+            await _db.SaveChangesAsync();
+            _logger.LogInformation("Start long procesing task");
+            await Task.Delay(5000);
+            _logger.LogInformation("Finished long processing task");
+            //await SendToMqtt($"{topic}-Response", message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+        }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 }

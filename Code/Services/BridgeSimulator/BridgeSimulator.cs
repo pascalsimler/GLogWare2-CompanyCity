@@ -40,7 +40,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var _1 = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         LoadConfiguration();
 
@@ -52,21 +52,21 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await Task.CompletedTask;
     }
 
     private void LoadConfiguration()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         LoadMqttConfiguration();
         LoadGLogWareConfiguration();
@@ -75,7 +75,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     private void LoadMqttConfiguration()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         string path = "MQTTBroker";
         _mqttBrokerIp = _configuration[$"{path}:Ip"] ?? _mqttBrokerIp;
@@ -88,7 +88,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     private async Task StartMqtt()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
 
@@ -132,7 +132,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task OnMqttMessageReceived(MqttApplicationMessageReceivedEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         try
         {
@@ -166,7 +166,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
     public async Task SendGLogWareMessageToMqtt(string topic, GLogWareMessage m)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
         _logger.LogInformation($"topic=[{topic}]");
 
         try

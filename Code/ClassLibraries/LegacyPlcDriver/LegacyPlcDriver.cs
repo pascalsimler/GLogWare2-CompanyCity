@@ -59,7 +59,7 @@ public class LegacyPlcDriver: IPlcDriver
     #region Public methods
     public void LoadConfiguration(string path)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
         _logger.LogInformation($"path=[{path}]");
 
         _op = path.Substring(path.LastIndexOf(':') + 1);
@@ -79,21 +79,24 @@ public class LegacyPlcDriver: IPlcDriver
         _logger.LogInformation($"_delayLife=[{_delayLife}]");
         _logger.LogInformation($"_validIdentifiers=[{_validIdentifiers}]");
         _logger.LogInformation($"_validSenders=[{_validSenders}]");
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var _1 = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _ = TcpConnectLoopAsync(cts.Token);
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
     public async Task SendAsync(PlcMessage plcMessage)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         LegacyPlcTelegram t = new LegacyPlcTelegram();
         t.Identifier = plcMessage.Identifier.ToString();
@@ -115,13 +118,15 @@ public class LegacyPlcDriver: IPlcDriver
                 break;
         }
         await SendToPlcAsync(t, true);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
     #endregion
 
     #region Private method
     private async Task TcpConnectLoopAsync(CancellationToken token)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         DriverNotificationEventArgs driverNotificationEventArgs = null!;
 
@@ -239,6 +244,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
         }
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
@@ -249,7 +255,7 @@ public class LegacyPlcDriver: IPlcDriver
         string information = string.Empty;
         LegacyPlcTelegram t = new LegacyPlcTelegram();
 
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         try
         {
@@ -304,12 +310,13 @@ public class LegacyPlcDriver: IPlcDriver
             await WriteLogPlcAsync(lp);
         }
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
     private async Task ProcessTelegramAsync(LegacyPlcTelegram t)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _lpReceive = new LogPlc();
         _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString();
@@ -418,13 +425,15 @@ public class LegacyPlcDriver: IPlcDriver
         {
             _logger.LogError(ex, "Error handling PLC telegram");
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private bool ValidateTelegram(LegacyPlcTelegram t)
     {
         byte b;
 
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         t.Parse();
         //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
@@ -512,14 +521,17 @@ public class LegacyPlcDriver: IPlcDriver
             }
         }
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         return true;
     }
 
     private async void OnWatchdogRetryAsync(object source, ElapsedEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         await SendToPlcAsync(_lastSentTelegram, false);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     //private async void OnWatchdogLifeAsync(object source, ElapsedEventArgs e)
@@ -535,7 +547,7 @@ public class LegacyPlcDriver: IPlcDriver
 
     private async Task SendToPlcAsync(LegacyPlcTelegram t, bool isNew = false)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         try
         {
@@ -599,6 +611,8 @@ public class LegacyPlcDriver: IPlcDriver
         {
             _logger.LogError(ex, $"Error !");
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task WriteLogPlcAsync(LogPlc logPlc)

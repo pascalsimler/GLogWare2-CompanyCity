@@ -9,14 +9,14 @@ public partial class BridgeSimulator
 
     private void LoadGLogWareConfiguration()
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _plcSimulatorDriver.LoadConfiguration($"GantryBridges:{OP}");
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
 
         _plcSimulatorDriver.DriverNotification += OnPlcDriverNotification;
         await _plcSimulatorDriver.StartAsync(cancellationToken);
@@ -24,7 +24,7 @@ public partial class BridgeSimulator
 
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        using var _ = _logger.LogMethodScope();
+        _logger.LogInformation(LogMessages.EnterMethod);
     }
 
     //private async Task SendTelegram(PlcMessage pm)
