@@ -28,6 +28,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     private LegacyPlcTelegram _lastSentTelegram = null!;
     private LegacyPlcTelegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
+    private SemaphoreSlim _semaphoreSend = null!;
     #endregion
 
     #region Event handlers
@@ -109,16 +110,21 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        TcpListener listener = new TcpListener(IPAddress.Any, _port);
-        listener.Start();
-        _logger.LogInformation($"Listening on port {_port} ...");
+        DriverNotificationEventArgs driverNotificationEventArgs = null!;
 
         _lastSentTelegram = new LegacyPlcTelegram();
         _ackTelegram = new LegacyPlcTelegram();
+
+        _semaphoreSend = new SemaphoreSlim(1);
+
         _watchdogRetry = new System.Timers.Timer(_delayRetry);
         _watchdogRetry.Elapsed += OnWatchdogRetryAsync!;
         _watchdogRetry.AutoReset = true;
-        _watchdogRetry.Enabled = false;
+        _watchdogRetry.Stop();
+
+        TcpListener listener = new TcpListener(IPAddress.Any, _port);
+        listener.Start();
+        _logger.LogInformation($"Listening on port {_port} ...");
 
         try
         {
@@ -129,6 +135,9 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     _logger.LogInformation($"Waiting for a new incoming connection request!");
                     _tcpClient = await listener.AcceptTcpClientAsync(token);
                     _logger.LogInformation($"Client connected from {_tcpClient.Client.RemoteEndPoint} !");
+                    driverNotificationEventArgs = new DriverNotificationEventArgs();
+                    driverNotificationEventArgs.notificationType = DriverNotificationType.Online;
+                    DriverNotification?.Invoke(this, driverNotificationEventArgs);
 
                     //await SendCurrentSTAT();
 
@@ -155,6 +164,9 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                 {
                     _logger.LogError(ex, $"Unexpected error !");
                 }
+                driverNotificationEventArgs = new DriverNotificationEventArgs();
+                driverNotificationEventArgs.notificationType = DriverNotificationType.Offline;
+                DriverNotification?.Invoke(this, driverNotificationEventArgs);
             }
         }
         finally
@@ -214,151 +226,186 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         _logger.LogInformation(LogMessages.EnterMethod);
 
         string logMsg = string.Empty;
+        DriverNotificationEventArgs driverNotificationEventArgs = null!;
 
-        if (!ValidateTelegram(t))
+        while (true)
         {
-            _logger.LogWarning(t.HexaDump());
-            return;
-        }
-
-        _logger.LogInformation(t.AsciiString);
-        if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
-        {
-            if (_watchdogRetry.Enabled)
+            if (!ValidateTelegram(t))
             {
-                if (t.Counter == _lastSentTelegram.Counter)
+                _logger.LogWarning(t.HexaDump());
+                break;
+            }
+
+            _logger.LogInformation(t.AsciiString);
+
+            if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
+            {
+                if (_watchdogRetry.Enabled)
                 {
-                    _watchdogRetry.Enabled = false;
+                    if (t.Counter == _lastSentTelegram.Counter)
+                    {
+                        _watchdogRetry.Stop();
+                        _semaphoreSend.Release();
+                        driverNotificationEventArgs = new DriverNotificationEventArgs();
+                        driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSentAcknowledged;
+                        DriverNotification?.Invoke(this, driverNotificationEventArgs);
+                    }
+                    else
+                    {
+                        logMsg =
+                            $"Unexpected counter in ACKN: " +
+                            $"Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]";
+                        _logger.LogError(logMsg);
+                        _logger.LogError(t.HexaDump());
+                    }
                 }
                 else
                 {
                     logMsg =
-                        $"Unexpected counter in ACKN: " +
-                        $"Is=[{t.Counter}], ShouldBe=[{_lastSentTelegram.Counter}]";
+                        $"No pending ACKN expected !";
                     _logger.LogError(logMsg);
                     _logger.LogError(t.HexaDump());
                 }
+                break;
             }
-            else
+
+            _ackTelegram.Sender = t.Receiver;
+            _ackTelegram.Receiver = t.Sender;
+            _ackTelegram.Identifier = PlcMessageIdentifiers.ACKN.ToString();
+            _ackTelegram.AckFlag = "0";
+            _ackTelegram.Counter = t.Counter;
+            _ackTelegram.Data = t.Data;
+            await SendToGLogWareAsync(_ackTelegram, false);
+
+            if (t.Counter == _lastReceivedCounter && t.Counter != "0")
             {
                 logMsg =
-                    $"No pending ACKN expected !";
+                    $"Same counter [{t.Counter}] as previous telegram. " +
+                    $"It is a retry telegram --> No processing";
                 _logger.LogError(logMsg);
                 _logger.LogError(t.HexaDump());
+                break;
             }
-            return;
+            _lastReceivedCounter = t.Counter;
+
+            PlcMessage plcMessage = new PlcMessage();
+            plcMessage.Sender = t.Sender;
+            plcMessage.Receiver = t.Receiver;
+            switch (t.Identifier)
+            {
+                case nameof(PlcMessageIdentifiers.ORDS):
+                    plcMessage.Identifier = PlcMessageIdentifiers.ORDS;
+                    ORDSStruct ordsStruct = ORDSStruct.FromData(t.Data);
+                    ORDS ords = ordsStruct.ToMessage(t.Sender);
+                    plcMessage.Data = ords;
+                    break;
+                default:
+                    plcMessage.Data = null;
+                    break;
+            }
+
+            driverNotificationEventArgs = new DriverNotificationEventArgs();
+            driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramReceived;
+            driverNotificationEventArgs.plcMessage = plcMessage;
+            DriverNotification?.Invoke(this, driverNotificationEventArgs);
+            
+            break;
         }
-
-        _ackTelegram.Sender = t.Receiver;
-        _ackTelegram.Receiver = t.Sender;
-        _ackTelegram.Identifier = PlcMessageIdentifiers.ACKN.ToString();
-        _ackTelegram.AckFlag = "0";
-        _ackTelegram.Counter = t.Counter;
-        _ackTelegram.Data = t.Data;
-        await SendToGLogWareAsync(_ackTelegram, false);
-
-        if (t.Counter == _lastReceivedCounter && t.Counter != "0")
-        {
-            logMsg =
-                $"Same counter [{t.Counter}] as previous telegram. " +
-                $"It is a retry telegram --> No processing";
-            _logger.LogError(logMsg);
-            _logger.LogError(t.HexaDump());
-            return;
-        }
-        _lastReceivedCounter = t.Counter;
-
-        //await ProcessGLogWareTelegram(t);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private bool ValidateTelegram(LegacyPlcTelegram t)
-    {
-        string information = string.Empty;
-        byte b;
-        
+    {        
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        t.Parse();
-        //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
-        //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
-        //_logger.LogInformation($"Counter=[{t.Counter}]");
-        //_logger.LogInformation($"Receiver=[{t.Receiver}]");
-        //_logger.LogInformation($"Sender=[{t.Sender}]");
-        //_logger.LogInformation($"Identifier=[{t.Identifier}]");
-        //_logger.LogInformation($"Data=[{t.Data}]");
-        //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
-
-        b = t.Bytes[0];
-        if (b != LegacyPlcTelegramConstants.STX)
+        byte b;
+        string errorText = string.Empty;
+        bool rValue = false;
+        while (true)
         {
-            information =
-                $"Telegramm has wrong start byte: " +
-                $"STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]";
-            _logger.LogError(information);
-            return false;
-        }
+            t.Parse();
+            //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
+            //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
+            //_logger.LogInformation($"Counter=[{t.Counter}]");
+            //_logger.LogInformation($"Receiver=[{t.Receiver}]");
+            //_logger.LogInformation($"Sender=[{t.Sender}]");
+            //_logger.LogInformation($"Identifier=[{t.Identifier}]");
+            //_logger.LogInformation($"Data=[{t.Data}]");
+            //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
 
-        b = t.Bytes[^1];
-        if (b != LegacyPlcTelegramConstants.ETX)
-        {
-            information =
-                $"Telegramm has wrong end byte: " +
-                $"STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]";
-            _logger.LogError(information);
-            return false;
-        }
-
-        if (!"0|1".Split('|').Contains(t.AckFlag))
-        {
-            information =
-                $"Telegram has invalid AckFlag=[{t.AckFlag}]. " +
-                $"Expected values are: [0]=Acknowledge not required, [1]=Acknowledge required";
-            _logger.LogError(information);
-            return false;
-        }
-
-        if (!char.IsDigit(t.Counter[0]))
-        {
-            information =
-                $"Telegram has invalid Counter=[{t.Counter}]";
-            _logger.LogError(information);
-            return false;
-        }
-
-        if (t.Receiver != _op)
-        {
-            information =
-                $"Telegram has an invalid Receiver. " +
-                $"(Is=[{t.Receiver}]) != (Should=[{_op}]";
-            _logger.LogError(information);
-            return false;
-        }
-
-        if (t.Sender != LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER)
-        {
-            information =
-                $"Telegram has an invalid Sender. " +
-                $"(Is=[{t.Sender}]) != (Should=[{LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER}])";
-            _logger.LogError(information);
-            return false;
-        }
-
-        if (_validIdentifiers != string.Empty)
-        {
-            if (!_validIdentifiers.Split('|').Contains(t.Identifier))
+            b = t.Bytes[0];
+            if (b != LegacyPlcTelegramConstants.STX)
             {
-                information =
-                    $"Telegram has an invalid Identifier. " +
-                    $"(Is=[{t.Identifier}]) != (Should=[{_validIdentifiers}])";
-                _logger.LogError(information);
-                return false;
+                errorText =
+                    $"Telegramm has wrong start byte: " +
+                    $"STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]";
+                break; ;
             }
+
+            b = t.Bytes[^1];
+            if (b != LegacyPlcTelegramConstants.ETX)
+            {
+                errorText =
+                    $"Telegramm has wrong end byte: " +
+                    $"STX != [Hexa:0x{b.ToString("X2")} - Decimal:{b} - ASCII:{((char)b).ToString()}]";
+                break;
+            }
+
+            if (!"0|1".Split('|').Contains(t.AckFlag))
+            {
+                errorText =
+                    $"Telegram has invalid AckFlag=[{t.AckFlag}]. " +
+                    $"Expected values are: [0]=Acknowledge not required, [1]=Acknowledge required";
+                break;
+            }
+
+            if (!char.IsDigit(t.Counter[0]))
+            {
+                errorText =
+                    $"Telegram has invalid Counter=[{t.Counter}]";
+                break;
+            }
+
+            if (t.Receiver != _op)
+            {
+                errorText =
+                    $"Telegram has an invalid Receiver. " +
+                    $"(Is=[{t.Receiver}]) != (Should=[{_op}]";
+                break;
+            }
+
+            if (t.Sender != LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER)
+            {
+                errorText =
+                    $"Telegram has an invalid Sender. " +
+                    $"(Is=[{t.Sender}]) != (Should=[{LegacyPlcTelegramConstants.GLOGWARE_IDENTIFIER}])";
+                break;
+            }
+
+            if (_validIdentifiers != string.Empty)
+            {
+                if (!_validIdentifiers.Split('|').Contains(t.Identifier))
+                {
+                    errorText =
+                        $"Telegram has an invalid Identifier. " +
+                        $"(Is=[{t.Identifier}]) != (Should=[{_validIdentifiers}])";
+                    break;
+                }
+            }
+
+            rValue = true;
+            break;
+        }
+        if (!rValue)
+        {
+            _logger.LogError(errorText);
         }
 
+
+        _logger.LogInformation($"rValue=[{rValue}]");
         _logger.LogInformation(LogMessages.LeaveMethod);
-        return true;
+        return rValue;
     }
 
     private async Task SendToGLogWareAsync(LegacyPlcTelegram t, bool isNew = false)
@@ -369,6 +416,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         {
             if (isNew)
             {
+                await _semaphoreSend.WaitAsync();
                 t.AckFlag = "1";
                 if (_lastSentTelegram.Counter == string.Empty)
                 {
@@ -381,9 +429,14 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     if (counter > 9) counter = 1;
                     t.Counter = $"{counter:0}";
                 }
+                t.Build();
+                _lastSentTelegram = t;
+                _watchdogRetry.Start();
             }
-
-            t.Build();
+            else if (t.Identifier == PlcMessageIdentifiers.ACKN.ToString())
+            {
+                t.Build();
+            }
 
             if (_tcpClient != null)
             {

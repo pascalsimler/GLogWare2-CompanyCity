@@ -1,0 +1,1 @@
+Get-Content BridgeManager-OP7100BR-20260527.log -Wait | Select-String -CaseSensitive -pattern ([char]0x03)

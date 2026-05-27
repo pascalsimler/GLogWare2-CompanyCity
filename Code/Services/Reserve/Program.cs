@@ -3,7 +3,7 @@ using Gudel.GLogWare.Services.Reserve;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-
+Reserve.ServiceName = "Reserve";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
 

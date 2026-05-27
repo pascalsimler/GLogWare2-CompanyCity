@@ -5,15 +5,17 @@ namespace Gudel.GLogWare.Services.BridgeManager;
 
 public partial class BridgeManager
 {
+    #region Private members
     private Resource? _resource;
     private JobTypeIdentifiers _lastJobType;
-    
+    #endregion
+
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        bool rValue = true;
-        while (rValue)
+        bool rValue = false;
+        while (true)
         {
             _resource = _db.Resources
                 .Where(x => x.Name == OP)
@@ -22,7 +24,6 @@ public partial class BridgeManager
             {
                 _logger.LogError(
                     $"Resouce.Name=[{OP}] does not exist !");
-                rValue = false;
                 break;
             }
 
@@ -30,7 +31,6 @@ public partial class BridgeManager
             {
                 _logger.LogInformation(
                     $"Communication with PLC of the bridge is currently offline !");
-                rValue = false;
                 break;
             }
 
@@ -38,7 +38,6 @@ public partial class BridgeManager
             {
                 _logger.LogInformation(
                     $"Bridge is in mode=[{_resource.Mode}]!=[{nameof(ResourceModeIdentifiers.AUTOMATIC)}]");
-                rValue = false;
                 break;
             }
 
@@ -50,10 +49,10 @@ public partial class BridgeManager
                 .FirstOrDefault();
             if (j != null)
             {
-                rValue = false;
                 break;
             }
 
+            rValue = true;
             break;
         }
 
@@ -67,7 +66,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!await VerifyGeneralConditionsToStartOrder())
             {
@@ -118,7 +117,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!_resource!.InfeedEnabled)
             {
@@ -141,7 +140,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!await VerifyConditionsToStartInputOrder())
             {
@@ -164,7 +163,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!_resource!.OutfeedEnabled)
             {
@@ -187,7 +186,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!await VerifyConditionsToStartOutputOrder())
             {
@@ -210,7 +209,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             if (!_resource!.RelocationEnabled)
             {
@@ -243,7 +242,7 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.EnterMethod);
 
         bool rValue = true;
-        while (rValue)
+        while (true)
         {
             break;
         }

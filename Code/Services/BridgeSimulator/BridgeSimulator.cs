@@ -1,4 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Shared;
+using Microsoft.EntityFrameworkCore;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
@@ -11,31 +13,39 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 {
     #region Public members
     public static string? OP = string.Empty;
-    public static string ServiceName = string.Empty;
+    public static string ServiceName => $"BridgeSimulator-{OP}";
     #endregion
 
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IPlcDriver _plcSimulatorDriver;
+    private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
+    private GLogWareDbContext _db = null!;
     #endregion
 
-    #region Private members
+    #region Mqtt parameters
     private string _mqttBrokerIp { get; set; } = "127.0.0.1";
     private int _mqttBrokerPort { get; set; } = 1883;
     private string _mqttBrokerRootTopic { get; set; } = string.Empty;
     private string _subscriptionTopic { get; set; } = string.Empty;
-    private IManagedMqttClient? _mqttClient = null;
     #endregion
 
+    #region Private members
+    private IManagedMqttClient? _mqttClient = null;
+    private SemaphoreSlim _semaphoreLock = null!;
+    #endregion
+   
     public BridgeSimulator(
         ILogger<BridgeSimulator> logger,
         IConfiguration configuration,
-        IPlcDriver plcSimulatorDriver)
+        IPlcDriver plcSimulatorDriver,
+       IDbContextFactory<GLogWareDbContext> dbContextFactory)
     {
         _logger = logger;
         _configuration = configuration;
         _plcSimulatorDriver = plcSimulatorDriver;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -146,6 +156,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
                     break;
                 case GLogWareMessageIdentifiers.ToGLogWare:
                     PlcMessage pm = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;
+                    await ProcessPlcMessage(pm);
                     await _plcSimulatorDriver.SendAsync(pm);
                     break;
                 case GLogWareMessageIdentifiers.FromGLogWare:
@@ -188,4 +199,29 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
         }
 
     }
+
+    private async Task Lock()
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        await _semaphoreLock.WaitAsync();
+        if (_db != null)
+        {
+            _db.Dispose();
+            _db = null!;
+        }
+        _db = _dbContextFactory.CreateDbContext();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
+    private void Unlock()
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        _semaphoreLock.Release();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
 }

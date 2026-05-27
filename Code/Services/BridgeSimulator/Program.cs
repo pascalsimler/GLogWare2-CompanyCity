@@ -10,8 +10,6 @@ if (BridgeSimulator.OP == null)
     Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
     return;
 }
-Console.WriteLine($"OP=[{BridgeSimulator.OP}]");
-BridgeSimulator.ServiceName = $"BridgeSimulator-{BridgeSimulator.OP}";
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");

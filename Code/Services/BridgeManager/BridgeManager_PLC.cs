@@ -31,25 +31,28 @@ public partial class BridgeManager
         if (e.notificationType == DriverNotificationType.TelegramReceived)
         {
             await ProcessPlcMessage(e.plcMessage);
-            return;
         }
-        
-        _driverState = e.notificationType;
-        switch (_driverState)
+        else
         {
-            case DriverNotificationType.Online:
-                _logger.LogInformation($"PLC is now ONLINE");
-                break;
-            case DriverNotificationType.Offline:
-                _logger.LogInformation($"PLC is now OFFLINE");
-                break;
-            case DriverNotificationType.TelegramSent:
-                _logger.LogInformation($"PLC has a telegram to send");
-                break;
-            case DriverNotificationType.TelegramSentAcknowledged:
-                _logger.LogInformation($"PLC acknowledged the sent telegram");
-                break;
+            _driverState = e.notificationType;
+            switch (_driverState)
+            {
+                case DriverNotificationType.Online:
+                    _logger.LogInformation($"PLC is now ONLINE");
+                    break;
+                case DriverNotificationType.Offline:
+                    _logger.LogInformation($"PLC is now OFFLINE");
+                    break;
+                case DriverNotificationType.TelegramSent:
+                    _logger.LogInformation($"PLC has a telegram to send");
+                    break;
+                case DriverNotificationType.TelegramSentAcknowledged:
+                    _logger.LogInformation($"PLC acknowledged the sent telegram");
+                    break;
+            }
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task ProcessPlcMessage(PlcMessage pm)

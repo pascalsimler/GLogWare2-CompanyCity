@@ -3,7 +3,7 @@ using Gudel.GLogWare.Services.JobManager;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-
+JobManager.ServiceName = "JobManager";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
 

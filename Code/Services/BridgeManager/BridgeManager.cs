@@ -176,7 +176,13 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
             switch (m.Identifier)
             {
                 case GLogWareMessageIdentifiers.WakeUp:
-                    await TryToStartNewOrder();
+                    if (!await TryToStartNewOrder())
+                    {
+                        PlcMessage life = new PlcMessage();
+                        life.Identifier = PlcMessageIdentifiers.LIFE;
+                        life.Receiver = OP!;
+                        await _plcDriver.SendAsync(life);
+                    }
                     break;
                 case GLogWareMessageIdentifiers.ToPlc:
                     PlcMessage pmTo = GLogWareMessage.DeSerialize<PlcMessage>(m.Data!.ToString()!)!;

@@ -13,6 +13,10 @@ namespace Gudel.GLogWare.Services.DemoService;
 
 public partial class DemoService : IHostedService, IAsyncDisposable
 {
+    #region Public member
+    public static string ServiceName { get; set; } = string.Empty;
+    #endregion
+
     #region Injected members
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
@@ -74,7 +78,7 @@ public partial class DemoService : IHostedService, IAsyncDisposable
             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
             .WithClientOptions(new MqttClientOptionsBuilder()
                 .WithTcpServer(_mqttBrokerIp, _mqttBrokerPort)
-                .WithClientId("DemoService")
+                .WithClientId(ServiceName)
                 .WithCleanSession(false)
                 .Build())
             .Build();
@@ -94,7 +98,7 @@ public partial class DemoService : IHostedService, IAsyncDisposable
             await Task.CompletedTask;
         };
 
-        _subscriptionTopic = $"{_mqttBrokerRootTopic}/DemoService/Incoming";
+        _subscriptionTopic = $"{_mqttBrokerRootTopic}/{ServiceName}/Incoming";
         _logger.LogInformation($"subscriptionTopic=[{_subscriptionTopic}]");
 
         MqttTopicFilter[] mqttSubscriptionTopics = new[] {

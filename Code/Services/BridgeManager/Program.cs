@@ -10,7 +10,6 @@ if (BridgeManager.OP == null)
     Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
     return;
 }
-Console.WriteLine($"OP=[{BridgeManager.OP}]");
 
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");

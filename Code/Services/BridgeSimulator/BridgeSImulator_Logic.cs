@@ -29,6 +29,8 @@ public partial class BridgeSimulator
         _currentSTAT.WorkingMode = STATBridgeWorkingModes.AUTOMATIC;
         _currentSTAT.GripperOccupied = false;
         _currentSTAT.ErrorFlag = false;
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private void SetBridgeConfiguration(BridgeConfiguration bc)
@@ -37,9 +39,11 @@ public partial class BridgeSimulator
 
         _bridgeConfiguration = bc;
         _logger.LogInformation($"DelaySendCOMP=[{_bridgeConfiguration.DelaySendCOMP}]");
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
-    private void ProcessPlcMessage(PlcMessage pm)
+    private async Task ProcessPlcMessage(PlcMessage pm)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
@@ -49,47 +53,63 @@ public partial class BridgeSimulator
                 _currentSTAT = GLogWareMessage.DeSerialize<STATBridge>(pm.Data!.ToString()!)!;
                 break;
             case PlcMessageIdentifiers.COMP:
+                if (_currentORDS != null)
+                {
+                    COMP comp = GLogWareMessage.DeSerialize<COMP>(pm.Data!.ToString()!)!;
+                    if ( comp.FeedbackCode == "0000")
+                    {
+                        _currentORDS = null;
+                    }
+                }
+                break;
+            default:
                 break;
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
-    //private async Task ProcessGLogWareTelegram(LegacyPlcTelegram t)
-    //{
-    //    switch (t.Identifier)
-    //    {
-    //        case nameof(PlcMessageIdentifiers.ORDS):
-    //            ORDSStruct ordsStruct = ORDSStruct.FromData(t.Data);
-    //            if (_currentSTAT == null) break;
-    //            if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
-    //            {
-    //                await SendCOMP(ordsStruct.Jobid, "0001");
-    //                break;
-    //            }
-    //            if (_currentORDS != null)
-    //            {
-    //                await SendCOMP(ordsStruct.Jobid, "0002");
-    //                break;
-    //            }
-    //            if (_bridgeConfiguration.DelaySendCOMP > 0)
-    //            {
-    //                _currentORDS = ordsStruct.ToMessage(OP!);
-    //                _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
-    //                _orderExecutionTimer.Start();
-    //                break;
-    //            }
-    //            break;
-    //    }
-    //}
+    private async Task Process_ORDS(ORDS ords)
+    {
+        if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
+        {
+            await SendCOMP(ords.Jobid, "0001");
+        }
+        else if (_currentORDS != null)
+        {
+            await SendCOMP(ords.Jobid, "0002");
+        }
+        else
+        {
+            _currentORDS = ords;
+            if (_bridgeConfiguration.DelaySendCOMP > 0)
+            {
+                _orderExecutionTimer.Interval = _bridgeConfiguration.DelaySendCOMP;
+                _orderExecutionTimer.Start();
+            }
+        }
+    }
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (_currentORDS == null) return;
+        await CheckOrderExecution();
 
-        _orderExecutionTimer.Stop();
-        await SendCOMP(_currentORDS.Jobid, "0000");
-        _currentORDS = null;
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
+    private async Task CheckOrderExecution()
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        if (_currentORDS != null)
+        {
+            await SendCOMP(_currentORDS.Jobid, "0000");
+            _currentORDS = null;
+        }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task SendCurrentSTAT()
@@ -118,6 +138,8 @@ public partial class BridgeSimulator
 
         PlcMessage pm = new PlcMessage();
         pm.Identifier = PlcMessageIdentifiers.COMP;
+        pm.Sender = OP!;
+        pm.Receiver = "GLOGWARE";
         pm.Data = comp;
 
         GLogWareMessage m = new GLogWareMessage();

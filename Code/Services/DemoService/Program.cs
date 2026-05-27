@@ -3,6 +3,7 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
+DemoService.ServiceName = "DemoService";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
 
