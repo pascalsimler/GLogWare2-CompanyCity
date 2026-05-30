@@ -48,7 +48,13 @@ public class Place : BaseTracking, ISeedData<Place>
                     p.G = g.ToString();
                     p.XCell = x.ToString();
                     p.YCell = y.ToString();
-                    p.Bridge = (x < 36) ? "OP7100BR": "OP7200BR";
+                    p.Distance = (x-15) * (x-15) + (y-8) * (y-8);
+                    p.Bridge = (g) switch
+                    {
+                        1 => (x < 36) ? "OP7100BR" : "OP7200BR",
+                        2 => (x < 36) ? "OP7300BR" : "OP7400BR",
+                        _ => throw new NotImplementedException(),
+                    };
                     places.Add(p);
                 }
             }

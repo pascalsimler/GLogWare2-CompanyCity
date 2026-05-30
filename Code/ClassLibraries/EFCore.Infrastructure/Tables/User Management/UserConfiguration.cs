@@ -6,7 +6,19 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<User> entity)
     {
+        entity.Property(e => e.Login)
+              .HasMaxLength(64)
+              .IsUnicode(false)
+              .IsRequired()
+              .HasComment("Unique user login");
+
+        entity.Property(e => e.Login)
+              .HasMaxLength(64)
+              .HasComment("Unique user login");
+
+        entity.Property(e => e.IsLdap)
+              .HasComment("Mapped user from Active Directory (or more generally any LDAP)");
     }
 }
