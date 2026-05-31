@@ -23,7 +23,7 @@ case "$DatabaseProvider" in
         export ConnectionStrings__Default="Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*"
         ;;
     "Oracle")
-        export ConnectionStrings__Default="User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;"
+        export ConnectionStrings__Default="User Id=CCI;Password=*Gudel1954*;Data Source=oracle.glogware.com:1521/GLogWare;"
         ;;
     "MySql")
         export ConnectionStrings__Default="server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*"

@@ -1,6 +1,6 @@
 x-volumes:
-  config: &config D:/GLogWare2/CompanyCity/Config:/app/Config
-  logfiles: &logfiles D:/GLogWare2/CompanyCity/Logfiles:/app/Logfiles
+  config: &config /home/glogware/GLogWare/CompanyCity/Config:/app/Config
+  logfiles: &logfiles /home/glogware/GLogWare/CompanyCity/Logfiles:/app/Logfiles
 
 x-tz-env: &tz-env
   TZ: Europe/Zurich

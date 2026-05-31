@@ -8,5 +8,5 @@ public class User :BaseTracking
     public string? PasswordHash { get; set; }
     public bool IsLdap { get; set; }
     public bool IsLocked { get; set; }
-    public DateTime LastLoggedAt { get; set; }
+    public DateTime LastSuccessfulLoginAt { get; set; }
 }

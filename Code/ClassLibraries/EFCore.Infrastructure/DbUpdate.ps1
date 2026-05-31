@@ -13,7 +13,7 @@ switch ($DatabaseProvider) {
 		$env:ConnectionStrings__Default="Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*"
 	}
 	"Oracle" {  
-		$env:ConnectionStrings__Default="User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;"
+		$env:ConnectionStrings__Default="User Id=CCI;Password=*Gudel1954*;Data Source=oracle.glogware.com:1521/GLogWare;"
 	}
 	"MySql" {
 		$env:ConnectionStrings__Default="server=mysql.glogware.com;port=3306;database=GLogWare_CompanyCity;user=root;password=*Gudel1954*"
