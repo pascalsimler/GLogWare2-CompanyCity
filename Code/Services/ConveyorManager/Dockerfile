@@ -26,4 +26,4 @@ RUN dotnet publish "./ConveyorManager.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ConveyorManager.dll"]
+ENTRYPOINT ["dotnet", "Gudel.GLogWare.Services.ConveyorManager.dll"]
