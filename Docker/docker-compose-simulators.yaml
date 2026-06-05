@@ -44,7 +44,7 @@ services:
 
   conveyorsimulator-op2000al:
     image: conveyorsimulator:latest
-    container_name: ConveyorSimulator-OP72000AL
+    container_name: ConveyorSimulator-OP2000AL
     environment:
       OP: OP72000AL
       <<: *tz-env
