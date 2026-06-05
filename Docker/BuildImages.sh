@@ -16,6 +16,8 @@ images=(
   "garbage:$pathBackend/Garbage"
   "bridgemanager:$pathBackend/BridgeManager"
   "bridgesimulator:$pathBackend/BridgeSimulator"
+  "conveyormanager:$pathBackend/ConveyorManager"
+  "conveyorsimulator:$pathBackend/ConveyorSimulator"
   "simulatorwebapp:$pathFrontend/SimulatorWebApp"
   "glogwarewebapp:$pathFrontend/GLogWareWebApp/GLogWareWebApp"
 )

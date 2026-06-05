@@ -14,7 +14,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
 {
     #region Public members
     public static string? OP = string.Empty;
-    public static string ServiceName => $"BridgeManager-{OP}";
+    public static string ServiceName => $"ConveyorManager-{OP}";
     #endregion
 
     #region Injected members
@@ -126,7 +126,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
             .WithClientOptions(new MqttClientOptionsBuilder()
                 .WithTcpServer(_mqttBrokerIp, _mqttBrokerPort)
-                .WithClientId($"BridgeManager-{OP}")
+                .WithClientId($"ConveyorManager-{OP}")
                 .WithCleanSession(false)
                 .Build())
             .Build();
@@ -146,7 +146,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
             await Task.CompletedTask;
         };
 
-        _subscriptionTopic = $"{_mqttBrokerRootTopic}/GantryBridges/{OP}/Manager/Incoming";
+        _subscriptionTopic = $"{_mqttBrokerRootTopic}/Conveyors/{OP}/Manager/Incoming";
         _logger.LogInformation($"subscriptionTopic=[{_subscriptionTopic}]");
 
         var mqttSubscriptionTopics = new[] {

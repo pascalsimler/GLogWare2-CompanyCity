@@ -17,6 +17,7 @@ services:
     volumes:
       - *config
       - *logfiles
+
   bridgesimulator-op7200br:
     image: bridgesimulator:latest
     container_name: BridgeSimulator-OP7200BR
@@ -28,6 +29,31 @@ services:
     volumes:
       - *config
       - *logfiles
+
+  conveyorsimulator-op1000al:
+    image: conveyorsimulator:latest
+    container_name: ConveyorSimulator-OP1000AL
+    environment:
+      OP: OP1000AL
+      <<: *tz-env
+    ports:
+      - "1000:1000"
+    volumes:
+      - *config
+      - *logfiles
+
+  conveyorsimulator-op2000al:
+    image: conveyorsimulator:latest
+    container_name: ConveyorSimulator-OP72000AL
+    environment:
+      OP: OP72000AL
+      <<: *tz-env
+    ports:
+      - "2000:2000"
+    volumes:
+      - *config
+      - *logfiles
+
   simulatorwebapp:
      image: simulatorwebapp:latest
      container_name: SimulatorWebApp

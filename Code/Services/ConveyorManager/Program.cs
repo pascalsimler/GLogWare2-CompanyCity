@@ -62,7 +62,7 @@ builder.Services.AddHostedService<ConveyorManager>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeManager-{ConveyorManager.OP}";
+    options.ServiceName = $"{trigram}-ConveyorManager-{ConveyorManager.OP}";
 });
 
 var host = builder.Build();

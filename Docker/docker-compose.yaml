@@ -15,6 +15,7 @@ services:
     volumes:
       - *config
       - *logfiles
+
   bridgemanager-op7200br:
     image: bridgemanager:latest
     container_name: BridgeManager-OP7200BR
@@ -24,6 +25,27 @@ services:
     volumes:
       - *config
       - *logfiles
+
+  conveyormanager-op1000al:
+    image: conveyormanager:latest
+    container_name: ConveyorManager-OP1000AL
+    environment:
+      OP: OP1000AL
+      <<: *tz-env
+    volumes:
+      - *config
+      - *logfiles
+
+  conveyormanager-op20000al:
+    image: conveyormanager:latest
+    container_name: ConveyorManager-OP2000AL
+    environment:
+      OP: OP2000AL
+      <<: *tz-env
+    volumes:
+      - *config
+      - *logfiles
+
   jobmanager:
     image: jobmanager:latest
     container_name: JobManager
@@ -32,6 +54,7 @@ services:
     volumes:
       - *config
       - *logfiles
+
   reserve:
     image: reserve:latest
     container_name: Reserve
@@ -40,6 +63,7 @@ services:
     volumes:
       - *config
       - *logfiles
+
   garbage:
     image: garbage:latest
     container_name: Garbage
@@ -48,6 +72,7 @@ services:
     volumes:
       - *config
       - *logfiles
+
   glogwarewebapp:
      image: glogwarewebapp:latest
      container_name: GLogWareWebApp

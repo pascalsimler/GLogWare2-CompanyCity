@@ -44,6 +44,15 @@
     <File Path="Config/Test/config.json" />
   </Folder>
   <Folder Name="/Docker/">
+    <File Path="Docker/BuildImages.ps1" />
+    <File Path="Docker/BuildImages.sh" />
+    <File Path="Docker/docker-compose-simulators.ps1" />
+    <File Path="Docker/docker-compose-simulators.sh" />
+    <File Path="Docker/docker-compose-simulators.yaml" />
+    <File Path="Docker/docker-compose.ps1" />
+    <File Path="Docker/docker-compose.sh" />
+    <File Path="Docker/docker-compose.yaml" />
+    <File Path="Docker/ImportImages.sh" />
     <File Path="Docker/readme.txt" />
   </Folder>
   <Folder Name="/Logfiles/">

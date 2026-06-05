@@ -12,6 +12,8 @@ $images = @(
     [tuple]::Create("garbage", "$pathBackend\Garbage"), 
     [tuple]::Create("bridgemanager", "$pathBackend\BridgeManager"), 
     [tuple]::Create("bridgesimulator", "$pathBackend\BridgeSimulator"), 
+    [tuple]::Create("conveyormanager", "$pathBackend\ConveyorManager"), 
+    [tuple]::Create("conveyorsimulator", "$pathBackend\ConveyorSimulator"), 
     [tuple]::Create("simulatorwebapp", "$pathFrontend\SimulatorWebApp"), 
     [tuple]::Create("glogwarewebapp", "$pathFrontend\GLogWareWebApp\GLogWareWebApp")
 )
