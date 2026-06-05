@@ -8,3 +8,6 @@
 obj
 bin
 Config/config.json
+Runtime/*
+!Runtime/*.ps1
+Runtime/*/
