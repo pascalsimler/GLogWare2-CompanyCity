@@ -1,8 +1,81 @@
 ﻿@page "/conveyors"
+@using SimulatorWebApp.Components.Pages.Conveyors.FromPlc
+@using SimulatorWebApp.Components.Pages.Conveyors.ToPlc
 @rendermode InteractiveServer
 
 <h3>Conveyors</h3>
+<br />
+
+<table>
+<tr>
+    <td width="200px"></td>
+    <td>
+        <InputRadioGroup @bind-Value="direction">
+            <label style="margin-right:30px;">
+                <InputRadio Value="Direction.FromPlc" /> From Plc
+            </label>
+            <label>
+                <InputRadio Value="Direction.ToPlc" /> To Plc
+            </label>
+        </InputRadioGroup>
+    </td>
+</tr>
+</table>
+
+<br />
+
+@if (direction == Direction.FromPlc)
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabFromPlc == 0 ? "active" : "")" @onclick="() => SetTabFromPlc(0)">STAT</button>
+            <button class="tab @(activeTabFromPlc == 1 ? "active" : "")" @onclick="() => SetTabFromPlc(1)">ARIV</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabFromPlc == 0)
+            {
+                <UcSTATConveyor />
+            }
+            else if (activeTabFromPlc == 1)
+            {
+                <UcARIV />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab @(activeTabToPlc == 0 ? "active" : "")" @onclick="() => SetTabToPlc(0)">TARG</button>
+        </div>
+
+        <div class="tab-content">
+            @if (activeTabToPlc == 0)
+            {
+                <UcTARG />
+            }
+        </div>
+    </div>
+}
 
 @code {
+    private enum Direction
+    {
+        FromPlc,
+        ToPlc
+    }
 
+    private int activeTabFromPlc = 0;
+    private int activeTabToPlc = 0;
+    private Direction direction = Direction.FromPlc;
+
+    override protected void OnInitialized()
+    {
+    }
+
+    private async Task SetTabFromPlc(int index) => activeTabFromPlc = index;
+    private async Task SetTabToPlc(int index) => activeTabToPlc = index;
 }
+

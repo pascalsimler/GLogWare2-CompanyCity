@@ -1,0 +1,270 @@
+﻿<EditForm Model="@targ" OnValidSubmit="() => SendToPlc()">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-grid">
+
+        <table width="100%">
+            <tr>
+                <td align="right">
+                    Job-Id:
+                </td>
+                <td align="right">
+                    <InputText @bind-Value="targ.Jobid"
+                               style="width: 100px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    Inner ⌀:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.InnerDiameter"
+                                 max="9999" style="width: 80px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    Article:
+                </td>
+                <td align="right">
+                    <InputText @bind-Value="targ.Article"
+                               style="width: 100px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    Outer ⌀:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.OuterDiameter"
+                                 max="9999" style="width: 80px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    Order:
+                </td>
+                <td align="right">
+                    <InputText @bind-Value="targ.Order"
+                               style="width: 100px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    Width:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.Width"
+                                 max="9999" style="width: 80px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    TireCount:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.TireCount"
+                                 max="20" style="width: 40px" />
+                </td>
+                <td width="50px"></td>
+                <td colspan="2"></td>
+            </tr>
+            <tr style="height: 30px;">
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <td align="center" colspan="2">
+                    <b>Pick Position</b>
+                </td>
+                <td width="50px"></td>
+                <td align="center" colspan="2">
+                    <b>Drop Position</b>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    PosType:
+                </td>
+                <td align="right">
+                    <InputSelect @bind-Value="targ.PickPosition.PositionType">
+                        <option value="Undefined">Undefined</option>
+                        <option value="Conveyor">Conveyor</option>
+                        <option value="Store">Store</option>
+                        <option value="Pallet">Pallet</option>
+                    </InputSelect>
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    PosType:
+                </td>
+                <td align="right">
+                    <InputSelect @bind-Value="targ.DropPosition.PositionType">
+                        <option value="Undefined">Undefined</option>
+                        <option value="Conveyor">Conveyor</option>
+                        <option value="Store">Store</option>
+                        <option value="Pallet">Pallet</option>
+                    </InputSelect>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    Conveyor:
+                </td>
+                <td align="right">
+                    <InputText @bind-Value="targ.PickPosition.ConveyorPlace"
+                               style="width: 50px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    Conveyor:
+                </td>
+                <td align="right">
+                    <InputText @bind-Value="targ.DropPosition.ConveyorPlace"
+                               style="width: 50px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    XCell:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.PickPosition.XCell"
+                                 max="73" style="width: 40px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    XCell:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.DropPosition.XCell"
+                                 max="73" style="width: 40px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    YCell:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.PickPosition.YCell"
+                                 max="17" style="width: 40px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    YCell:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.DropPosition.YCell"
+                                 max="17" style="width: 40px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    XPos:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.PickPosition.XPosition"
+                                 max="999999" style="width: 80px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    XPos:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.DropPosition.XPosition"
+                                 max="999999" style="width: 80px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    YPos:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.PickPosition.YPosition"
+                                 max="999999" style="width: 80px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    YPos:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.DropPosition.YPosition"
+                                 max="999999" style="width: 80px" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    ZOffset:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.PickPosition.ZOffset"
+                                 max="999999" style="width: 80px" />
+                </td>
+                <td width="50px"></td>
+                <td align="right">
+                    ZOffset:
+                </td>
+                <td align="right">
+                    <InputNumber @bind-Value="targ.DropPosition.ZOffset"
+                                 max="999999" style="width: 80px" />
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <br />
+
+    <button type="submit">Send</button>
+</EditForm>
+
+@code {
+    private ORDS targ = null!;
+
+    override protected void OnInitialized()
+    {
+        targ = new ORDS()
+        {
+            Jobid = "Job-Id",
+            Article = "ArticleNr",
+            Order = "OrderNr",
+            InnerDiameter = 760,
+            OuterDiameter = 830,
+            Width = 210,
+            TireCount = 3
+        };
+        targ.PickPosition = new ORDSPosition()
+        {
+            PositionType = ORDSPositionTypes.Conveyor,
+            ConveyorPlace = "1340",
+            XCell = 0,
+            YCell = 0,
+            XPosition = 0,
+            YPosition = 0,
+            ZOffset = 0
+        };
+        targ.DropPosition = new ORDSPosition()
+        {
+            PositionType = ORDSPositionTypes.Store,
+            ConveyorPlace = "0000",
+            XCell = 47,
+            YCell = 3,
+            XPosition = 54321,
+            YPosition = 2345,
+            ZOffset = 4567
+        };
+    }
+
+    private async Task SendToPlc()
+    {
+        string topic = $"Conveyors/OP1000AL/Manager/Incoming";
+        GLogWareMessage m = new GLogWareMessage();
+        m.Identifier = GLogWareMessageIdentifiers.ToPlc;
+
+        PlcMessage pm = new PlcMessage();
+        pm.Identifier = PlcMessageIdentifiers.TARG;
+        pm.Sender = "GLOGWARE";
+        pm.Receiver = "OP1000AL";
+        pm.Data = targ;
+        m.Data = pm;
+
+        await MqttService.SendMessage(topic, m);
+    }
+}

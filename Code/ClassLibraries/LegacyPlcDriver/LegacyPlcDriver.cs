@@ -571,7 +571,7 @@ public class LegacyPlcDriver: IPlcDriver
                     //_logger.LogInformation($"Hexa: {t.HexaDump()}");
                     NetworkStream stream = _tcpClient.GetStream();
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
-                    if (!new[] { PlcMessageIdentifiers.ACKN.ToString(), PlcMessageIdentifiers.LIFE.ToString() }.Contains(t.Identifier))
+                    if (!new[] { PlcMessageIdentifiers.ACKN.ToString() /*, PlcMessageIdentifiers.LIFE.ToString()*/ }.Contains(t.Identifier))
                     {
                         LogPlc lpSend = new LogPlc();
                         lpSend.Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString();
@@ -612,6 +612,7 @@ public class LegacyPlcDriver: IPlcDriver
             {
                 "BR" => nameof(LogPlcCategoryIdentifiers.GANTRY),
                 "PA" => nameof(LogPlcCategoryIdentifiers.PALLETIZER),
+                "AL" => nameof(LogPlcCategoryIdentifiers.CONVEYOR),
                 _ => nameof(LogPlcCategoryIdentifiers.UNCATEGORIZED)
             };
             db.LogPlcs.Add(logPlc);

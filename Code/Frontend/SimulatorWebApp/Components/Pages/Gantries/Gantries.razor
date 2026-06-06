@@ -42,7 +42,7 @@
         <div class="tab-content">
             @if (activeTabFromPlc == 0)
             {
-                <UcSTAT bridgeOP="@bridgeOP" />
+                <UcSTATBridge bridgeOP="@bridgeOP" />
             }
             else if (activeTabFromPlc == 1)
             {
@@ -73,7 +73,7 @@ else
 }
 
 @code {
-    public enum Direction
+    private enum Direction
     {
         FromPlc,
         ToPlc

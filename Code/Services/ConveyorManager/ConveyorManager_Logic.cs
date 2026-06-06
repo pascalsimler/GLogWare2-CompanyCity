@@ -1,5 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
 using Gudel.GLogWare.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.Services.ConveyorManager;
 
@@ -8,6 +9,28 @@ public partial class ConveyorManager
     #region Private members
 
     #endregion
+
+    private async Task<bool> ProcessWaitOnRouteJobs()
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        var waitOnRouteJobs = _db.Jobs
+            .Include(j => j.ActualPlaceRecord)
+            .Where(j => j.Status == nameof(JobStatusIdentifiers.WAIT_ON_ROUTE))
+            .OrderBy(j => j.ModifiedAt);
+
+        foreach (Job job in waitOnRouteJobs)
+        {
+            _logger.LogInformation($"JobId=[{job.Jobid}]");
+            _logger.LogInformation($"ActualPlace=[{job.ActualPlace}]");
+            _logger.LogInformation($"ActualPlaceRecord.PlaceType=[{job.ActualPlaceRecord.PlaceType}]");
+            _logger.LogInformation($"----------------------------------");
+        }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+
+        return false;
+    }
 
     private async Task Process_STAT(STATConveyor stat)
     {

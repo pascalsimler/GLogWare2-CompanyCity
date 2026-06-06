@@ -2,14 +2,14 @@
 
 namespace Gudel.GLogWare.LegacyPlcDriver;
 
-public struct ARIVStruct : ILegacyPlcStruct<COMP, COMPStruct>
+public struct ARIVStruct : ILegacyPlcStruct<ARIV, ARIVStruct>
 {
-    public static COMPStruct FromData(string data)
+    public static ARIVStruct FromData(string data)
     {
         throw new NotImplementedException();
     }
 
-    public static COMPStruct FromMessage(COMP m)
+    public static ARIVStruct FromMessage(ARIV m)
     {
         throw new NotImplementedException();
     }
@@ -24,7 +24,7 @@ public struct ARIVStruct : ILegacyPlcStruct<COMP, COMPStruct>
         throw new NotImplementedException();
     }
 
-    public COMP ToMessage(string resourceNr)
+    public ARIV ToMessage(string resourceNr)
     {
         throw new NotImplementedException();
     }
