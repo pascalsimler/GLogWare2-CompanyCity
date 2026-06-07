@@ -36,10 +36,12 @@ public class LegacyPlcDriver: IPlcDriver
     private TcpClient? _tcpClient = null;
     private string _lastReceivedCounter = "0";
     private LegacyPlcTelegram _lastSentTelegram = null!;
+    private PlcMessage _lastSentPlcMessage = null!;
     private LegacyPlcTelegram _ackTelegram = null!;
     private System.Timers.Timer _watchdogRetry = null!;
     private LogPlc _lpReceive = null!;
     private SemaphoreSlim _semaphoreSend = null!;
+    private DriverNotificationEventArgs _driverNotificationEventArgs = null!;
     #endregion region
 
     #region Constructor
@@ -116,6 +118,11 @@ public class LegacyPlcDriver: IPlcDriver
                 break;
         }
         await SendToPlcAsync(t, true);
+        _lastSentPlcMessage = plcMessage;
+        _driverNotificationEventArgs = new DriverNotificationEventArgs();
+        _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSent;
+        _driverNotificationEventArgs.plcMessage = _lastSentPlcMessage;
+        DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
@@ -125,8 +132,6 @@ public class LegacyPlcDriver: IPlcDriver
     private async Task TcpConnectLoopAsync(CancellationToken token)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
-
-        DriverNotificationEventArgs driverNotificationEventArgs = null!;
 
         string information = string.Empty;
         
@@ -156,9 +161,9 @@ public class LegacyPlcDriver: IPlcDriver
                     lp.Information = information;
                     await WriteLogPlcAsync(lp);
                 }
-                driverNotificationEventArgs = new DriverNotificationEventArgs();
-                driverNotificationEventArgs.notificationType = DriverNotificationType.Online;
-                DriverNotification?.Invoke(this, driverNotificationEventArgs);
+                _driverNotificationEventArgs = new DriverNotificationEventArgs();
+                _driverNotificationEventArgs.notificationType = DriverNotificationType.Online;
+                DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
                 using NetworkStream stream = _tcpClient.GetStream();
                 await TcpReceiveLoopAsync(stream, token);
@@ -221,9 +226,9 @@ public class LegacyPlcDriver: IPlcDriver
                     await WriteLogPlcAsync(lp);
                 }
             }
-            driverNotificationEventArgs = new DriverNotificationEventArgs();
-            driverNotificationEventArgs.notificationType = DriverNotificationType.Offline;
-            DriverNotification?.Invoke(this, driverNotificationEventArgs);
+            _driverNotificationEventArgs = new DriverNotificationEventArgs();
+            _driverNotificationEventArgs.notificationType = DriverNotificationType.Offline;
+            DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
             if (!token.IsCancellationRequested)
             {
@@ -311,8 +316,6 @@ public class LegacyPlcDriver: IPlcDriver
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        DriverNotificationEventArgs driverNotificationEventArgs = null!;
-
         _lpReceive = new LogPlc();
         _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString();
 
@@ -336,9 +339,10 @@ public class LegacyPlcDriver: IPlcDriver
                     {
                         _watchdogRetry.Stop();
                         _semaphoreSend.Release();
-                        driverNotificationEventArgs = new DriverNotificationEventArgs();
-                        driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSentAcknowledged;
-                        DriverNotification?.Invoke(this, driverNotificationEventArgs);
+                        _driverNotificationEventArgs = new DriverNotificationEventArgs();
+                        _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSentAcknowledged;
+                        _driverNotificationEventArgs.plcMessage = _lastSentPlcMessage;
+                        DriverNotification?.Invoke(this, _driverNotificationEventArgs);
                     }
                     else
                     {
@@ -410,10 +414,10 @@ public class LegacyPlcDriver: IPlcDriver
 
             await WriteLogPlcAsync(_lpReceive);
             
-            driverNotificationEventArgs = new DriverNotificationEventArgs();
-            driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramReceived;
-            driverNotificationEventArgs.plcMessage = plcMessage;
-            DriverNotification?.Invoke(this, driverNotificationEventArgs);
+            _driverNotificationEventArgs = new DriverNotificationEventArgs();
+            _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramReceived;
+            _driverNotificationEventArgs.plcMessage = plcMessage;
+            DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
             break;
         }

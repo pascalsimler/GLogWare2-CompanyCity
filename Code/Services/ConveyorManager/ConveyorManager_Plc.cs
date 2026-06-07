@@ -81,6 +81,7 @@ public partial class ConveyorManager
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
         Unlock();
+        ResetTimer(_watchdogWakeup);
     }
 
 }

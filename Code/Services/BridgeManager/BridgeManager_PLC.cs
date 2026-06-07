@@ -5,7 +5,7 @@ namespace Gudel.GLogWare.Services.BridgeManager;
 public partial class BridgeManager
 {
     #region Private members
-    private DriverNotificationType _driverState;
+    private DriverNotificationType _driverState = DriverNotificationType.Offline;
     #endregion region
 
     private void LoadPlcConfiguration()
@@ -81,6 +81,7 @@ public partial class BridgeManager
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
         Unlock();
+        ResetTimer(_watchdogWakeup);
     }
 
 }

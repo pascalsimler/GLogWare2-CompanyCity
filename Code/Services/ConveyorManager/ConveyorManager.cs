@@ -199,6 +199,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
         Unlock();
+        ResetTimer(_watchdogWakeup);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
@@ -273,5 +274,11 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
         _watchdogWakeup.Start();
 
         _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
+    private void ResetTimer(System.Timers.Timer timer)
+    {
+        timer.Stop();
+        timer.Start();
     }
 }
