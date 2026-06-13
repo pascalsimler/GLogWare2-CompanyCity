@@ -26,10 +26,9 @@ public class GLogWareDbContextFactory : IDesignTimeDbContextFactory<GLogWareDbCo
 #endif
 #if USE_ORACLE
         var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseOracle(connectionString, b =>
-            {
-                b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
-            })
+            .UseOracle(connectionString, x =>
+                x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
+            )
             .Options;
 #endif
 #if USE_MYSQL

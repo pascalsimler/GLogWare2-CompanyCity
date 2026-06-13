@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup>
-    <DatabaseProvider>SqlServer</DatabaseProvider>
+    <DatabaseProvider>Oracle</DatabaseProvider>
   </PropertyGroup>
 </Project>

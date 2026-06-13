@@ -79,30 +79,31 @@ public static class DatabaseProviderHelper
 #if USE_POSTGRES
         services.AddDbContext<GLogWareDbContext>(options =>
             options.UseNpgsql(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+                connectionString, x => 
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 #if USE_SQLSERVER
         services.AddDbContext<GLogWareDbContext>(options =>
             options.UseSqlServer(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+                connectionString, x => 
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 #if USE_ORACLE
         services.AddDbContext<GLogWareDbContext>(options =>
             options.UseOracle(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+                connectionString, x => {
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
+                    x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+            }));
 #endif
 #if USE_MYSQL
         services.AddDbContext<GLogWareDbContext>(options =>
             options.UseMySQL(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+                connectionString, x => 
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 
         return services;
@@ -115,30 +116,31 @@ public static class DatabaseProviderHelper
 #if USE_POSTGRES
         services.AddDbContextFactory<GLogWareDbContext>(options =>
             options.UseNpgsql(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+                connectionString, x => 
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 #if USE_SQLSERVER
         services.AddDbContextFactory<GLogWareDbContext>(options =>
             options.UseSqlServer(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+               connectionString, x =>
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 #if USE_ORACLE
         services.AddDbContextFactory<GLogWareDbContext>(options =>
             options.UseOracle(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+              connectionString, x => {
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
+                    x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+            }));
 #endif
 #if USE_MYSQL
         services.AddDbContextFactory<GLogWareDbContext>(options =>
             options.UseMySQL(
-                connectionString,
-                x => x.MigrationsAssembly(
-                    typeof(DatabaseProvider).Assembly.FullName)));
+               connectionString, x =>
+                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
+            );
 #endif
 
         return services;
@@ -158,7 +160,9 @@ public static class DatabaseProviderHelper
 #endif
 #if USE_ORACLE
         var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseOracle(connectionString)
+            .UseOracle(connectionString, x => 
+                x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
+            )
             .Options;
 #endif
 #if USE_MYSQL
