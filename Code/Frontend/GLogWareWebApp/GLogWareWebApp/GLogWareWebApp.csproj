@@ -13,8 +13,8 @@
     <ProjectReference Include="..\GLogWareWebApp.Client\GLogWareWebApp.Client.csproj" />
     <ProjectReference Include="..\..\..\ClassLibraries\Shared\Shared.csproj" />
     <ProjectReference Include="..\..\..\ClassLibraries\EFCore.Infrastructure\EFCore.Infrastructure.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
   </ItemGroup>
 
