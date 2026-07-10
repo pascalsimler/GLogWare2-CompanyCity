@@ -6,29 +6,23 @@ namespace Gudel.GLogWare.EFCore.Infrastructure;
 
 public static class DatabaseProviderHelper
 {
-    public static DatabaseProvider GetDatabaseProvider()
+    public static DatabaseProvider databaseProvider = DatabaseProvider.Unknown;
+
+    public static void SetDatabaseProvider(string providerName)
     {
-        DatabaseProvider providerName = DatabaseProvider.Unknown;
-
-#if USE_POSTGRES
-        providerName = DatabaseProvider.Postgres;
-#endif
-#if USE_SQLSERVER
-        providerName = DatabaseProvider.SqlServer;
-#endif
-#if USE_ORACLE
-        providerName = DatabaseProvider.Oracle;
-#endif
-#if USE_MYSQL
-        providerName = DatabaseProvider.MySql;
-#endif
-
-        return providerName;
+        databaseProvider = providerName switch
+        {
+            "SqlServer" => DatabaseProvider.SqlServer,
+            "Oracle" => DatabaseProvider.Oracle,
+            "Postgres" => DatabaseProvider.Postgres,
+            "MySql" => DatabaseProvider.MySql,
+            _ => DatabaseProvider.Unknown
+        };
     }
 
     public static string GetNowSql()
     {
-        return GetDatabaseProvider() switch
+        return databaseProvider switch 
         {
             DatabaseProvider.Oracle => "LOCALTIMESTAMP",
             DatabaseProvider.SqlServer => "GETDATE()",
@@ -40,7 +34,7 @@ public static class DatabaseProviderHelper
 
     public static string GetBlobType()
     {
-        return GetDatabaseProvider() switch
+        return databaseProvider switch
         {
             DatabaseProvider.Oracle => "CLOB",
             DatabaseProvider.SqlServer => "NVARCHAR(MAX)",
@@ -62,7 +56,7 @@ public static class DatabaseProviderHelper
             "$1_$2",
             RegexOptions.Compiled);
 
-        return GetDatabaseProvider() switch
+        return databaseProvider switch
         {
             DatabaseProvider.Oracle => snake.ToUpperInvariant(),
             DatabaseProvider.SqlServer => name,
@@ -73,103 +67,123 @@ public static class DatabaseProviderHelper
     }
 
     public static IServiceCollection AddGLogWareDbContext(
-        this IServiceCollection services,
-        string connectionString)
+        this IServiceCollection services, string connectionString)
     {
-#if USE_POSTGRES
-        services.AddDbContext<GLogWareDbContext>(options =>
-            options.UseNpgsql(
-                connectionString, x => 
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
-#if USE_SQLSERVER
-        services.AddDbContext<GLogWareDbContext>(options =>
-            options.UseSqlServer(
-                connectionString, x => 
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
-#if USE_ORACLE
-        services.AddDbContext<GLogWareDbContext>(options =>
-            options.UseOracle(
-                connectionString, x => {
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
-                    x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
-            }));
-#endif
-#if USE_MYSQL
-        services.AddDbContext<GLogWareDbContext>(options =>
-            options.UseMySQL(
-                connectionString, x => 
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
+        switch (databaseProvider)
+        {
+            case DatabaseProvider.SqlServer:
+                services.AddDbContext<GLogWareDbContext>(
+                    options => options.UseSqlServer(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+            case DatabaseProvider.Oracle:
+                services.AddDbContext<GLogWareDbContext>(
+                    options => options.UseOracle(
+                        connectionString, 
+                        x => {
+                            x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
+                            x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+                        }
+                    )
+                );
+                break;
+            case DatabaseProvider.Postgres:
+                services.AddDbContext<GLogWareDbContext>(
+                    options => options.UseNpgsql(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+            case DatabaseProvider.MySql:
+                services.AddDbContext<GLogWareDbContext>(
+                    options => options.UseMySQL(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+        }
 
         return services;
     }
 
     public static IServiceCollection AddGLogWareDbContextFactory(
-       this IServiceCollection services,
-       string connectionString)
+       this IServiceCollection services, string connectionString)
     {
-#if USE_POSTGRES
-        services.AddDbContextFactory<GLogWareDbContext>(options =>
-            options.UseNpgsql(
-                connectionString, x => 
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
-#if USE_SQLSERVER
-        services.AddDbContextFactory<GLogWareDbContext>(options =>
-            options.UseSqlServer(
-               connectionString, x =>
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
-#if USE_ORACLE
-        services.AddDbContextFactory<GLogWareDbContext>(options =>
-            options.UseOracle(
-              connectionString, x => {
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
-                    x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
-            }));
-#endif
-#if USE_MYSQL
-        services.AddDbContextFactory<GLogWareDbContext>(options =>
-            options.UseMySQL(
-               connectionString, x =>
-                    x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName))
-            );
-#endif
+        switch (databaseProvider)
+        {
+            case DatabaseProvider.SqlServer:
+                services.AddDbContextFactory<GLogWareDbContext>(
+                    options => options.UseSqlServer(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+            case DatabaseProvider.Oracle:
+                services.AddDbContextFactory<GLogWareDbContext>(
+                    options => options.UseOracle(
+                        connectionString, 
+                        x => {
+                            x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName);
+                            x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+                        }
+                    )
+                );
+                break;
+            case DatabaseProvider.Postgres:
+                services.AddDbContextFactory<GLogWareDbContext>(
+                    options => options.UseNpgsql(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+            case DatabaseProvider.MySql:
+                services.AddDbContextFactory<GLogWareDbContext>(
+                    options => options.UseMySQL(
+                        connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+        }
 
         return services;
     }
 
     public static GLogWareDbContext GetGLogWareDbContext(string connectionString)
     {
-#if USE_POSTGRES
-        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseNpgsql(connectionString)
-            .Options;
-#endif
-#if USE_SQLSERVER
-        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseSqlServer(connectionString)
-            .Options;
-#endif
-#if USE_ORACLE
-        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseOracle(connectionString, x => 
-                x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
-            )
-            .Options;
-#endif
-#if USE_MYSQL
-        var options = new DbContextOptionsBuilder<GLogWareDbContext>()
-            .UseMySQL(connectionString)
-            .Options;
-#endif
+        var options = databaseProvider switch
+        {
+            DatabaseProvider.SqlServer =>
+                new DbContextOptionsBuilder<GLogWareDbContext>()
+                    .UseSqlServer(connectionString)
+                    .Options,
+            DatabaseProvider.Oracle =>
+                new DbContextOptionsBuilder<GLogWareDbContext>()
+                    .UseOracle(
+                        connectionString, 
+                        x => x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
+                    )
+                    .Options,
+            DatabaseProvider.Postgres =>
+                new DbContextOptionsBuilder<GLogWareDbContext>()
+                    .UseNpgsql(connectionString)
+                    .Options,
+            DatabaseProvider.MySql =>
+                new DbContextOptionsBuilder<GLogWareDbContext>()
+                    .UseMySQL(connectionString)
+                    .Options,
+            _ =>
+                new DbContextOptionsBuilder<GLogWareDbContext>()
+                    .UseSqlServer(connectionString)
+                    .Options,
+        };
 
         return new GLogWareDbContext(options);
     }

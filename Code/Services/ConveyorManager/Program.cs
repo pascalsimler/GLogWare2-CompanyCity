@@ -49,10 +49,10 @@ builder.Logging.AddSerilog(logger);
 logger.Information($"ConveyorManager.OP=[{ConveyorManager.OP}]");
 logger.Information($"ConveyorManager.ServiceName=[{ConveyorManager.ServiceName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
-logger.Information($"databaseProvider=[{databaseProvider}]");
-string connectionString = builder.Configuration[$"Database:ConnectionString_{databaseProvider}"]!;
-logger.Information($"connectionString=[{connectionString}]");
+string providerName = builder.Configuration[$"Database:Provider"]!;
+logger.Information($"providerName=[{providerName}]");
+DatabaseProviderHelper.SetDatabaseProvider(providerName);
+string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 

@@ -7,13 +7,15 @@
   },
   "EnableSystemLogging": 0,
   "Database": {
+    "Provider": "SqlServer",
+    "ConnectionString": "Server=10.59.0.1;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
     "ConnectionString_Postgres": "Host=postgres.glogware.com;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-    "ConnectionString_SqlServer": "Server=sqlserver.glogware.com;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
-    "ConnectionString_Oracle": "User Id=COC;Password=Oramgr001;Data Source=oracle.glogware.com:1521/FREEPDB1;",
+    "ConnectionString_SqlServer": "Server=10.59.0.1;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+    "ConnectionString_Oracle": "User Id=COMPANY_CITY;Password=Oramgr001;Data Source=oracle.glogware.com:1521/GLOGWARE;",
     "ConnectionString_MySql": "server=tidb.glogware.com;port=4000;database=GLogWare_CompanyCity;user=root;password="
   },
   "MQTTBroker": {
-    "Ip": "mqtt.glogware.com",
+    "Ip": "10.59.0.1",
     "Port": "1883",
     "RootTopic": "Company/City/GLogWare"
   },
@@ -51,6 +53,8 @@
       "DelayRetry": 5000,
       "DelayLife": 30000,
       "DelayWakeup": 30000,
+      "ValidPlcIdentifiers": "ACKN|STAT|ALRM|ARIV",
+      "ValidGLogWareIdentifiers": "ACKN|LIFE|TARG",
       "Description": "Infeed Conveyors"
     },
     "OP2000AL": {
@@ -60,6 +64,8 @@
       "DelayRetry": 5000,
       "DelayLife": 30000,
       "DelayWakeup": 30000,
+      "ValidPlcIdentifiers": "ACKN|STAT|ALRM|ARIV",
+      "ValidGLogWareIdentifiers": "ACKN|LIFE|TARG",
       "Description": "Outfeed Conveyors"
     }
   }

@@ -117,7 +117,7 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
                       .HasComment("Date/time the record was updated for the last time");
             }
 
-            switch (DatabaseProviderHelper.GetDatabaseProvider())
+            switch (DatabaseProviderHelper.databaseProvider)
             {
                 case DatabaseProvider.Postgres:
                     foreach (var property in entityType.GetProperties())

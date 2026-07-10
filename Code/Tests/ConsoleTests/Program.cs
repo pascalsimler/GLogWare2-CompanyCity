@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+string databaseProvider = DatabaseProviderHelper.databaseProvider.ToString();
 Console.WriteLine($"databaseProvider=[{databaseProvider}]");
 
 var configuration = new ConfigurationBuilder()

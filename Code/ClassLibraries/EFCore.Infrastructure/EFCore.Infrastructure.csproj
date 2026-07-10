@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\EFCore.Domain\EFCore.Domain.csproj" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -21,45 +22,10 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.9" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Remove="Migrations_SqlServer\**\*.cs" />
-		<Compile Remove="Migrations_Postgres\**\*.cs" />
-		<Compile Remove="Migrations_Oracle\**\*.cs" />
-		<Compile Remove="Migrations_MySql\**\*.cs" />
-	</ItemGroup>
-	
-	<PropertyGroup Condition="'$(DatabaseProvider)' == 'SqlServer'">
-		<DefineConstants>$(DefineConstants);USE_SQLSERVER</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup Condition="'$(DatabaseProvider)' == 'SqlServer'">
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
-		<Compile Include="Migrations_SqlServer\**\*.cs" />
-	</ItemGroup>
-	
-	<PropertyGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
-		<DefineConstants>$(DefineConstants);USE_POSTGRES</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup Condition="'$(DatabaseProvider)' == 'Postgres'">
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
-		<Compile Include="Migrations_Postgres\**\*.cs" />
-	</ItemGroup>
-	
-	<PropertyGroup Condition="'$(DatabaseProvider)' == 'Oracle'">
-		<DefineConstants>$(DefineConstants);USE_ORACLE</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup Condition="'$(DatabaseProvider)' == 'Oracle'">
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
 		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26200" />
-		<Compile Include="Migrations_Oracle\**\*.cs" />
-	</ItemGroup>
-	
-	<PropertyGroup Condition="'$(DatabaseProvider)' == 'MySql'">
-		<DefineConstants>$(DefineConstants);USE_MYSQL</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup Condition="'$(DatabaseProvider)' == 'MySql'">
 		<PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
-		<Compile Include="Migrations_MySql\**\*.cs" />
 	</ItemGroup>
-	
+		
 </Project>

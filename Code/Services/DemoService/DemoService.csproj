@@ -21,6 +21,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ClassLibraries\EFCore.Infrastructure\EFCore.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\ClassLibraries\Shared\Shared.csproj" />
   </ItemGroup>
 </Project>

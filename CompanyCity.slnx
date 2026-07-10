@@ -65,7 +65,6 @@
     <File Path=".dockerignore" />
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
-    <File Path="Directory.Build.props" />
     <File Path="Rebuild.ps1" />
     <File Path="Rebuild.sh" />
   </Folder>

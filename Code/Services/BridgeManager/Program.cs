@@ -2,7 +2,9 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.LegacyPlcDriver;
 using Gudel.GLogWare.Services.BridgeManager;
 using Gudel.GLogWare.Shared;
+using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
+using System.Configuration.Provider;
 
 BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
 if (BridgeManager.OP == null)
@@ -49,9 +51,10 @@ builder.Logging.AddSerilog(logger);
 logger.Information($"BridgeManager.OP=[{BridgeManager.OP}]");
 logger.Information($"BridgeManager.ServiceName=[{BridgeManager.ServiceName}]");
 logger.Information($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
-logger.Information($"databaseProvider=[{databaseProvider}]");
-string connectionString = builder.Configuration[$"Database:ConnectionString_{databaseProvider}"]!;
+string providerName = builder.Configuration[$"Database:Provider"]!;
+logger.Information($"providerName=[{providerName}]");
+DatabaseProviderHelper.SetDatabaseProvider(providerName);
+string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
 logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");

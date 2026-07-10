@@ -40,7 +40,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
 logger.Information($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.GetDatabaseProvider().ToString();
+string databaseProvider = DatabaseProviderHelper.databaseProvider.ToString();
 logger.Information($"databaseProvider=[{databaseProvider}]");
 string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
 logger.Information($"connectionString=[{connectionString}]");
