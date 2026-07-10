@@ -65,7 +65,5 @@
     <File Path=".dockerignore" />
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
-    <File Path="Rebuild.ps1" />
-    <File Path="Rebuild.sh" />
   </Folder>
 </Solution>
