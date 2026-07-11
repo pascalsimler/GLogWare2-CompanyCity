@@ -10,7 +10,6 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Directory.Build.props", "."]
 COPY ["Code/Services/Garbage/Garbage.csproj", "Code/Services/Garbage/"]
 RUN dotnet restore "./Code/Services/Garbage/Garbage.csproj"
 COPY . .

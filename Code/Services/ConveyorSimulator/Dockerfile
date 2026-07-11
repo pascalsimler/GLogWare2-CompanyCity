@@ -10,7 +10,6 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Debug
 WORKDIR /src
-COPY ["Directory.Build.props", "."]
 COPY ["Code/Services/ConveyorSimulator/ConveyorSimulator.csproj", "Code/Services/ConveyorSimulator/"]
 RUN dotnet restore "./Code/Services/ConveyorSimulator/ConveyorSimulator.csproj"
 COPY . .
