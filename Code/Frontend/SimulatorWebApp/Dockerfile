@@ -11,7 +11,6 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Debug
 WORKDIR /src
-COPY ["Directory.Build.props", "."]
 COPY ["Code/Frontend/SimulatorWebApp/SimulatorWebApp.csproj", "Code/Frontend/SimulatorWebApp/"]
 COPY ["Code/ClassLibraries/EFCore.Infrastructure/EFCore.Infrastructure.csproj", "Code/ClassLibraries/EFCore.Infrastructure/"]
 COPY ["Code/ClassLibraries/EFCore.Domain/EFCore.Domain.csproj", "Code/ClassLibraries/EFCore.Domain/"]

@@ -11,7 +11,6 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Debug
 WORKDIR /src
-COPY ["Directory.Build.props", "."]
 COPY ["Code/Frontend/GLogWareWebApp/GLogWareWebApp/GLogWareWebApp.csproj", "Code/Frontend/GLogWareWebApp/GLogWareWebApp/"]
 COPY ["Code/Frontend/GLogWareWebApp/GLogWareWebApp.Client/GLogWareWebApp.Client.csproj", "Code/Frontend/GLogWareWebApp/GLogWareWebApp.Client/"]
 RUN dotnet restore "./Code/Frontend/GLogWareWebApp/GLogWareWebApp/GLogWareWebApp.csproj"
