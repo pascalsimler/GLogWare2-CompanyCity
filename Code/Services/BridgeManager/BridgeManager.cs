@@ -198,8 +198,11 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
-        Unlock();
-        ResetTimer(_watchdogWakeup);
+        finally
+        {
+            Unlock();
+            ResetTimer(_watchdogWakeup);
+        }
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }

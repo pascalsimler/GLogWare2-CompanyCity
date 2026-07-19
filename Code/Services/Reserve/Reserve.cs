@@ -136,7 +136,10 @@ public partial class Reserve: IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
-        Unlock();
+        finally
+        {
+            Unlock();
+        }
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }

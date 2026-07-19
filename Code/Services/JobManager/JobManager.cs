@@ -136,6 +136,10 @@ public partial class JobManager : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
+        finally
+        {
+            Unlock();
+        }
         Unlock();
 
         _logger.LogInformation(LogMessages.LeaveMethod);

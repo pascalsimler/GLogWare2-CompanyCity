@@ -80,8 +80,12 @@ public partial class BridgeManager
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
-        Unlock();
-        ResetTimer(_watchdogWakeup);
-    }
+        finally
+        {
+            Unlock();
+            ResetTimer(_watchdogWakeup);
+        }
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
 }

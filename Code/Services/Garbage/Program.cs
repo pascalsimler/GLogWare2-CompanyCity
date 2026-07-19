@@ -3,7 +3,7 @@ using Gudel.GLogWare.Services.Garbage;
 using Gudel.GLogWare.Shared;
 using Serilog;
 
-
+Garbage.ServiceName = "Garbage";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
 

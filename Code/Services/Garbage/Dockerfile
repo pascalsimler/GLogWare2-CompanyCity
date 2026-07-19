@@ -8,7 +8,7 @@ WORKDIR /app
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
+ARG BUILD_CONFIGURATION=Debug
 WORKDIR /src
 COPY ["Code/Services/Garbage/Garbage.csproj", "Code/Services/Garbage/"]
 RUN dotnet restore "./Code/Services/Garbage/Garbage.csproj"
@@ -25,4 +25,4 @@ RUN dotnet publish "./Garbage.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Gudel.Glogware.Services.Garbage.dll"]
+ENTRYPOINT ["dotnet", "Gudel.GLogWare.Services.Garbage.dll"]

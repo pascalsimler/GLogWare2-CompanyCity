@@ -40,7 +40,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
         ILogger<BridgeSimulator> logger,
         IConfiguration configuration,
         IPlcDriver plcSimulatorDriver,
-       IDbContextFactory<GLogWareDbContext> dbContextFactory)
+        IDbContextFactory<GLogWareDbContext> dbContextFactory)
     {
         _logger = logger;
         _configuration = configuration;
