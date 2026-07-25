@@ -1,4 +1,5 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
 using System.Timers;
 
 namespace Gudel.GLogWare.Services.BridgeSimulator;
@@ -125,7 +126,7 @@ public partial class BridgeSimulator
         m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
         m.Data = pm;
 
-        await SendGLogWareMessageToMqtt(_subscriptionTopic, m);
+        await SendGLogWareMessage(_subscriptionTopic, m);
     }
 
     private async Task SendCOMP(string jobId, string feedbackCode)
@@ -146,6 +147,6 @@ public partial class BridgeSimulator
         m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
         m.Data = pm;
 
-        await SendGLogWareMessageToMqtt(_subscriptionTopic, m);
+        await SendGLogWareMessage(_subscriptionTopic, m);
     }
 }

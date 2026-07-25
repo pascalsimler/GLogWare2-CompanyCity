@@ -1,7 +1,11 @@
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.LegacyPlcDriver;
+using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.MessageBus;
+using Gudel.GLogWare.MQTTMessageBus;
+using Gudel.GLogWare.PlcDriver;
 using Gudel.GLogWare.Services.BridgeSimulator;
-using Gudel.GLogWare.Shared;
 using Serilog;
 
 BridgeSimulator.OP = Environment.GetEnvironmentVariable("OP");
@@ -54,8 +58,9 @@ logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
-builder.Services.AddSingleton<IPlcDriver, LegacyPlcSimulatorDriver>();
 builder.Services.AddGLogWareDbContextFactory(connectionString);
+builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
+builder.Services.AddSingleton<IPlcDriver, LegacyPlcSimulatorDriver>();
 builder.Services.AddHostedService<BridgeSimulator>();
 
 builder.Services.AddWindowsService(options =>

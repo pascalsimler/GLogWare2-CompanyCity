@@ -1,4 +1,4 @@
-﻿namespace Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Ldap;
 
 public class Ldap
 {

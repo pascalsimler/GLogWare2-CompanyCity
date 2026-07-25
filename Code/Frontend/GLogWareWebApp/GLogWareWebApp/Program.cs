@@ -1,7 +1,7 @@
-using GLogWareWebApp.Client.Pages;
 using GLogWareWebApp.Components;
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
-using Gudel.GLogWare.Shared;
+using Gudel.GLogWare.Logging;
 using Serilog;
 using Serilog.Events;
 

@@ -1,4 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
+using Gudel.GLogWare.PlcDriver;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -104,8 +106,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         await SendToGLogWareAsync(t, true);
         _lastSentPlcMessage = plcMessage;
         _driverNotificationEventArgs = new DriverNotificationEventArgs();
-        _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSent;
-        _driverNotificationEventArgs.plcMessage = _lastSentPlcMessage;
+        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSent;
+        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
@@ -141,7 +143,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     _tcpClient = await listener.AcceptTcpClientAsync(token);
                     _logger.LogInformation($"Client connected from {_tcpClient.Client.RemoteEndPoint} !");
                     _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                    _driverNotificationEventArgs.notificationType = DriverNotificationType.Online;
+                    _driverNotificationEventArgs.NotificationType = DriverNotificationType.Online;
                     DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
                     //await SendCurrentSTAT();
@@ -170,7 +172,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     _logger.LogError(ex, $"Unexpected error !");
                 }
                 _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                _driverNotificationEventArgs.notificationType = DriverNotificationType.Offline;
+                _driverNotificationEventArgs.NotificationType = DriverNotificationType.Offline;
                 DriverNotification?.Invoke(this, _driverNotificationEventArgs);
             }
         }
@@ -251,8 +253,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                         _watchdogRetry.Stop();
                         _semaphoreSend.Release();
                         _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                        _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramSentAcknowledged;
-                        _driverNotificationEventArgs.plcMessage = _lastSentPlcMessage;
+                        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSentAcknowledged;
+                        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
                         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
                     }
                     else
@@ -310,8 +312,8 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
             }
 
             _driverNotificationEventArgs = new DriverNotificationEventArgs();
-            _driverNotificationEventArgs.notificationType = DriverNotificationType.TelegramReceived;
-            _driverNotificationEventArgs.plcMessage = plcMessage;
+            _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramReceived;
+            _driverNotificationEventArgs.PlcMessage = plcMessage;
             DriverNotification?.Invoke(this, _driverNotificationEventArgs);
             
             break;

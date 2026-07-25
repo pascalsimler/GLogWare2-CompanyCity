@@ -1,4 +1,4 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -28,10 +28,6 @@ public class GLogWareDbContextFactory : IDesignTimeDbContextFactory<GLogWareDbCo
 
         var options = DatabaseProviderHelper.databaseProvider switch
         {
-            DatabaseProvider.SqlServer =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseSqlServer(connectionString)
-                    .Options,
             DatabaseProvider.Oracle =>
                 new DbContextOptionsBuilder<GLogWareDbContext>()
                     .UseOracle(

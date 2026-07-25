@@ -1,4 +1,4 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Messages;
 
 namespace Gudel.GLogWare.LegacyPlcDriver;
 

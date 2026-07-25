@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Gudel.GLogWare.Shared;
+namespace Gudel.GLogWare.Logging;
 
 public class CustomLoggerEnricher : ILogEventEnricher
 {

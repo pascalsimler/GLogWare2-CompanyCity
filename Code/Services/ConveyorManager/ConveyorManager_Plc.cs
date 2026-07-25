@@ -1,4 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
+using Gudel.GLogWare.PlcDriver;
 
 namespace Gudel.GLogWare.Services.ConveyorManager;
 
@@ -26,15 +28,15 @@ public partial class ConveyorManager
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"notificationType=[{e.notificationType}]");
+        _logger.LogInformation($"notificationType=[{e.NotificationType}]");
 
-        if (e.notificationType == DriverNotificationType.TelegramReceived)
+        if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
-            await ProcessPlcMessage(e.plcMessage);
+            await ProcessPlcMessage(e.PlcMessage);
         }
         else
         {
-            _driverState = e.notificationType;
+            _driverState = e.NotificationType;
             switch (_driverState)
             {
                 case DriverNotificationType.Online:

@@ -1,7 +1,11 @@
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.LegacyPlcDriver;
+using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.MessageBus;
+using Gudel.GLogWare.MQTTMessageBus;
+using Gudel.GLogWare.PlcDriver;
 using Gudel.GLogWare.Services.ConveyorManager;
-using Gudel.GLogWare.Shared;
 using Serilog;
 
 ConveyorManager.OP = Environment.GetEnvironmentVariable("OP");
@@ -57,7 +61,9 @@ string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddGLogWareDbContextFactory(connectionString);
+builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 builder.Services.AddSingleton<IPlcDriver, LegacyPlcDriver>();
+builder.Services.AddSingleton<RouteService>();
 builder.Services.AddHostedService<ConveyorManager>();
 
 builder.Services.AddWindowsService(options =>

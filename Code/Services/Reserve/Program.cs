@@ -1,6 +1,7 @@
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Services.Reserve;
-using Gudel.GLogWare.Shared;
 using Serilog;
 
 Reserve.ServiceName = "Reserve";

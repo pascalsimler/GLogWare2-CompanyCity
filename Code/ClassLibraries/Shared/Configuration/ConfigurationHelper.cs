@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Configuration;
 
 /// <summary>
 /// Helper class for accessing the config and logfiles subfolders from any GLogWare services

@@ -1,4 +1,5 @@
-﻿<EditForm Model="@comp" OnValidSubmit="() => SendToGLogWare()">
+﻿@using Gudel.GLogWare.Messages
+<EditForm Model="@comp" OnValidSubmit="() => SendToGLogWare()">
     <DataAnnotationsValidator />
     <ValidationSummary />
 

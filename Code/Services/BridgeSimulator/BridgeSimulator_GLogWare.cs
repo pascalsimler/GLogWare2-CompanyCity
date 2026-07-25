@@ -1,4 +1,6 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
+using Gudel.GLogWare.PlcDriver;
 
 namespace Gudel.GLogWare.Services.BridgeSimulator;
 
@@ -27,13 +29,13 @@ public partial class BridgeSimulator
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        if (e.notificationType == DriverNotificationType.TelegramReceived)
+        if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
-            await ProcessGLogWareMessage(e.plcMessage);
+            await ProcessGLogWareMessage(e.PlcMessage);
         }
         else
         {
-            _driverState = e.notificationType;
+            _driverState = e.NotificationType;
             switch (_driverState)
             {
                 case DriverNotificationType.Online:

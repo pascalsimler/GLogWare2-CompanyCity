@@ -1,5 +1,6 @@
 using Gudel.GLogWare.EFCore.Infrastructure;
-using Gudel.GLogWare.Shared;
+using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
 using MQTTnet.Client;

@@ -1,5 +1,6 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
-using Gudel.GLogWare.Shared;
+using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.Services.ConveyorManager;

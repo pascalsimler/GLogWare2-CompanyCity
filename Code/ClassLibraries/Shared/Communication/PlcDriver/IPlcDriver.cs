@@ -1,4 +1,6 @@
-﻿namespace Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Messages;
+
+namespace Gudel.GLogWare.PlcDriver;
 
 public interface IPlcDriver
 {

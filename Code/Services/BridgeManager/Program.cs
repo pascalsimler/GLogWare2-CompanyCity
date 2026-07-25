@@ -1,10 +1,12 @@
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.LegacyPlcDriver;
+using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.MessageBus;
+using Gudel.GLogWare.MQTTMessageBus;
+using Gudel.GLogWare.PlcDriver;
 using Gudel.GLogWare.Services.BridgeManager;
-using Gudel.GLogWare.Shared;
-using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
-using System.Configuration.Provider;
 
 BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
 if (BridgeManager.OP == null)
@@ -60,6 +62,7 @@ string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddGLogWareDbContextFactory(connectionString);
+builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 builder.Services.AddSingleton<IPlcDriver, LegacyPlcDriver>();
 builder.Services.AddHostedService<BridgeManager>();
 

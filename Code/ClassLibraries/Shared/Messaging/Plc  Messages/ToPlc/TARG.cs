@@ -1,4 +1,4 @@
-﻿namespace Gudel.GLogWare.Shared;
+﻿namespace Gudel.GLogWare.Messages;
 
 public class TARG
 {

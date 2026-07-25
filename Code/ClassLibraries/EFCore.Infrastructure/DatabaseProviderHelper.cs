@@ -25,10 +25,9 @@ public static class DatabaseProviderHelper
         return databaseProvider switch 
         {
             DatabaseProvider.Oracle => "LOCALTIMESTAMP",
-            DatabaseProvider.SqlServer => "GETDATE()",
             DatabaseProvider.Postgres => "LOCALTIMESTAMP",
             DatabaseProvider.MySql => "CURRENT_TIMESTAMP(6)",
-            _ => string.Empty
+            _ => "GETDATE()"
         };
     }
 
@@ -37,10 +36,9 @@ public static class DatabaseProviderHelper
         return databaseProvider switch
         {
             DatabaseProvider.Oracle => "CLOB",
-            DatabaseProvider.SqlServer => "NVARCHAR(MAX)",
             DatabaseProvider.Postgres => "TEXT",
             DatabaseProvider.MySql => "LONGTEXT",
-            _ => string.Empty
+            _ => "NVARCHAR(MAX)"
         };
     }
 
@@ -59,9 +57,7 @@ public static class DatabaseProviderHelper
         return databaseProvider switch
         {
             DatabaseProvider.Oracle => snake.ToUpperInvariant(),
-            DatabaseProvider.SqlServer => name,
             DatabaseProvider.Postgres => snake.ToLowerInvariant(),
-            DatabaseProvider.MySql => name,
             _ => name
         };
     }
@@ -71,14 +67,6 @@ public static class DatabaseProviderHelper
     {
         switch (databaseProvider)
         {
-            case DatabaseProvider.SqlServer:
-                services.AddDbContext<GLogWareDbContext>(
-                    options => options.UseSqlServer(
-                        connectionString, 
-                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
-                    )
-                );
-                break;
             case DatabaseProvider.Oracle:
                 services.AddDbContext<GLogWareDbContext>(
                     options => options.UseOracle(
@@ -102,6 +90,14 @@ public static class DatabaseProviderHelper
                 services.AddDbContext<GLogWareDbContext>(
                     options => options.UseMySQL(
                         connectionString, 
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
+            default:
+                services.AddDbContext<GLogWareDbContext>(
+                    options => options.UseSqlServer(
+                        connectionString,
                         x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
                     )
                 );
@@ -116,14 +112,6 @@ public static class DatabaseProviderHelper
     {
         switch (databaseProvider)
         {
-            case DatabaseProvider.SqlServer:
-                services.AddDbContextFactory<GLogWareDbContext>(
-                    options => options.UseSqlServer(
-                        connectionString, 
-                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
-                    )
-                );
-                break;
             case DatabaseProvider.Oracle:
                 services.AddDbContextFactory<GLogWareDbContext>(
                     options => options.UseOracle(
@@ -151,6 +139,14 @@ public static class DatabaseProviderHelper
                     )
                 );
                 break;
+            default:
+                services.AddDbContextFactory<GLogWareDbContext>(
+                    options => options.UseSqlServer(
+                        connectionString,
+                        x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+                    )
+                );
+                break;
         }
 
         return services;
@@ -160,10 +156,6 @@ public static class DatabaseProviderHelper
     {
         var options = databaseProvider switch
         {
-            DatabaseProvider.SqlServer =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseSqlServer(connectionString)
-                    .Options,
             DatabaseProvider.Oracle =>
                 new DbContextOptionsBuilder<GLogWareDbContext>()
                     .UseOracle(

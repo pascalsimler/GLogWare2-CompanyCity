@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Gudel.GLogWare.Shared;
+namespace Gudel.GLogWare.Messages;
 
 public class GLogWareMessage
 {

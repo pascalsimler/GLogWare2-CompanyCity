@@ -1,5 +1,5 @@
-﻿using Gudel.GLogWare.EFCore.Infrastructure;
-using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Configuration;
+using Gudel.GLogWare.EFCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 

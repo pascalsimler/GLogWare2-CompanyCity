@@ -1,5 +1,5 @@
 ﻿using Gudel.GLogWare.EFCore.Domain;
-using Gudel.GLogWare.Shared;
+using Gudel.GLogWare.Logging;
 
 namespace Gudel.GLogWare.Services.DemoService;
 

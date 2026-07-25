@@ -1,6 +1,7 @@
+using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Services.Garbage;
-using Gudel.GLogWare.Shared;
 using Serilog;
 
 Garbage.ServiceName = "Garbage";

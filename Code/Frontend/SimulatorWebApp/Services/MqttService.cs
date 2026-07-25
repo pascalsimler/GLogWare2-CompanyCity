@@ -1,4 +1,4 @@
-﻿using Gudel.GLogWare.Shared;
+﻿using Gudel.GLogWare.Messages;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
