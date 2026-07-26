@@ -4,6 +4,7 @@ using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.Messages;
 using Gudel.GLogWare.PlcDriver;
 using Microsoft.EntityFrameworkCore;
+using System.Timers;
 
 namespace Gudel.GLogWare.Services.ConveyorSimulator;
 
@@ -25,9 +26,12 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
 
     #region Private members
     private string _subscriptionTopic { get; set; } = string.Empty;
+    private System.Timers.Timer _watchdogWakeup = null!;
+    private int _delayWakeup { get; set; } = 30000;
     private SemaphoreSlim _semaphoreLock = null!;
     #endregion
-   
+
+    #region Constructors
     public ConveyorSimulator(
         ILogger<ConveyorSimulator> logger,
         IConfiguration configuration,
@@ -41,7 +45,9 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
         _plcSimulatorDriver = plcSimulatorDriver;
         _dbContextFactory = dbContextFactory;
     }
+    #endregion
 
+    #region Public methods
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -51,6 +57,7 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
         await _messageBus.StartAsync();
         _ = StartPlcSimulatorDriverAsync(cancellationToken);
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
@@ -58,6 +65,7 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
 
@@ -65,9 +73,12 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
+        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
+    #endregion
 
+    #region Private methods
     private void LoadConfiguration()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -85,6 +96,8 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
 
         LoadGLogWareConfiguration();
         InitSimulation();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async void OnMessageBusNotification(object? sender, MessageBusNotificationEventArgs e)
@@ -114,6 +127,7 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
+        await Lock();
         try
         {
             GLogWareMessage m = GLogWareMessage.DeSerialize(payload)!;
@@ -140,6 +154,13 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
+        finally
+        {
+            Unlock();
+            ResetTimer(_watchdogWakeup);
+        }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     public async Task SendGLogWareMessage(string topic, GLogWareMessage m)
@@ -158,12 +179,35 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
         {
             _logger.LogError(ex, "Exception");
         }
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
+    private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        await SendWakeUp(_subscriptionTopic);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+
+    private async Task SendWakeUp(string topic)
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        GLogWareMessage gm = new GLogWareMessage();
+        gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
+        await SendGLogWareMessage(_subscriptionTopic, gm);
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
     private async Task Lock()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
+        _watchdogWakeup.Stop();
         await _semaphoreLock.WaitAsync();
         if (_db != null)
         {
@@ -180,8 +224,19 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
         _logger.LogInformation(LogMessages.EnterMethod);
 
         _semaphoreLock.Release();
+        _watchdogWakeup.Start();
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
 
+    private void ResetTimer(System.Timers.Timer timer)
+    {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
+        timer.Stop();
+        timer.Start();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
+    }
+    #endregion
 }

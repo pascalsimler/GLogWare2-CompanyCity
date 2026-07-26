@@ -1,6 +1,8 @@
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.MessageBus;
+using Gudel.GLogWare.MQTTMessageBus;
 using Serilog;
 using Serilog.Events;
 using SimulatorWebApp.Components;
@@ -52,7 +54,9 @@ logger.Information($"trigram=[{trigram}]");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<MqttService>();
+builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
+builder.Services.AddSingleton<MessageBusService>();
+builder.Services.AddHostedService<HostedMessageBusService>();
 
 builder.Services.AddWindowsService(options =>
 {

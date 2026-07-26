@@ -10,8 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Tables\Logs\LogPlcCategory.cs" />
-    <None Include="Tables\Topology\ResourceModeIdentifiers.cs" />
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

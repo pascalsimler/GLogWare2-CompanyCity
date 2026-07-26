@@ -97,7 +97,7 @@
         pm.Data = comp;
         m.Data = pm;
 
-        await MqttService.SendMessage(topic, m);
+        await MessageBusService.SendMessage(topic, m);
     }
 
     private async Task OnExecutionTimeChangedAsync(string value)
@@ -114,6 +114,6 @@
         m.Identifier = GLogWareMessageIdentifiers.Configuration;
         m.Data = bridgeConfiguration;
         
-        await MqttService.SendMessage(topic, m);
+        await MessageBusService.SendMessage(topic, m);
     }
 }

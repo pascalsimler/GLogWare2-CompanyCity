@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<AssemblyName>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyName>
 		<RootNamespace>Gudel.GLogWare.$(MSBuildProjectName)</RootNamespace>
+		<AssemblyTitle>Gudel.GLogWare.$(MSBuildProjectName)</AssemblyTitle>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,7 +24,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26200" />
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26300" />
 		<PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
 	</ItemGroup>
 		

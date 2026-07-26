@@ -31,6 +31,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     private SemaphoreSlim _semaphoreLock = null!;
     #endregion
 
+    #region Constructors
     public BridgeManager(
         ILogger<BridgeManager> logger,
         IConfiguration configuration,
@@ -44,7 +45,9 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         _plcDriver = plcDriver;
         _dbContextFactory = dbContextFactory;
     }
+    #endregion
 
+    #region Public methods
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -80,7 +83,9 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
         _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
+    #endregion
 
+    #region Private methods
     private void LoadConfiguration()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -235,7 +240,12 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
     private void ResetTimer(System.Timers.Timer timer)
     {
+        _logger.LogInformation(LogMessages.EnterMethod);
+
         timer.Stop();
         timer.Start();
+
+        _logger.LogInformation(LogMessages.LeaveMethod);
     }
+    #endregion
 }

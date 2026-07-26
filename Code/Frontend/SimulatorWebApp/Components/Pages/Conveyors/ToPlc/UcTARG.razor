@@ -266,6 +266,6 @@
         pm.Data = targ;
         m.Data = pm;
 
-        await MqttService.SendMessage(topic, m);
+        await MessageBusService.SendMessage(topic, m);
     }
 }

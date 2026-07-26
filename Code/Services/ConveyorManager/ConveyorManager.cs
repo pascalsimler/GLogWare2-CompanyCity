@@ -32,6 +32,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
     private SemaphoreSlim _semaphoreLock = null!;
     #endregion
 
+    #region Constructors
     public ConveyorManager(
         ILogger<ConveyorManager> logger,
         IConfiguration configuration,
@@ -48,7 +49,9 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
         _routeService = routeService;
         _dbContextFactory = dbContextFactory;
     }
+    #endregion
 
+    #region Public methods
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -84,7 +87,9 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
         _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }
+    #endregion
 
+    #region Private methods
     private void LoadConfiguration()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -241,4 +246,5 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
         timer.Stop();
         timer.Start();
     }
+    #endregion
 }

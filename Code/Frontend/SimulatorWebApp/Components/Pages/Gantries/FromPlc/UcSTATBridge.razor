@@ -62,6 +62,6 @@
         pm.Data = stat;
         m.Data = pm;
 
-        await MqttService.SendMessage(topic, m);
+        await MessageBusService.SendMessage(topic, m);
     }
 }

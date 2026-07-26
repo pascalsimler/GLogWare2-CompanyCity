@@ -19,5 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ClassLibraries\EFCore.Infrastructure\EFCore.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\ClassLibraries\MQTTMessageBus\MQTTMessageBus.csproj" />
   </ItemGroup>
 </Project>

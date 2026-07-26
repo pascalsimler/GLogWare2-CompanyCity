@@ -3,6 +3,8 @@ using Gudel.GLogWare.EFCore.Infrastructure;
 using Serilog;
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.Logging;
+using Gudel.GLogWare.MessageBus;
+using Gudel.GLogWare.MQTTMessageBus;
 
 DemoService.ServiceName = "DemoService";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
@@ -50,6 +52,7 @@ string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
 
 builder.Services.AddGLogWareDbContextFactory(connectionString);
+builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 builder.Services.AddHostedService<DemoService>();
 
 builder.Services.AddWindowsService(options =>
