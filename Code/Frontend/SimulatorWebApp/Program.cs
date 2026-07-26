@@ -54,6 +54,7 @@ logger.Information($"trigram=[{trigram}]");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 builder.Services.AddSingleton<MessageBusService>();
 builder.Services.AddHostedService<HostedMessageBusService>();
