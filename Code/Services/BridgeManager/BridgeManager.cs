@@ -80,6 +80,13 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
+        _watchdogWakeup?.Dispose();
+        _semaphoreLock?.Dispose();
+        if (_db != null)
+        {
+            await _db.DisposeAsync();
+        }
+
         _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
     }

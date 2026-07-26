@@ -48,9 +48,9 @@ public partial class JobManager : IHostedService, IAsyncDisposable
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        LoadConfiguration();
-
         _semaphoreLock = new SemaphoreSlim(1);
+
+        LoadConfiguration();
 
         await _messageBus.StartAsync();
 
@@ -74,6 +74,13 @@ public partial class JobManager : IHostedService, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
+
+        _watchdogWakeup?.Dispose();
+        _semaphoreLock?.Dispose();
+        if (_db != null)
+        {
+            await _db.DisposeAsync();
+        }
 
         _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
