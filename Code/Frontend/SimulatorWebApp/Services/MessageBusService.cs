@@ -47,7 +47,6 @@ public class MessageBusService
 
         try
         {
-            topic = $"{_configuration[$"MQTTBroker:RootTopic"]}/{topic}";
             m.Sender = "Simulator";
             payload = m.Serialize();
 
