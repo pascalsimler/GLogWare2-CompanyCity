@@ -614,6 +614,7 @@ public class LegacyPlcDriver: IPlcDriver
         try
         {
             using GLogWareDbContext db = _dbContextFactory.CreateDbContext();
+            logPlc.Process = _op;
             logPlc.Category = (_op.Substring(_op.Length-2)) switch
             {
                 "BR" => nameof(LogPlcCategoryIdentifiers.GANTRY),
