@@ -40,9 +40,10 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
 logger.Information($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.databaseProvider.ToString();
-logger.Information($"databaseProvider=[{databaseProvider}]");
-string connectionString = builder.Configuration[$"ConnectionString_{databaseProvider}"]!;
+string providerName = builder.Configuration[$"Database:Provider"]!;
+logger.Information($"providerName=[{providerName}]");
+DatabaseProviderHelper.SetDatabaseProvider(providerName);
+string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
 logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
 logger.Information($"trigram=[{trigram}]");
@@ -52,6 +53,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddGLogWareDbContext(connectionString);
+ 
 builder.Services.AddWindowsService(options =>
 {
     options.ServiceName = $"{trigram}-GLogWareWebApp";

@@ -30,7 +30,7 @@ public class MessageBusService
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
               $"Simulator-{GetClientIp()}",
               []
           );

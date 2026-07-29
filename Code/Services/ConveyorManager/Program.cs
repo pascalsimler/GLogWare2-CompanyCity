@@ -11,7 +11,7 @@ using Serilog;
 ConveyorManager.OP = Environment.GetEnvironmentVariable("OP");
 if (ConveyorManager.OP == null)
 {
-    Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
+    Console.WriteLine("OP environement variable is not set !!! ==> Hasta la vista ...");
     return;
 }
 

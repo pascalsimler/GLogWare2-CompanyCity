@@ -11,7 +11,7 @@ using Serilog;
 BridgeManager.OP = Environment.GetEnvironmentVariable("OP");
 if (BridgeManager.OP == null)
 {
-    Console.WriteLine("OP environement variable is not set !!! ==> Asta la vista ...");
+    Console.WriteLine("OP environement variable is not set !!! ==> Hasta la vista ...");
     return;
 }
 

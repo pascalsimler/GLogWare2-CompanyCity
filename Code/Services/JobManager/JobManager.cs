@@ -94,7 +94,7 @@ public partial class JobManager : IHostedService, IAsyncDisposable
 
         _subscriptionTopic = $"{ServiceName}/Incoming"; ;
         _messageBus.MessageBusNotification += OnMessageBusNotification;
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
             ServiceName,
             new string[] {
                 _subscriptionTopic

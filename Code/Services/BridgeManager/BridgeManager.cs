@@ -99,7 +99,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
 
         _subscriptionTopic = $"GantryBridges/{OP}/Manager/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
             $"BridgeManager-{OP}", 
             new string[] { 
                 _subscriptionTopic

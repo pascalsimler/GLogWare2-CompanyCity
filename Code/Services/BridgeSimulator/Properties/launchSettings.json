@@ -9,7 +9,11 @@
       "dotnetRunMessages": true
     },
     "Container (Dockerfile)": {
-      "commandName": "Docker"
+      "commandName": "Docker",
+      "environmentVariables": {
+        "OP": "OP7100BR"
+      },
+      "containerRunArguments": "-p 7100:7100"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"

@@ -94,7 +94,7 @@ public partial class ConveyorSimulator : IHostedService, IAsyncDisposable
 
         _subscriptionTopic = $"Conveyors/{OP}/Simulation/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
             $"BridgeSimulator-{OP}",
             new string[] {
                 _subscriptionTopic

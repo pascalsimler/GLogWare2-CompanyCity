@@ -29,6 +29,7 @@ public class MQTTMessageBus : IMessageBus
     public event EventHandler<MessageBusNotificationEventArgs>? MessageBusNotification;
     #endregion
 
+    #region Constructors
     public MQTTMessageBus(
         ILogger<MQTTMessageBus> logger,
         IConfiguration configuration
@@ -37,8 +38,10 @@ public class MQTTMessageBus : IMessageBus
         _logger = logger;
         _configuration = configuration;
     }
+    #endregion
 
-    public void LoadConfiguration(string clientId, string[] subscriptionTopics)
+    #region Public members
+    public void Init(string clientId, string[] subscriptionTopics)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
         _logger.LogInformation($"clientId=[{clientId}]");
@@ -110,7 +113,9 @@ public class MQTTMessageBus : IMessageBus
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
+    #endregion region
 
+    #region Private members
     private Task OnConnected(MqttClientConnectedEventArgs args)
     {
         RaiseNotification(
@@ -151,4 +156,5 @@ public class MQTTMessageBus : IMessageBus
                 Payload = payload
             });
     }
+    #endregion
 }

@@ -96,7 +96,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
 
         _subscriptionTopic = $"GantryBridges/{OP}/Simulation/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
             $"BridgeSimulator-{OP}",
             new string[] {
                 _subscriptionTopic

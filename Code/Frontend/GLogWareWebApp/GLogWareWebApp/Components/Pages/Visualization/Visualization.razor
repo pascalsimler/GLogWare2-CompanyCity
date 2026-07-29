@@ -1,0 +1,176 @@
+﻿@page "/visualization"
+@rendermode InteractiveServer
+@using System
+@using System.Collections.Generic
+@using Gudel.GLogWare.EFCore.Infrastructure
+@inject GLogWareDbContext _db
+
+<h3>Visualization</h3>
+<br /><br />
+
+<div>
+    <svg @ref="_svgRef" width="@SvgWidth" height="@SvgHeight" viewBox="0 0 @SvgWidth @SvgHeight">
+        <rect x="0" y="0" width="@SvgWidth" height="@SvgHeight" rx="8" ry="8" fill="#f3f4f6" stroke="#d1d5db" />
+
+        @foreach (var cell in _cells)
+        {
+            var cx = cell.Cx;
+            var cy = cell.Cy;
+            var fill = cell.Selected ? SelectedFill : UnselectedFill;
+            var stroke = cell.Selected ? SelectedStroke : UnselectedStroke;
+
+            <GantryCell Cx="cell.Cx"
+                           Cy="cell.Cy"
+                           Radius="Radius"
+                           Number="cell.Number"
+                           Selected="cell.Selected"
+                           FontSize="FontSize"
+                           OnToggle="@(() => Toggle(cell))" 
+            />
+        }
+    </svg>
+
+    @if (SelectedCells.Any())
+    {
+        <div class="selected-panel">
+            <h3>Selected Cells (@SelectedCells.Count())</h3>
+            <table class="selected-table">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Col</th>
+                        <th>Current Number</th>
+                        <th>New Number</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cell in SelectedCells)
+                    {
+                        <tr>
+                            <td>@cell.Row</td>
+                            <td>@cell.Col</td>
+                            <td>@cell.Number</td>
+                            <td>
+                                <input type="number" 
+                                       min="1" 
+                                       max="9" 
+                                       @bind="cell.TempNumber" 
+                                       class="number-input" />
+                            </td>
+                            <td>
+                                <button @onclick="@(() => UpdateCellNumber(cell))" class="update-btn">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="panel-actions">
+                <button @onclick="UpdateAllSelected" class="update-all-btn">Update All</button>
+                <button @onclick="ClearSelection" class="clear-btn">Clear Selection</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private const double Ratio = 15.0; // ratio d'échelle pour l'affichage
+    private double SvgWidth = 0;
+    private double SvgHeight = 0;
+
+    // Visual configuration (px)
+    private double Radius = 475 / Ratio; // rayon d'un cercle
+    private const double Padding = 12; // marge intérieure du rectangle
+    private const string SelectedFill = "#ff7b7b"; // couleur quand sélectionné
+    private const string UnselectedFill = "#bde0fe"; // couleur normale
+    private const string SelectedStroke = "#b30000";
+    private const string UnselectedStroke = "#0366d6";
+    private const int FontSize = 40;
+
+    private Random _rng = new();
+    private List<Cell> _cells = new();
+    private ElementReference _svgRef;
+
+    private IEnumerable<Cell> SelectedCells => _cells.Where(c => c.Selected);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _cells = new List<Cell>();
+
+        var q = _db.Places.Where(x => x.Area == "GANTRY");
+
+        foreach (var c in q)
+        {
+            if (c.XPos > SvgWidth) SvgWidth = c.XPos;
+            if (c.YPos > SvgHeight) SvgHeight = c.YPos;
+
+            _cells.Add(new Cell
+            {
+                Row = int.Parse(c.YCell),
+                Col = int.Parse(c.XCell),
+                Number = _rng.Next(1, 10), // 1..9 inclus
+                Selected = false,
+                Cx = Radius + c.XPos / Ratio,
+                Cy = 2*Radius + c.YPos / Ratio    
+            });
+        }
+
+        SvgWidth = SvgWidth / Ratio  + 2*Radius;
+        SvgHeight = SvgHeight / Ratio + 3*Radius;
+    }
+
+    private void Toggle(Cell cell)
+    {
+        cell.Selected = !cell.Selected;
+        if (cell.Selected)
+        {
+            cell.TempNumber = cell.Number;
+        }
+        StateHasChanged();
+    }
+
+    private void UpdateCellNumber(Cell cell)
+    {
+        if (cell.TempNumber >= 1 && cell.TempNumber <= 9)
+        {
+            cell.Number = cell.TempNumber;
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateAllSelected()
+    {
+        foreach (var cell in SelectedCells)
+        {
+            if (cell.TempNumber >= 1 && cell.TempNumber <= 9)
+            {
+                cell.Number = cell.TempNumber;
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void ClearSelection()
+    {
+        foreach (var cell in _cells)
+        {
+            cell.Selected = false;
+        }
+        StateHasChanged();
+    }
+
+    private class Cell
+    {
+        public int Row { get; set; }
+        public int Col { get; set; }
+        public int Number { get; set; }
+        public bool Selected { get; set; }
+        public double Cx { get; set; }
+        public double Cy { get; set; }
+        public int TempNumber { get; set; }
+    }
+}

@@ -103,7 +103,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
 
         _subscriptionTopic = $"Conveyors/{OP}/Manager/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
-        _messageBus.LoadConfiguration(
+        _messageBus.Init(
             $"ConveyorManager-{OP}",
             new string[] {
                 _subscriptionTopic

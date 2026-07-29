@@ -1,0 +1,42 @@
+﻿@rendermode InteractiveServer
+
+<g transform="translate(@Cx, @Cy)"
+   style="cursor:pointer"
+   @onclick="OnClick">
+    <circle cx="0"
+            cy="0"
+            r="@Radius"
+            fill="@Fill"
+            stroke="@Stroke"
+            stroke-width="1.2" />
+    <text x="0"
+          y="0"
+          text-anchor="middle"
+          dominant-baseline="central"
+          font-family="Segoe UI, Arial"
+          font-size="@FontSize">
+        @Number
+    </text>
+</g>
+
+@code {
+    [Parameter] public double Cx { get; set; }
+    [Parameter] public double Cy { get; set; }
+    [Parameter] public double Radius { get; set; }
+    [Parameter] public int Number { get; set; }
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public int FontSize { get; set; }
+
+    [Parameter] public EventCallback OnToggle { get; set; }
+
+    private string Fill => Selected ? "#ff7b7b" : "#bde0fe";
+    private string Stroke => Selected ? "#b30000" : "#0366d6";
+
+    private async Task OnClick()
+    {
+        if (OnToggle.HasDelegate)
+        {
+            await OnToggle.InvokeAsync();
+        }
+    }
+}
