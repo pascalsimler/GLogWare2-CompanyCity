@@ -39,7 +39,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     public event EventHandler<DriverNotificationEventArgs>? DriverNotification;
     #endregion
 
-    #region Constructor
+    #region Constructors
     public LegacyPlcSimulatorDriver(
         ILogger<LegacyPlcDriver> logger,
         IConfiguration configuration)

@@ -26,10 +26,11 @@
     [Parameter] public int Number { get; set; }
     [Parameter] public bool Selected { get; set; }
     [Parameter] public int FontSize { get; set; }
+    [Parameter] public string? Zob { get; set; }
 
     [Parameter] public EventCallback OnToggle { get; set; }
 
-    private string Fill => Selected ? "#ff7b7b" : "#bde0fe";
+    private string Fill => Selected ? "#ff7b7b" : Zob;
     private string Stroke => Selected ? "#b30000" : "#0366d6";
 
     private async Task OnClick()

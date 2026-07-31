@@ -14,17 +14,13 @@
 
         @foreach (var cell in _cells)
         {
-            var cx = cell.Cx;
-            var cy = cell.Cy;
-            var fill = cell.Selected ? SelectedFill : UnselectedFill;
-            var stroke = cell.Selected ? SelectedStroke : UnselectedStroke;
-
-            <GantryCell Cx="cell.Cx"
-                           Cy="cell.Cy"
-                           Radius="Radius"
-                           Number="cell.Number"
-                           Selected="cell.Selected"
-                           FontSize="FontSize"
+            <GantryCell Cx="@cell.Cx"
+                           Cy="@cell.Cy"
+                           Radius="@Radius"
+                           Number="@cell.Number"
+                           Selected="@cell.Selected"
+                           FontSize="@FontSize"
+                           Zob="@cell.Zob"
                            OnToggle="@(() => Toggle(cell))" 
             />
         }
@@ -115,7 +111,8 @@
                 Number = _rng.Next(1, 10), // 1..9 inclus
                 Selected = false,
                 Cx = Radius + c.XPos / Ratio,
-                Cy = 2*Radius + c.YPos / Ratio    
+                Cy = 2*Radius + c.YPos / Ratio,
+                Zob = $"#{_rng.Next(0x1000000):X6}"
             });
         }
 
@@ -172,5 +169,6 @@
         public double Cx { get; set; }
         public double Cy { get; set; }
         public int TempNumber { get; set; }
+        public string? Zob { get; set; }
     }
 }

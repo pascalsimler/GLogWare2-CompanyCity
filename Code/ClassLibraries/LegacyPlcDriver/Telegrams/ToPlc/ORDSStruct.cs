@@ -30,7 +30,7 @@ public struct ORDSStruct: ILegacyPlcStruct<ORDS, ORDSStruct>
     {
         ORDSStruct ordsStruct = new ORDSStruct();
 
-        ordsStruct.Jobid = data.Substring(0,16);
+        ordsStruct.Jobid = data.Substring(0, 16);
         ordsStruct.Article = data.Substring(16, 16);
         ordsStruct.Order = data.Substring(32, 16);
         ordsStruct.PickType = data.Substring(48, 1);

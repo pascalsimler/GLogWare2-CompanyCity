@@ -1,10 +1,6 @@
 <Solution>
   <Folder Name="/Code/">
     <File Path="Code/readme.txt" />
-    <Project Path="Code/Database/Database.sqlproj" Id="76d1a6c0-1f13-4b3d-a31d-9e11faf78262">
-      <Build />
-      <Deploy />
-    </Project>
   </Folder>
   <Folder Name="/Code/ClassLibraries/">
     <File Path="Code/ClassLibraries/readme.txt" />

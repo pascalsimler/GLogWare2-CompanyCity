@@ -46,7 +46,7 @@ public class LegacyPlcDriver: IPlcDriver
     private DriverNotificationEventArgs _driverNotificationEventArgs = null!;
     #endregion region
 
-    #region Constructor
+    #region Constructors
     public LegacyPlcDriver(
         ILogger<LegacyPlcDriver> logger,
         IConfiguration configuration,
