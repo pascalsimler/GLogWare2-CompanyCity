@@ -25,6 +25,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
+    private string _configPath => $"BridgeSimulator:{OP}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
@@ -97,13 +98,13 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
         _subscriptionTopic = $"GantryBridges/{OP}/Simulation/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
         _messageBus.Init(
-            $"BridgeSimulator-{OP}",
+            ServiceName,
             new string[] {
                 _subscriptionTopic
             }
         );
-        //    if (int.TryParse(_configuration[$"{path}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
-        //    _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
+        if (int.TryParse(_configuration[$"{_configPath}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
+        _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
 
         LoadGLogWareConfiguration();
         InitSimulation();

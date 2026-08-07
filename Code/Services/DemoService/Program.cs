@@ -34,7 +34,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "DemoService"),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, DemoService.ServiceName),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -57,7 +57,7 @@ builder.Services.AddHostedService<DemoService>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-DemoService";
+    options.ServiceName = $"{trigram}-{DemoService.ServiceName}";
 });
 
 var host = builder.Build();

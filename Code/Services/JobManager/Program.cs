@@ -33,7 +33,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "JobManager"),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, JobManager.ServiceName),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -56,7 +56,7 @@ builder.Services.AddHostedService<JobManager>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-JobManager";
+    options.ServiceName = $"{trigram}-{JobManager.ServiceName}";
 });
 
 var host = builder.Build();

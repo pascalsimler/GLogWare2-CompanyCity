@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Communication\PlcDriver\LegacyPlcDriver\**" />
+    <EmbeddedResource Remove="Communication\PlcDriver\LegacyPlcDriver\**" />
+    <None Remove="Communication\PlcDriver\LegacyPlcDriver\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Messaging\Plc  Messages\FromPlc\STATConveyor.cs" />
   </ItemGroup>
 
@@ -20,10 +26,6 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Communication\PlcDriver\LegacyPlcDriver\" />
   </ItemGroup>
 
 </Project>

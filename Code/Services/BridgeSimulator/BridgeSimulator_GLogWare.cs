@@ -14,7 +14,7 @@ public partial class BridgeSimulator
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _plcSimulatorDriver.LoadConfiguration($"GantryBridges:{OP}");
+        _plcSimulatorDriver.LoadConfiguration(_configPath);
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)

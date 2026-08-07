@@ -14,7 +14,7 @@ public partial class ConveyorSimulator
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _plcSimulatorDriver.LoadConfiguration($"Conveyors:{OP}");
+        _plcSimulatorDriver.LoadConfiguration(_configPath);
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)

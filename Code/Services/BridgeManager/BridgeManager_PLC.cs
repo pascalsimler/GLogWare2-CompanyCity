@@ -10,11 +10,12 @@ public partial class BridgeManager
     private DriverNotificationType _driverState = DriverNotificationType.Offline;
     #endregion region
 
+    #region Private methods
     private void LoadPlcConfiguration()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _plcDriver.LoadConfiguration($"GantryBridges:{OP}");
+        _plcDriver.LoadConfiguration(_configPath);
     }
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)
@@ -90,4 +91,5 @@ public partial class BridgeManager
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
+    #endregion
 }

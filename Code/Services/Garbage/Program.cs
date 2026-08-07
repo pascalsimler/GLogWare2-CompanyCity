@@ -33,7 +33,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "Garbage"),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, Garbage.ServiceName),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -56,7 +56,7 @@ builder.Services.AddHostedService<Garbage>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-Garbage";
+    options.ServiceName = $"{trigram}-{Garbage.ServiceName}";
 });
 
 var host = builder.Build();

@@ -65,7 +65,7 @@ builder.Services.AddHostedService<BridgeSimulator>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeSimulator-{BridgeSimulator.OP}";
+    options.ServiceName = $"{trigram}-{BridgeSimulator.ServiceName}";
 });
 
 var host = builder.Build();

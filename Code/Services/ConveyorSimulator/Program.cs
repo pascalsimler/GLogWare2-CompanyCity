@@ -65,7 +65,7 @@ builder.Services.AddHostedService<ConveyorSimulator>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeSimulator-{ConveyorSimulator.OP}";
+    options.ServiceName = $"{trigram}-{ConveyorSimulator.ServiceName}";
 });
 
 var host = builder.Build();

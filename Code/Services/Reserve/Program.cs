@@ -33,7 +33,7 @@ if (enableSystemLogging == 0)
 var logger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
-        path: ConfigurationHelper.GetLogFilePath(projectRootPath, "Reserve"),
+        path: ConfigurationHelper.GetLogFilePath(projectRootPath, Reserve.ServiceName),
         flushToDiskInterval: TimeSpan.FromSeconds(1),
         rollingInterval: RollingInterval.Day,
         outputTemplate: logMessageTemplate)
@@ -56,7 +56,7 @@ builder.Services.AddHostedService<Reserve>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-Reserve";
+    options.ServiceName = $"{trigram}-{Reserve.ServiceName}";
 });
 
 var host = builder.Build();

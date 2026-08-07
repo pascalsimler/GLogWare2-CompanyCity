@@ -26,6 +26,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
+    private string _configPath => $"ConveyorManager:{OP}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
@@ -104,13 +105,13 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
         _subscriptionTopic = $"Conveyors/{OP}/Manager/Incoming";
         _messageBus.MessageBusNotification += OnMessageBusNotification;
         _messageBus.Init(
-            $"ConveyorManager-{OP}",
+            ServiceName,
             new string[] {
                 _subscriptionTopic
             }
         );
-        //    if (int.TryParse(_configuration[$"{path}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
-        //    _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
+        if (int.TryParse(_configuration[$"{_configPath}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
+        _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
 
         LoadPlcConfiguration();
 

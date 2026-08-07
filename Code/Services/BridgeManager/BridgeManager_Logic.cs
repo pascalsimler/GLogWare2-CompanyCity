@@ -11,6 +11,9 @@ public partial class BridgeManager
     private JobTypeIdentifiers _lastJobType;
     #endregion
 
+    #region Private methods
+
+    #region Orrders in general
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -112,7 +115,9 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.LeaveMethod);
         return rValue;
     }
+#endregion
 
+    #region Input orders
     private async Task<bool> VerifyConditionsToStartInputOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -158,7 +163,9 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.LeaveMethod);
         return rValue;
     }
+    #endregion
 
+    #region Output orders
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -204,7 +211,9 @@ public partial class BridgeManager
         _logger.LogInformation(LogMessages.LeaveMethod);
         return rValue;
     }
+    #endregion
 
+    #region Relocation orders
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -237,7 +246,9 @@ public partial class BridgeManager
         _lastJobType = JobTypeIdentifiers.RELOCATION;
         return true;
     }
+    #endregion
 
+    #region Palletizing orders
     private async Task<bool> VerifyConditionsToStartPalletizingOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -262,7 +273,9 @@ public partial class BridgeManager
         _lastJobType = JobTypeIdentifiers.PALLETIZING;
         return true;
     }
+    #endregion
 
+    #region PLC notifications
     private async Task Process_STAT(STATBridge stat)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
@@ -330,4 +343,7 @@ public partial class BridgeManager
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
+    #endregion
+
+    #endregion
 }

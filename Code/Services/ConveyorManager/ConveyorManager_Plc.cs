@@ -14,7 +14,7 @@ public partial class ConveyorManager
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _plcDriver.LoadConfiguration($"Conveyors:{OP}");
+        _plcDriver.LoadConfiguration(_configPath);
     }
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)

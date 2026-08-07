@@ -22,6 +22,7 @@ public partial class Reserve: IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
+    private string _configPath => $"{ServiceName}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
@@ -99,8 +100,8 @@ public partial class Reserve: IHostedService, IAsyncDisposable
                 _subscriptionTopic
             }
         );
-        //    if (int.TryParse(_configuration[$"{path}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
-        //    _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
+        if (int.TryParse(_configuration[$"{_configPath}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
+        _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }

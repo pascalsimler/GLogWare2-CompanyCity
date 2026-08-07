@@ -68,7 +68,7 @@ builder.Services.AddHostedService<BridgeManager>();
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = $"{trigram}-BridgeManager-{BridgeManager.OP}";
+    options.ServiceName = $"{trigram}-{BridgeManager.ServiceName}";
 });
 
 var host = builder.Build();
