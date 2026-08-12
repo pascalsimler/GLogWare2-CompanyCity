@@ -13,7 +13,7 @@ public partial class BridgeManager
 
     #region Private methods
 
-    #region Orrders in general
+    #region Orders in general
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
         _logger.LogInformation(LogMessages.EnterMethod);

@@ -1,5 +1,4 @@
-﻿using Google.Protobuf;
-using Gudel.GLogWare.EFCore.Infrastructure;
+﻿using Gudel.GLogWare.EFCore.Infrastructure;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.Messages;
@@ -211,7 +210,7 @@ public partial class JobManager : IHostedService, IAsyncDisposable
             _db.Dispose();
             _db = null!;
         }
-        _db = _dbContextFactory.CreateDbContext();
+        _db = await _dbContextFactory.CreateDbContextAsync();
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }

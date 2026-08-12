@@ -234,7 +234,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
             _db.Dispose();
             _db = null!;
         }
-        _db = _dbContextFactory.CreateDbContext();
+        _db = await _dbContextFactory.CreateDbContextAsync();
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }

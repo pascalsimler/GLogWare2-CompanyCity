@@ -20,34 +20,35 @@ public class GLogWareDbContextFactory : IDesignTimeDbContextFactory<GLogWareDbCo
             )
             .Build();
 
-        string providerName = configuration[$"Database:Provider"]!;
-        Console.WriteLine($"Database:Provider=[{providerName}]");
+        DatabaseProviderHelper.SetDatabaseProvider();
         string connectionString = configuration[$"Database:ConnectionString"]!;
         Console.WriteLine($"Database:ConnectionString=[{connectionString}]");
-        DatabaseProviderHelper.SetDatabaseProvider(providerName);
 
-        var options = DatabaseProviderHelper.databaseProvider switch
-        {
-            DatabaseProvider.Oracle =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseOracle(
-                        connectionString, 
-                        x => x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
-                    )
-                    .Options,
-            DatabaseProvider.Postgres =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseNpgsql(connectionString)
-                    .Options,
-            DatabaseProvider.MySql =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseMySQL(connectionString)
-                    .Options,
-            _ =>
-                new DbContextOptionsBuilder<GLogWareDbContext>()
-                    .UseSqlServer(connectionString)
-                    .Options,
-        };
+
+        var options =
+#if SQLSERVER
+            new DbContextOptionsBuilder<GLogWareDbContext>()
+                .UseSqlServer(connectionString)
+                .Options;
+#endif
+#if ORACLE
+            new DbContextOptionsBuilder<GLogWareDbContext>()
+                .UseOracle(
+                    connectionString, 
+                    x => x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
+                )
+                .Options;
+#endif
+#if POSTGRES
+            new DbContextOptionsBuilder<GLogWareDbContext>()
+                .UseNpgsql(connectionString)
+                .Options;
+#endif
+#if MYSQL
+            new DbContextOptionsBuilder<GLogWareDbContext>()
+                .UseMySQL(connectionString)
+                .Options;
+#endif
 
         return new GLogWareDbContext(options);
     }

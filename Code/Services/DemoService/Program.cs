@@ -43,9 +43,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
 logger.Information($"projectRootPath=[{projectRootPath}]");
-string providerName = builder.Configuration[$"Database:Provider"]!;
-logger.Information($"providerName=[{providerName}]");
-DatabaseProviderHelper.SetDatabaseProvider(providerName);
 string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
 logger.Information($"connectionString=[{connectionString}]");
 string trigram = builder.Configuration[$"Project:Trigram"]!;
