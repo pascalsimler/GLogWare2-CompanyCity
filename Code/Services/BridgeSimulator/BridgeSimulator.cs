@@ -25,7 +25,7 @@ public partial class BridgeSimulator : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-    private string _configPath => $"BridgeSimulator:{OP}";
+    private string _configPath => $"GantryBridges:{OP}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;

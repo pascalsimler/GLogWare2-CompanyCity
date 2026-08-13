@@ -26,7 +26,7 @@ public partial class ConveyorManager : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-    private string _configPath => $"ConveyorManager:{OP}";
+    private string _configPath => $"Conveyors:{OP}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;

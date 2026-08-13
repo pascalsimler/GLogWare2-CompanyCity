@@ -25,7 +25,7 @@ public partial class BridgeManager : IHostedService, IAsyncDisposable
     #endregion
 
     #region Private members
-    public string _configPath => $"BridgeManager:{OP}";
+    public string _configPath => $"GantryBridges:{OP}";
     private string _subscriptionTopic { get; set; } = string.Empty;
     private System.Timers.Timer _watchdogWakeup = null!;
     private int _delayWakeup { get; set; } = 30000;
