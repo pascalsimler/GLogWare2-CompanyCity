@@ -1,5 +1,5 @@
-﻿using Gudel.GLogWare.EFCore.Domain;
-using Gudel.GLogWare.EFCore.Infrastructure;
+﻿using Gudel.GLogWare.Entities;
+using Gudel.GLogWare.Infrastructure;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Messages;
 using Gudel.GLogWare.PlcDriver;
@@ -59,28 +59,28 @@ public class LegacyPlcDriver: IPlcDriver
     #endregion
 
     #region Public methods
-    public void LoadConfiguration(string path)
+    public void LoadConfiguration(string configPath)
     {
         _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"path=[{path}]");
+        _logger.LogInformation("configPath=[{configPath}]", configPath);
 
-        _op = path.Substring(path.LastIndexOf(':') + 1);
-        _ip = _configuration[$"{path}:Ip"] ?? _ip;
-        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
-        if (int.TryParse(_configuration[$"{path}:DelayConnection"], out int tmpDelayConnection)) _delayConnection = tmpDelayConnection;
-        if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
-        if (int.TryParse(_configuration[$"{path}:DelayLife"], out int tmpDelayLife)) _delayLife = tmpDelayLife;
-        _validIdentifiers = _configuration[$"{path}:ValidPlcIdentifiers"] ?? string.Empty;
-        _validSenders = _configuration[$"{path}:ValidSenders"] ?? string.Empty;
+        _op = configPath.Substring(configPath.LastIndexOf(':') + 1);
+        _ip = _configuration[$"{configPath}:Ip"] ?? _ip;
+        if (int.TryParse(_configuration[$"{configPath}:Port"], out int tmpPort)) _port = tmpPort;
+        if (int.TryParse(_configuration[$"{configPath}:DelayConnection"], out int tmpDelayConnection)) _delayConnection = tmpDelayConnection;
+        if (int.TryParse(_configuration[$"{configPath}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
+        if (int.TryParse(_configuration[$"{configPath}:DelayLife"], out int tmpDelayLife)) _delayLife = tmpDelayLife;
+        _validIdentifiers = _configuration[$"{configPath}:ValidPlcIdentifiers"] ?? string.Empty;
+        _validSenders = _configuration[$"{configPath}:ValidSenders"] ?? string.Empty;
 
-        _logger.LogInformation($"_op=[{_op}]");
-        _logger.LogInformation($"_ip=[{_ip}]");
-        _logger.LogInformation($"_port=[{_port}]");
-        _logger.LogInformation($"_delayConnectionPlc=[{_delayConnection}]");
-        _logger.LogInformation($"_delayRetry=[{_delayRetry}]");
-        _logger.LogInformation($"_delayLife=[{_delayLife}]");
-        _logger.LogInformation($"_validIdentifiers=[{_validIdentifiers}]");
-        _logger.LogInformation($"_validSenders=[{_validSenders}]");
+        _logger.LogInformation("_op=[{_op}]", _op);
+        _logger.LogInformation("_ip=[{_ip}]", _ip);
+        _logger.LogInformation("_port=[{_port}]", _port);
+        _logger.LogInformation("_delayConnectionPlc=[{_delayConnection}]", _delayConnection);
+        _logger.LogInformation("_delayRetry=[{_delayRetry}]", _delayRetry);
+        _logger.LogInformation("_delayLife=[{_delayLife}]", _delayLife);
+        _logger.LogInformation("_validIdentifiers=[{_validIdentifiers}]", _validIdentifiers);
+        _logger.LogInformation("_validSenders=[{_validSenders}]", _validSenders);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
     }
@@ -100,10 +100,12 @@ public class LegacyPlcDriver: IPlcDriver
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        LegacyPlcTelegram t = new LegacyPlcTelegram();
-        t.Identifier = plcMessage.Identifier.ToString();
-        t.Sender = "GLOGWARE";
-        t.Receiver = plcMessage.Receiver;
+        LegacyPlcTelegram t = new()
+        {
+            Identifier = plcMessage.Identifier.ToString(),
+            Sender = "GLOGWARE",
+            Receiver = plcMessage.Receiver
+        };
         switch (plcMessage.Identifier)
         {
             case PlcMessageIdentifiers.LIFE:
@@ -121,9 +123,11 @@ public class LegacyPlcDriver: IPlcDriver
         }
         await SendToPlcAsync(t, true);
         _lastSentPlcMessage = plcMessage;
-        _driverNotificationEventArgs = new DriverNotificationEventArgs();
-        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSent;
-        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
+        _driverNotificationEventArgs = new DriverNotificationEventArgs()
+        {
+            NotificationType = DriverNotificationType.TelegramSent,
+            PlcMessage = _lastSentPlcMessage
+        };
         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
         _logger.LogInformation(LogMessages.LeaveMethod);
@@ -158,13 +162,17 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Connected to {_ip}:{_port} !";
                 _logger.LogInformation(information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
+                    LogPlc lp = new()
+                    {
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information
+                    };
                     await WriteLogPlcAsync(lp);
                 }
-                _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                _driverNotificationEventArgs.NotificationType = DriverNotificationType.Online;
+                _driverNotificationEventArgs = new()
+                {
+                    NotificationType = DriverNotificationType.Online
+                };
                 DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
                 using NetworkStream stream = _tcpClient.GetStream();
@@ -173,9 +181,11 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Connection closed by the PLC !";
                 _logger.LogWarning(information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
+                    LogPlc lp = new()
+                    {
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information
+                    };
                     await WriteLogPlcAsync(lp);
                 }
             }
@@ -184,10 +194,12 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Normal termination";
                 _logger.LogWarning(ex, information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    LogPlc lp = new()
+                    {
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information,
+                        Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+                    };
                     await WriteLogPlcAsync(lp);
                 }
                 break;
@@ -197,10 +209,12 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Socket error (Network or PLC inaccessible) !";
                 _logger.LogWarning(ex, information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    lp.Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}";
+                    LogPlc lp = new()
+                    { 
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information,
+                        Data = $"{ex.Source} ({ex.NativeErrorCode}): {ex.Message}\r\n{ex.StackTrace}"
+                    };
                     await WriteLogPlcAsync(lp);
                 }
             }
@@ -209,10 +223,12 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Connection interrupted !";
                 _logger.LogWarning(ex, information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    LogPlc lp = new()
+                    {
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information,
+                        Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+                    };
                     await WriteLogPlcAsync(lp);
                 }
             }
@@ -221,15 +237,19 @@ public class LegacyPlcDriver: IPlcDriver
                 information = $"Unexpected error !";
                 _logger.LogError(ex, information);
                 {
-                    LogPlc lp = new LogPlc();
-                    lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-                    lp.Information = information;
-                    lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+                    LogPlc lp = new()
+                    {
+                        Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                        Information = information,
+                        Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+                    };
                     await WriteLogPlcAsync(lp);
                 }
             }
-            _driverNotificationEventArgs = new DriverNotificationEventArgs();
-            _driverNotificationEventArgs.NotificationType = DriverNotificationType.Offline;
+            _driverNotificationEventArgs = new()
+            { 
+                NotificationType = DriverNotificationType.Offline
+            };
             DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
             if (!token.IsCancellationRequested)
@@ -253,7 +273,7 @@ public class LegacyPlcDriver: IPlcDriver
         int bytesRead = 0;
         int offset = 0;
         string information = string.Empty;
-        LegacyPlcTelegram t = new LegacyPlcTelegram();
+        LegacyPlcTelegram t = new();
 
         _logger.LogInformation(LogMessages.EnterMethod);
 
@@ -283,30 +303,36 @@ public class LegacyPlcDriver: IPlcDriver
         {
             information = $"Normal termination";
             _logger.LogWarning(ex, information);
-            LogPlc lp = new LogPlc();
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+            LogPlc lp = new()
+            {
+                Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                Information = information,
+                Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+            };
             await WriteLogPlcAsync(lp);
         }
         catch (IOException ex)
         {
             information = $"Connection interrupted !";
             _logger.LogWarning(ex, information);
-            LogPlc lp = new LogPlc();
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+            LogPlc lp = new()
+            {
+                Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                Information = information,
+                Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+            };
             await WriteLogPlcAsync(lp);
         }
         catch (Exception ex)
         {
             information = $"Unexpected error !";
             _logger.LogError(ex, information);
-            LogPlc lp = new LogPlc();
-            lp.Direction = LogPlcDirectionIdentifiers.GENERAL.ToString();
-            lp.Information = information;
-            lp.Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}";
+            LogPlc lp = new()
+            {
+                Direction = LogPlcDirectionIdentifiers.GENERAL.ToString(),
+                Information = information,
+                Data = $"{ex.Source}: {ex.Message}\r\n{ex.StackTrace}"
+            };
             await WriteLogPlcAsync(lp);
         }
 
@@ -318,8 +344,10 @@ public class LegacyPlcDriver: IPlcDriver
     {
         _logger.LogInformation(LogMessages.EnterMethod);
 
-        _lpReceive = new LogPlc();
-        _lpReceive.Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString();
+        _lpReceive = new()
+        {
+            Direction = LogPlcDirectionIdentifiers.PLC_TO_GLOGWARE.ToString()
+        };
 
         while (true)
         {
@@ -341,9 +369,11 @@ public class LegacyPlcDriver: IPlcDriver
                     {
                         _watchdogRetry.Stop();
                         _semaphoreSend.Release();
-                        _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSentAcknowledged;
-                        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
+                        _driverNotificationEventArgs = new()
+                        {
+                            NotificationType = DriverNotificationType.TelegramSentAcknowledged,
+                            PlcMessage = _lastSentPlcMessage
+                        };
                         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
                     }
                     else
@@ -387,9 +417,11 @@ public class LegacyPlcDriver: IPlcDriver
             }
             _lastReceivedCounter = t.Counter;
 
-            PlcMessage plcMessage = new PlcMessage();
-            plcMessage.Sender = t.Sender;
-            plcMessage.Receiver = t.Receiver;
+            PlcMessage plcMessage = new()
+            {
+                Sender = t.Sender,
+                Receiver = t.Receiver
+            };
             switch (t.Identifier)
             {
                 case nameof(PlcMessageIdentifiers.STAT):
@@ -416,9 +448,11 @@ public class LegacyPlcDriver: IPlcDriver
 
             await WriteLogPlcAsync(_lpReceive);
             
-            _driverNotificationEventArgs = new DriverNotificationEventArgs();
-            _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramReceived;
-            _driverNotificationEventArgs.PlcMessage = plcMessage;
+            _driverNotificationEventArgs = new()
+            {
+                NotificationType = DriverNotificationType.TelegramReceived,
+                PlcMessage = plcMessage
+            };
             DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
             break;
@@ -579,8 +613,10 @@ public class LegacyPlcDriver: IPlcDriver
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
                     if (!new[] { PlcMessageIdentifiers.ACKN.ToString() /*, PlcMessageIdentifiers.LIFE.ToString()*/ }.Contains(t.Identifier))
                     {
-                        LogPlc lpSend = new LogPlc();
-                        lpSend.Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString();
+                        LogPlc lpSend = new()
+                        {
+                            Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString()
+                        };
                         if (!isNew) lpSend.Information = "Retry !";
                         lpSend.Ackflag = t.AckFlag;
                         lpSend.Counter = t.Counter;

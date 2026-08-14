@@ -1,4 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Domain;
+﻿using Gudel.GLogWare.Entities;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Messages;
 using Microsoft.EntityFrameworkCore;

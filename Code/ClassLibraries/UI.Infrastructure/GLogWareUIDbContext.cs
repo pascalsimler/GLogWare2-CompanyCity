@@ -1,0 +1,153 @@
+﻿using Gudel.GLogWare.EFCore;
+using Gudel.GLogWare.UI.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+
+namespace Gudel.GLogWare.UI.Infrastructure;
+
+public partial class GLogWareUIDbContext(DbContextOptions<GLogWareUIDbContext> options) : DbContext(options)
+{
+    #region Entity Sets
+
+    #region Tables
+    
+    #region Language
+    public DbSet<Language> Languages => Set<Language>();
+    public DbSet<Dictionary> Dictionaries => Set<Dictionary>();
+    #endregion
+
+    #region User Management
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
+    #endregion
+    
+    #endregion
+
+    #region Views
+    //public DbSet<VInventory> VInventories => Set<VInventory>();
+    #endregion
+    
+    #endregion
+
+    #region Overrides
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // apply BaseTracking properties on all entities inhereting from it.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            entityType.SetTableName(DatabaseProviderHelper.ToProviderName(entityType.GetTableName()!));
+
+            foreach (var property in entityType.GetProperties())
+            {
+                property.SetColumnName(DatabaseProviderHelper.ToProviderName(property.GetColumnName()));
+            }
+
+            foreach (var key in entityType.GetKeys())
+            {
+                key.SetName(DatabaseProviderHelper.ToProviderName(key.GetName()!));
+            }
+
+            foreach (var fk in entityType.GetForeignKeys())
+            {
+                fk.SetConstraintName(DatabaseProviderHelper.ToProviderName(fk.GetConstraintName()!));
+            }
+
+            if (typeof(BaseTracking).IsAssignableFrom(entityType.ClrType))
+            {
+                var entity = modelBuilder.Entity(entityType.ClrType);
+
+                entity.Property(nameof(BaseTracking.CreatedBy))
+                      .HasMaxLength(50)
+                      .HasDefaultValueSql("'GÜDEL'")
+                      .ValueGeneratedOnAdd()
+                      .HasComment("User or process who created the record");
+
+                entity.Property(nameof(BaseTracking.ModifiedBy))
+                      .HasMaxLength(50)
+                      .HasDefaultValueSql("'GÜDEL'")
+                      .ValueGeneratedOnAdd()
+                      .HasComment("User or process who created the record");
+
+                entity.Property(nameof(BaseTracking.CreatedAt))
+                      .HasDefaultValueSql(DatabaseProviderHelper.GetNowSql())
+                      .ValueGeneratedOnAdd()
+                      .HasComment("Date/time the record was created");
+
+                entity.Property(nameof(BaseTracking.ModifiedAt))
+                      .HasDefaultValueSql(DatabaseProviderHelper.GetNowSql())
+                      .ValueGeneratedOnAdd()
+                      .HasComment("Date/time the record was updated for the last time");
+            }
+
+            switch (DatabaseProviderHelper.databaseProvider)
+            {
+                case DatabaseProvider.Postgres:
+                    foreach (var property in entityType.GetProperties())
+                    {
+                        if (property.ClrType == typeof(DateTime?))
+                        {
+                            property.SetColumnType("timestamp without time zone");
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // apply properties efined in dedicated Configuration classses for each entity
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(GLogWareUIDbContext).Assembly);
+
+        //Views
+        //modelBuilder.Entity<VInventory>().HasNoKey().ToView("VInventory");
+
+        // Seeding data. Data to seed is performed trough the SeedData method of the entity class itself
+        var seedableTypes = typeof(Language).Assembly
+                .GetTypes()
+                .Where(t => t.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISeedData<>)))
+                .Select(t => new
+                {
+                    Type = t,
+                    Order = t.GetCustomAttribute<SeedOrderAttribute>()?.Order ?? int.MaxValue
+                })
+                .OrderBy(x => x.Order);
+
+        foreach (var entry in seedableTypes)
+        {
+            var method = entry.Type.GetMethod("SeedData");
+            var data = method!.Invoke(null, null);
+
+            modelBuilder.Entity(entry.Type).HasData((IEnumerable<object>)data!);
+        }
+    }
+
+    public override int SaveChanges()
+    {
+        foreach (var entry in ChangeTracker.Entries<BaseTracking>())
+        {
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property(e => e.ModifiedAt).CurrentValue = DateTime.Now;
+            }
+        }
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in ChangeTracker.Entries<BaseTracking>())
+        {
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property(e => e.ModifiedAt).CurrentValue = DateTime.Now;
+            }
+        }
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    #endregion
+
+}

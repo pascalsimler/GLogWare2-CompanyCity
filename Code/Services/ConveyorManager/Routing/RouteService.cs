@@ -1,4 +1,4 @@
-﻿using Gudel.GLogWare.EFCore.Infrastructure;
+﻿using Gudel.GLogWare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.Services.ConveyorManager;
@@ -9,7 +9,6 @@ public class RouteService
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IDbContextFactory<GLogWareDbContext> _dbContextFactory;
-    private GLogWareDbContext _db = null!;
     #endregion
 
     #region private members

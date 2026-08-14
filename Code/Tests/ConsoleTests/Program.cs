@@ -1,5 +1,6 @@
 ﻿using Gudel.GLogWare.Configuration;
-using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.EFCore;
+using Gudel.GLogWare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -19,7 +20,7 @@ var configuration = new ConfigurationBuilder()
 string connectionString = configuration[$"Database:ConnectionString_{databaseProvider}"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
-GLogWareDbContext db = DatabaseProviderHelper.GetGLogWareDbContext(connectionString);
+GLogWareDbContext db = DatabaseProviderHelper.GetDbProviderContext<GLogWareDbContext>(connectionString);
 Console.WriteLine("DbContext successfully created");
 
 //foreach (var inv in db.VInventories)

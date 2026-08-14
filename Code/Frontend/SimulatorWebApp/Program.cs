@@ -1,5 +1,5 @@
 using Gudel.GLogWare.Configuration;
-using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.EFCore;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.MQTTMessageBus;

@@ -72,7 +72,11 @@ public partial class BridgeSimulator
 
     private async Task Process_ORDS(ORDS ords)
     {
-        if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
+        if (_currentSTAT == null)
+        {
+            await SendCOMP(ords.Jobid, "0001");
+        }
+        else if (_currentSTAT.Parked || _currentSTAT.WorkingMode != STATBridgeWorkingModes.AUTOMATIC)
         {
             await SendCOMP(ords.Jobid, "0001");
         }

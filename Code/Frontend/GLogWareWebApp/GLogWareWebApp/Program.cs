@@ -1,6 +1,7 @@
 using GLogWareWebApp.Components;
 using Gudel.GLogWare.Configuration;
-using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.EFCore;
+using Gudel.GLogWare.Infrastructure;
 using Gudel.GLogWare.Logging;
 using Serilog;
 using Serilog.Events;
@@ -50,7 +51,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddGLogWareDbContext(connectionString);
+builder.Services.AddDbProviderContext<GLogWareDbContext>(connectionString);
  
 builder.Services.AddWindowsService(options =>
 {

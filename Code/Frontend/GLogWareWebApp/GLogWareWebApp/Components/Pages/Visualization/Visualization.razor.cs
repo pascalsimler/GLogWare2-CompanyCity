@@ -1,4 +1,4 @@
-using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Infrastructure;
 using Microsoft.AspNetCore.Components;
 
 namespace GLogWareWebApp.Components.Pages.Visualization;

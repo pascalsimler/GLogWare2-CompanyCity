@@ -1,4 +1,4 @@
-using Gudel.GLogWare.EFCore.Infrastructure;
+using Gudel.GLogWare.Infrastructure;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.Messages;
