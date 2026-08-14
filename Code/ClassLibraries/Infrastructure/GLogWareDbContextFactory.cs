@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.Infrastructure;
 
-public class AppDbContextFactory : DbProviderContextFactory<GLogWareDbContext>
+public class GLogWareDbContextFactory : DbProviderContextFactory<GLogWareDbContext>
 {
-    protected override string ConfigPathConnectionString => $"Database:ConnectionString";
+    protected override string ConfigPathConnectionString => $"Database:GLogWareBusiness:ConnectionString";
 
     protected override GLogWareDbContext CreateContext(
         DbContextOptions<GLogWareDbContext> options)

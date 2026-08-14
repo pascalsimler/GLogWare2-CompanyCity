@@ -7,11 +7,20 @@
   },
   "EnableSystemLogging": 0,
   "Database": {
-    "ConnectionString": "Host=10.59.0.1;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-    "ConnectionString_Postgres": "Host=10.59.0,1;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
-    "ConnectionString_SqlServer": "Server=10.59.0.1;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
-    "ConnectionString_Oracle": "User Id=COMPANY_CITY;Password=Oramgr001;Data Source=oracle.glogware.com:1521/GLOGWARE;",
-    "ConnectionString_MySql": "server=tidb.glogware.com;port=4000;database=GLogWare_CompanyCity;user=root;password="
+    "GLogWareBusiness": {
+      "ConnectionString": "Server=10.59.0.1;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+      "ConnectionString_Postgres": "Host=10.59.0,1;Port=5432;Database=GLogWare_CompanyCity;Username=admin;Password=*Gudel1954*",
+      "ConnectionString_SqlServer": "Server=10.59.0.1;Database=GLogWare_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+      "ConnectionString_Oracle": "User Id=COMPANY_CITY;Password=Oramgr001;Data Source=oracle.glogware.com:1521/GLOGWARE;",
+      "ConnectionString_MySql": "server=tidb.glogware.com;port=4000;database=GLogWare_CompanyCity;user=root;password="
+    },
+    "GLogWareUI": {
+      "ConnectionString": "Server=10.59.0.1;Database=GLogWareUI_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+      "ConnectionString_Postgres": "Host=10.59.0,1;Port=5432;Database=GLogWareUI_CompanyCity;Username=admin;Password=*Gudel1954*",
+      "ConnectionString_SqlServer": "Server=10.59.0.1;Database=GLogWareUI_CompanyCity;User Id=sa;Password=*Gudel1954*;TrustServerCertificate=True",
+      "ConnectionString_Oracle": "User Id=COMPANY_CITY;Password=Oramgr001;Data Source=oracle.glogware.com:1521/GLOGWARE;",
+      "ConnectionString_MySql": "server=tidb.glogware.com;port=4000;database=GLogWareUI_CompanyCity;user=root;password="
+    }
   },
   "MQTTBroker": {
     "Ip": "10.59.0.1",
