@@ -12,8 +12,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Debug
 WORKDIR /src
 COPY ["Code/Frontend/SimulatorWebApp/SimulatorWebApp.csproj", "Code/Frontend/SimulatorWebApp/"]
-COPY ["Code/ClassLibraries/EFCore.Infrastructure/EFCore.Infrastructure.csproj", "Code/ClassLibraries/EFCore.Infrastructure/"]
-COPY ["Code/ClassLibraries/EFCore.Domain/EFCore.Domain.csproj", "Code/ClassLibraries/EFCore.Domain/"]
+COPY ["Code/ClassLibraries/Infrastructure/Infrastructure.csproj", "Code/ClassLibraries/Infrastructure/"]
+COPY ["Code/ClassLibraries/Entities/Entities.csproj", "Code/ClassLibraries/Entities/"]
 COPY ["Code/ClassLibraries/Shared/Shared.csproj", "Code/ClassLibraries/Shared/"]
 RUN dotnet restore "./Code/Frontend/SimulatorWebApp/SimulatorWebApp.csproj"
 COPY . .
