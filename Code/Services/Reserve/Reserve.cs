@@ -46,7 +46,7 @@ public partial class Reserve: IHostedService, IAsyncDisposable
     #region Public methods
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _semaphoreLock = new SemaphoreSlim(1);
 
@@ -59,21 +59,23 @@ public partial class Reserve: IHostedService, IAsyncDisposable
         _watchdogWakeup.AutoReset = true;
         _watchdogWakeup.Start();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
+
+        _logger.LeaveMethod();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
         await Task.CompletedTask;
+
+        _logger.LeaveMethod();
     }
 
     public async ValueTask DisposeAsync()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _watchdogWakeup?.Dispose();
         _semaphoreLock?.Dispose();
@@ -82,7 +84,7 @@ public partial class Reserve: IHostedService, IAsyncDisposable
             await _db.DisposeAsync();
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
     #endregion
@@ -90,7 +92,7 @@ public partial class Reserve: IHostedService, IAsyncDisposable
     #region Private methods
     private void LoadConfiguration()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _subscriptionTopic = $"{ServiceName}/Incoming"; ;
         _messageBus.MessageBusNotification += OnMessageBusNotification;
@@ -101,23 +103,23 @@ public partial class Reserve: IHostedService, IAsyncDisposable
             }
         );
         if (int.TryParse(_configuration[$"{_configPath}:DelayWakeup"], out int tmpDelayWakeup)) _delayWakeup = tmpDelayWakeup;
-        _logger.LogInformation($"_delayWakeup=[{_delayWakeup}]");
+        _logger.LogKeyValue("_delayWakeup", _delayWakeup);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async void OnMessageBusNotification(object? sender, MessageBusNotificationEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"e.Notification§Type=[{e.NotificationType}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("e.NotificationType", e.NotificationType);
 
         switch (e.NotificationType)
         {
             case MessageBusNotificationType.Connected:
-                _logger.LogInformation($"Connected to message bus.");
+                _logger.LogInformation("Connected to message bus.");
                 break;
             case MessageBusNotificationType.Disconnected:
-                _logger.LogInformation($"Disconnected from message bus.");
+                _logger.LogInformation("Disconnected from message bus.");
                 break;
             case MessageBusNotificationType.MessageReceived:
                 _logger.LogInformation($"e.Topic=[{e.Topic}]");
@@ -126,12 +128,12 @@ public partial class Reserve: IHostedService, IAsyncDisposable
                 break;
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task ProcessMessageBusPayload(string payload)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await Lock();
         try
@@ -154,19 +156,19 @@ public partial class Reserve: IHostedService, IAsyncDisposable
             ResetTimer(_watchdogWakeup);
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task SendGLogWareMessage(string topic, GLogWareMessage m)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"topic=[{topic}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("topic", topic);
 
         try
         {
             m.Sender = ServiceName;
             string payload = m.Serialize();
-            _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
+            _logger.LogKeyValue("payload", $"\r\n{payload}\r\n");
             await _messageBus.PublishAsync(topic, payload);
         }
         catch (Exception ex)
@@ -174,35 +176,35 @@ public partial class Reserve: IHostedService, IAsyncDisposable
             _logger.LogError(ex, "Exception");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async void OnWatchdogWakeup(object source, ElapsedEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await SendWakeUp(_subscriptionTopic, "Wakeup timer ellapsed");
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task SendWakeUp(string topic, string message)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"topic=[{topic}]");
-        _logger.LogInformation($"message=[{message}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("topic", topic);
+        _logger.LogKeyValue("message", message);
 
         GLogWareMessage gm = new GLogWareMessage();
         gm.Identifier = GLogWareMessageIdentifiers.WakeUp;
         gm.Data = message;
         await SendGLogWareMessage(_subscriptionTopic, gm);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task Lock()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _watchdogWakeup.Stop();
         await _semaphoreLock.WaitAsync();
@@ -213,27 +215,27 @@ public partial class Reserve: IHostedService, IAsyncDisposable
         }
         _db = await _dbContextFactory.CreateDbContextAsync();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private void Unlock()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _semaphoreLock.Release();
         _watchdogWakeup.Start();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private void ResetTimer(System.Timers.Timer timer)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         timer.Stop();
         timer.Start();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion
 }

@@ -61,8 +61,8 @@ public class LegacyPlcDriver: IPlcDriver
     #region Public methods
     public void LoadConfiguration(string configPath)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation("configPath=[{configPath}]", configPath);
+        _logger.EnterMethod();
+        _logger.LogKeyValue("configPath", configPath);
 
         _op = configPath.Substring(configPath.LastIndexOf(':') + 1);
         _ip = _configuration[$"{configPath}:Ip"] ?? _ip;
@@ -73,32 +73,32 @@ public class LegacyPlcDriver: IPlcDriver
         _validIdentifiers = _configuration[$"{configPath}:ValidPlcIdentifiers"] ?? string.Empty;
         _validSenders = _configuration[$"{configPath}:ValidSenders"] ?? string.Empty;
 
-        _logger.LogInformation("_op=[{_op}]", _op);
-        _logger.LogInformation("_ip=[{_ip}]", _ip);
-        _logger.LogInformation("_port=[{_port}]", _port);
-        _logger.LogInformation("_delayConnectionPlc=[{_delayConnection}]", _delayConnection);
-        _logger.LogInformation("_delayRetry=[{_delayRetry}]", _delayRetry);
-        _logger.LogInformation("_delayLife=[{_delayLife}]", _delayLife);
-        _logger.LogInformation("_validIdentifiers=[{_validIdentifiers}]", _validIdentifiers);
-        _logger.LogInformation("_validSenders=[{_validSenders}]", _validSenders);
+        _logger.LogKeyValue("_op", _op);
+        _logger.LogKeyValue("_ip", _ip);
+        _logger.LogKeyValue("_port", _port);
+        _logger.LogKeyValue("_delayConnectionPlc", _delayConnection);
+        _logger.LogKeyValue("_delayRetry", _delayRetry);
+        _logger.LogKeyValue("_delayLife", _delayLife);
+        _logger.LogKeyValue("_validIdentifiers", _validIdentifiers);
+        _logger.LogKeyValue("_validSenders", _validSenders);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _ = TcpConnectLoopAsync(cts.Token);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
     public async Task SendAsync(PlcMessage plcMessage)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         LegacyPlcTelegram t = new()
         {
@@ -130,14 +130,14 @@ public class LegacyPlcDriver: IPlcDriver
         };
         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion
 
     #region Private method
     private async Task TcpConnectLoopAsync(CancellationToken token)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         string information = string.Empty;
         
@@ -178,7 +178,7 @@ public class LegacyPlcDriver: IPlcDriver
                 using NetworkStream stream = _tcpClient.GetStream();
                 await TcpReceiveLoopAsync(stream, token);
 
-                information = $"Connection closed by the PLC !";
+                information = "Connection closed by the PLC !";
                 _logger.LogWarning(information);
                 {
                     LogPlc lp = new()
@@ -191,7 +191,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
             catch (OperationCanceledException ex)
             {
-                information = $"Normal termination";
+                information = "Normal termination";
                 _logger.LogWarning(ex, information);
                 {
                     LogPlc lp = new()
@@ -206,7 +206,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
             catch (SocketException ex)
             {
-                information = $"Socket error (Network or PLC inaccessible) !";
+                information = "Socket error (Network or PLC inaccessible) !";
                 _logger.LogWarning(ex, information);
                 {
                     LogPlc lp = new()
@@ -220,7 +220,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
             catch (IOException ex)
             {
-                information = $"Connection interrupted !";
+                information = "Connection interrupted !";
                 _logger.LogWarning(ex, information);
                 {
                     LogPlc lp = new()
@@ -234,7 +234,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
             catch (Exception ex)
             {
-                information = $"Unexpected error !";
+                information = "Unexpected error !";
                 _logger.LogError(ex, information);
                 {
                     LogPlc lp = new()
@@ -254,7 +254,7 @@ public class LegacyPlcDriver: IPlcDriver
 
             if (!token.IsCancellationRequested)
             {
-                _logger.LogInformation($"Reconnecting in {_delayConnection} milliseconds ...");
+                _logger.LogInformation("Reconnecting in {DelayConnection} milliseconds ...", _delayConnection);
                 await Task.Delay(TimeSpan.FromMilliseconds(_delayConnection), token);
             }
 
@@ -264,7 +264,7 @@ public class LegacyPlcDriver: IPlcDriver
             }
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
@@ -275,7 +275,7 @@ public class LegacyPlcDriver: IPlcDriver
         string information = string.Empty;
         LegacyPlcTelegram t = new();
 
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -291,7 +291,7 @@ public class LegacyPlcDriver: IPlcDriver
                 }
                 if (bytesRead == 0)
                 {
-                    information = $"Connection closed by the PLC !";
+                    information = "Connection closed by the PLC !";
                     _logger.LogWarning(information);
                     break;
                 }
@@ -301,7 +301,7 @@ public class LegacyPlcDriver: IPlcDriver
         }
         catch (OperationCanceledException ex)
         {
-            information = $"Normal termination";
+            information = "Normal termination";
             _logger.LogWarning(ex, information);
             LogPlc lp = new()
             {
@@ -313,7 +313,7 @@ public class LegacyPlcDriver: IPlcDriver
         }
         catch (IOException ex)
         {
-            information = $"Connection interrupted !";
+            information = "Connection interrupted !";
             _logger.LogWarning(ex, information);
             LogPlc lp = new()
             {
@@ -325,7 +325,7 @@ public class LegacyPlcDriver: IPlcDriver
         }
         catch (Exception ex)
         {
-            information = $"Unexpected error !";
+            information = "Unexpected error !";
             _logger.LogError(ex, information);
             LogPlc lp = new()
             {
@@ -336,13 +336,13 @@ public class LegacyPlcDriver: IPlcDriver
             await WriteLogPlcAsync(lp);
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
     private async Task ProcessTelegramAsync(LegacyPlcTelegram t)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _lpReceive = new()
         {
@@ -458,12 +458,12 @@ public class LegacyPlcDriver: IPlcDriver
             break;
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private bool ValidateTelegram(LegacyPlcTelegram t)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         byte b;
         string errorText = string.Empty;
@@ -472,15 +472,15 @@ public class LegacyPlcDriver: IPlcDriver
         {
             t.Parse();
 
-            //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
-            //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
-            //_logger.LogInformation($"Counter=[{t.Counter}]");
-            //_logger.LogInformation($"Receiver=[{t.Receiver}]");
-            //_logger.LogInformation($"Sender=[{t.Sender}]");
-            //_logger.LogInformation($"Identifier=[{t.Identifier}]");
-            //_logger.LogInformation($"Data=[{t.Data}]");
-            //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
-      
+            //_logger.LogKeyValue("AsciiString", t.AsciiString);
+            //_logger.LogKeyValue("AckFlag", t.AckFlag);
+            //_logger.LogKeyValue("Counter", t.Counter);
+            //_logger.LogKeyValue("Receiver", t.Receiver);
+            //_logger.LogKeyValue("Sender", t.Sender);
+            //_logger.LogKeyValue("Identifier", t.Identifier);
+            //_logger.LogKeyValue("Data", t.Data);
+            //_logger.LogKeyValue("HexaDump", t.HexaDump());
+
             _lpReceive.Ackflag = t.AckFlag;
             _lpReceive.Counter = t.Counter;
             _lpReceive.Sender = t.Sender;
@@ -559,23 +559,23 @@ public class LegacyPlcDriver: IPlcDriver
             _lpReceive.Information = errorText;
         }
 
-        _logger.LogInformation($"rValue=[{rValue}]");
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LogKeyValue("rValue", rValue);
+        _logger.LeaveMethod();
         return rValue;
     }
 
     private async void OnWatchdogRetryAsync(object source, ElapsedEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await SendToPlcAsync(_lastSentTelegram, false);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task SendToPlcAsync(LegacyPlcTelegram t, bool isNew = false)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -607,42 +607,42 @@ public class LegacyPlcDriver: IPlcDriver
             {
                 if (_tcpClient.Connected)
                 {
-                    _logger.LogInformation($"{t.AsciiString}");
-                    //_logger.LogInformation($"Hexa: {t.HexaDump()}");
+                    _logger.LogKeyValue("AsciiString", t.AsciiString);
+                    //_logger.LogKeyValue("Hexa", t.HexaDump());
                     NetworkStream stream = _tcpClient.GetStream();
                     await stream.WriteAsync(t.Bytes, 0, t.Bytes.Length);
                     if (!new[] { PlcMessageIdentifiers.ACKN.ToString() /*, PlcMessageIdentifiers.LIFE.ToString()*/ }.Contains(t.Identifier))
                     {
                         LogPlc lpSend = new()
                         {
-                            Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString()
+                            Direction = LogPlcDirectionIdentifiers.GLOGWARE_TO_PLC.ToString(),
+                            Information = isNew ? string.Empty : "Retry !",
+                            Ackflag = t.AckFlag,
+                            Counter = t.Counter,
+                            Sender = t.Sender,
+                            Receiver = _op,
+                            Identifier = t.Identifier,
+                            Data = t.LogMsg
                         };
-                        if (!isNew) lpSend.Information = "Retry !";
-                        lpSend.Ackflag = t.AckFlag;
-                        lpSend.Counter = t.Counter;
-                        lpSend.Sender = t.Sender;
-                        lpSend.Receiver = _op;
-                        lpSend.Identifier = t.Identifier;
-                        lpSend.Data = t.LogMsg;
                         await WriteLogPlcAsync(lpSend);
                     }
                 }
                 else
                 {
-                    _logger.LogError($"_tcpClient is not connected !");
+                    _logger.LogError("_tcpClient is not connected !");
                 }
             }
             else
             {
-                _logger.LogError($"_tcpClient is null !");
+                _logger.LogError("_tcpClient is null !");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error !");
+            _logger.LogError(ex, "Error !");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task WriteLogPlcAsync(LogPlc logPlc)

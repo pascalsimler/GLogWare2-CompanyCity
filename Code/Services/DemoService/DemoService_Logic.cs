@@ -9,7 +9,7 @@ public partial class DemoService
 
     private async Task DoWork()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -30,6 +30,6 @@ public partial class DemoService
             _logger.LogError(ex.Message);
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 }

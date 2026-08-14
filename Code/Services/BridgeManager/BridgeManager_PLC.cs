@@ -13,23 +13,27 @@ public partial class BridgeManager
     #region Private methods
     private void LoadPlcConfiguration()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _plcDriver.LoadConfiguration(_configPath);
+
+        _logger.LeaveMethod();
     }
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
         
         _plcDriver.DriverNotification += OnPlcDriverNotification;
         await _plcDriver.StartAsync(cancellationToken);
+
+        _logger.LeaveMethod();
     }
 
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"notificationType=[{e.NotificationType}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("notificationType", e.NotificationType);
 
         if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
@@ -55,12 +59,12 @@ public partial class BridgeManager
             }
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task ProcessPlcMessage(PlcMessage pm)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await Lock();
         try
@@ -89,7 +93,7 @@ public partial class BridgeManager
             ResetTimer(_watchdogWakeup);
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion
 }

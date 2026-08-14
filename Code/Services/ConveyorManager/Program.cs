@@ -9,15 +9,18 @@ using Gudel.GLogWare.PlcDriver;
 using Gudel.GLogWare.Services.ConveyorManager;
 using Serilog;
 
-ConveyorManager.OP = Environment.GetEnvironmentVariable("OP");
+string configKey = "OP";
+ConveyorManager.OP = Environment.GetEnvironmentVariable(configKey);
+Console.WriteLine($"{configKey}=[{ConveyorManager.OP}]");
 if (ConveyorManager.OP == null)
 {
-    Console.WriteLine("OP environement variable is not set !!! ==> Hasta la vista ...");
+    Console.WriteLine($"{configKey} environement variable is not set !!! ==> Hasta la vista ...");
     return;
 }
 
+configKey = "projectRootPath";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
-Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+Console.WriteLine($"{configKey}=[{projectRootPath}]");
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile(
@@ -40,7 +43,7 @@ if (enableSystemLogging == 0)
     ;
 }
 
-var logger = loggerConfig
+var serilogLogger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
         path: ConfigurationHelper.GetLogFilePath(projectRootPath, ConveyorManager.ServiceName!),
@@ -49,13 +52,20 @@ var logger = loggerConfig
         outputTemplate: logMessageTemplate)
     .CreateLogger();
 builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(logger);
+builder.Logging.AddSerilog(serilogLogger);
 
-logger.Information($"projectRootPath=[{projectRootPath}]");
-string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
-logger.Information($"connectionString=[{connectionString}]");
-string trigram = builder.Configuration[$"Project:Trigram"]!;
-logger.Information($"trigram=[{trigram}]");
+using var startupLoggerFactory = LoggerFactory.Create(lb => lb.AddSerilog(serilogLogger));
+var logger = startupLoggerFactory.CreateLogger("Startup");
+
+logger.LogKeyValue("ConveyorManager.OP", ConveyorManager.OP);
+logger.LogKeyValue("ConveyorManager.ServiceName", ConveyorManager.ServiceName);
+logger.LogKeyValue("projectRootPath", projectRootPath);
+configKey = "Database:GLogWareBusiness:ConnectionString";
+string connectionString = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, connectionString);
+configKey = "Project:Trigram";
+string trigram = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, trigram);
 
 builder.Services.AddDbProviderContextFactory<GLogWareDbContext>(connectionString);
 builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();

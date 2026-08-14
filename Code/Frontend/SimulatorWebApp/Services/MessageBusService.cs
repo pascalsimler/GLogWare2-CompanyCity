@@ -28,7 +28,7 @@ public class MessageBusService
 
     public async Task StartAsync()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _messageBus.Init(
               $"Simulator-{GetClientIp()}",
@@ -37,21 +37,21 @@ public class MessageBusService
 
         await _messageBus.StartAsync();
       
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
     public async Task SendMessage(string topic, GLogWareMessage m)
     {
-        string payload = string.Empty;
+        string payload;
 
         try
         {
             m.Sender = "Simulator";
             payload = m.Serialize();
 
-            _logger.LogInformation($"topic=[{topic}]");
-            _logger.LogInformation($"payload=[\r\n{payload}\r\n]");
+            _logger.LogKeyValue("topic", topic);
+            _logger.LogKeyValue("payload", payload);
 
             await _messageBus.PublishAsync(topic, payload);
         }

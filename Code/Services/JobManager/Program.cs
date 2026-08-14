@@ -8,8 +8,10 @@ using Gudel.GLogWare.Services.JobManager;
 using Serilog;
 
 JobManager.ServiceName = "JobManager";
+
+string configKey = "projectRootPath";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
-Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+Console.WriteLine($"{configKey}=[{projectRootPath}]");
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile(
@@ -21,6 +23,7 @@ string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod
 int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .Enrich.FromLogContext()
     .Enrich.With(new CustomLoggerEnricher());
 
 if (enableSystemLogging == 0)
@@ -31,7 +34,7 @@ if (enableSystemLogging == 0)
     ;
 }
 
-var logger = loggerConfig
+var serilogLogger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
         path: ConfigurationHelper.GetLogFilePath(projectRootPath, JobManager.ServiceName),
@@ -40,13 +43,19 @@ var logger = loggerConfig
         outputTemplate: logMessageTemplate)
     .CreateLogger();
 builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(logger);
+builder.Logging.AddSerilog(serilogLogger);
 
-logger.Information($"projectRootPath=[{projectRootPath}]");
-string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
-logger.Information($"connectionString=[{connectionString}]");
-string trigram = builder.Configuration[$"Project:Trigram"]!;
-logger.Information($"trigram=[{trigram}]");
+using var startupLoggerFactory = LoggerFactory.Create(lb => lb.AddSerilog(serilogLogger));
+var logger = startupLoggerFactory.CreateLogger("Startup");
+
+logger.LogKeyValue("ServiceName", JobManager.ServiceName);
+logger.LogKeyValue("projectRootPath", projectRootPath);
+configKey = "Database:GLogWareBusiness:ConnectionString";
+string connectionString = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, connectionString);
+configKey = "Project:Trigram";
+string trigram = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, trigram);
 
 builder.Services.AddDbProviderContextFactory<GLogWareDbContext>(connectionString);
 builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();

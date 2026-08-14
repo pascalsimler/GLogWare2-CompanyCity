@@ -8,18 +8,18 @@ public partial class JobManager
 {
     private async Task DoWork()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await ProcessWaitingJobs();
         await CreateJobsForOutputOrders();
         await SearchPlaceInStore("Cruchot");
         
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task ProcessWaitingJobs()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         var waitingJobs = _db.Jobs
             .Include(j => j.ActualPlaceRecord)
@@ -28,9 +28,9 @@ public partial class JobManager
 
         foreach (Job job in waitingJobs)
         {
-            _logger.LogInformation($"JobId=[{job.Jobid}]");
-            _logger.LogInformation($"ActualPlace=[{job.ActualPlace}]");
-            _logger.LogInformation($"ActualPlaceRecord.PlaceType=[{job.ActualPlaceRecord.PlaceType}]");
+            _logger.LogKeyValue($"JobId", job.Jobid);
+            _logger.LogKeyValue($"ActualPlace", job.ActualPlace);
+            _logger.LogKeyValue($"ActualPlaceRecord.PlaceType", job.ActualPlaceRecord.PlaceType);
             switch (job.ActualPlaceRecord.PlaceType)
             {
                 case nameof(PlaceTypeIdentifiers.GANTRY_PICK):
@@ -43,21 +43,21 @@ public partial class JobManager
             _logger.LogInformation($"----------------------------------");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task CreateJobsForOutputOrders()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task SearchPlaceInStore(string iJobId, string? iRequestedPlace = null)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"iJobId=[{iJobId}]");
-        _logger.LogInformation($"iRequestedPlace=[{iRequestedPlace}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue($"iJobId", iJobId);
+        _logger.LogKeyValue($"iRequestedPlace", iRequestedPlace);
 
         string oPlaceFound = string.Empty;
 
@@ -227,6 +227,6 @@ public partial class JobManager
         //        END;
 
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 }

@@ -43,9 +43,9 @@ public class MQTTMessageBus : IMessageBus
     #region Public members
     public void Init(string clientId, string[] subscriptionTopics)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"clientId=[{clientId}]");
-        _logger.LogInformation($"subscriptionTopics=[{string.Join(", ", subscriptionTopics)}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("clientId", clientId);
+        _logger.LogKeyValue("subscriptionTopics", string.Join(", ", subscriptionTopics));
         _clientId = clientId;
         _subscriptionTopics = subscriptionTopics;
 
@@ -54,16 +54,16 @@ public class MQTTMessageBus : IMessageBus
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
         _rootTopic = _configuration[$"{path}:RootTopic"] ?? _rootTopic;
        
-        _logger.LogInformation($"_ip=[{_ip}]");
-        _logger.LogInformation($"_port=[{_port}]");
-        _logger.LogInformation($"_rootTopic=[{_rootTopic}]");
+        _logger.LogKeyValue("_ip", _ip);
+        _logger.LogKeyValue("_port", _port);
+        _logger.LogKeyValue("_rootTopic", _rootTopic);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     public async Task StartAsync()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
         _mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
@@ -90,14 +90,14 @@ public class MQTTMessageBus : IMessageBus
 
         await _mqttClient.StartAsync(mqttOptions);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     public async Task PublishAsync(string topic, string message)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"topic=[{topic}]");
-        _logger.LogInformation($"message=[{message}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("topic", topic);
+        _logger.LogKeyValue("message", message);
 
         var mqttMessage =
             new MqttApplicationMessageBuilder()
@@ -111,7 +111,7 @@ public class MQTTMessageBus : IMessageBus
             await _mqttClient.EnqueueAsync(mqttMessage);
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion region
 

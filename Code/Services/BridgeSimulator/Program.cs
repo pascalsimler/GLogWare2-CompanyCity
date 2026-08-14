@@ -9,15 +9,18 @@ using Gudel.GLogWare.PlcDriver;
 using Gudel.GLogWare.Services.BridgeSimulator;
 using Serilog;
 
-BridgeSimulator.OP = Environment.GetEnvironmentVariable("OP");
+string configKey = "OP";
+BridgeSimulator.OP = Environment.GetEnvironmentVariable(configKey);
+Console.WriteLine($"{configKey}=[{BridgeSimulator.OP}]");
 if (BridgeSimulator.OP == null)
 {
-    Console.WriteLine("OP environement variable is not set !!! ==> Hasta la vista ...");
+    Console.WriteLine($"{configKey} environement variable is not set !!! ==> Hasta la vista ...");
     return;
 }
 
+configKey = "projectRootPath";
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
-Console.WriteLine($"projectRootPath=[{projectRootPath}]");
+Console.WriteLine($"{configKey}=[{projectRootPath}]");
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile(
@@ -29,16 +32,18 @@ string logMessageTemplate = "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{ClassMethod
 int enableSystemLogging = builder.Configuration.GetValue<int>("EnableSystemLogging", 0);
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .Enrich.FromLogContext()
     .Enrich.With(new CustomLoggerEnricher());
 
 if (enableSystemLogging == 0)
 {
     loggerConfig
         .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning);
+        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+    ;
 }
 
-var logger = loggerConfig
+var serilogLogger = loggerConfig
     .WriteTo.Console(outputTemplate: logMessageTemplate)
     .WriteTo.File(
         path: ConfigurationHelper.GetLogFilePath(projectRootPath, BridgeSimulator.ServiceName),
@@ -47,14 +52,20 @@ var logger = loggerConfig
         outputTemplate: logMessageTemplate)
     .CreateLogger();
 builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(logger);
+builder.Logging.AddSerilog(serilogLogger);
 
-logger.Information($"ServiceName=[{BridgeSimulator.ServiceName}]");
-logger.Information($"projectRootPath=[{projectRootPath}]");
-string connectionString = builder.Configuration[$"Database:ConnectionString"]!;
-logger.Information($"connectionString=[{connectionString}]");
-string trigram = builder.Configuration[$"Project:Trigram"]!;
-logger.Information($"trigram=[{trigram}]");
+using var startupLoggerFactory = LoggerFactory.Create(lb => lb.AddSerilog(serilogLogger));
+var logger = startupLoggerFactory.CreateLogger("Startup");
+
+logger.LogKeyValue("BridgeSimulator.OP", BridgeSimulator.OP);
+logger.LogKeyValue("BridgeSimulator.ServiceName", BridgeSimulator.ServiceName);
+logger.LogKeyValue("projectRootPath", projectRootPath);
+configKey = "Database:GLogWareBusiness:ConnectionString";
+string connectionString = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, connectionString);
+configKey = "Project:Trigram";
+string trigram = builder.Configuration[configKey]!;
+logger.LogKeyValue(configKey, trigram);
 
 builder.Services.AddDbProviderContextFactory<GLogWareDbContext>(connectionString);
 builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();

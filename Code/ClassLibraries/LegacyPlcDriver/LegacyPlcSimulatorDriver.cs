@@ -52,41 +52,43 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     #region Public methods
     public void LoadConfiguration(string path)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
-        _logger.LogInformation($"path=[{path}]");
+        _logger.EnterMethod();
+        _logger.LogKeyValue("path", path);
 
         _op = path.Substring(path.LastIndexOf(':') + 1);
         if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
         if (int.TryParse(_configuration[$"{path}:DelayRetry"], out int tmpDelayRetry)) _delayRetry = tmpDelayRetry;
         _validIdentifiers = _configuration[$"{path}:ValidGLogWareIdentifiers"] ?? string.Empty;
 
-        _logger.LogInformation($"_op=[{_op}]");
-        _logger.LogInformation($"_port=[{_port}]");
-        _logger.LogInformation($"_delayRetry=[{_delayRetry}]");
-        _logger.LogInformation($"_validIdentifiers=[{_validIdentifiers}]");
+        _logger.LogKeyValue("_op", _op);
+        _logger.LogKeyValue("_port", _port);
+        _logger.LogKeyValue("_delayRetry", _delayRetry);
+        _logger.LogKeyValue("_validIdentifiers", _validIdentifiers);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _ = TcpAcceptLoopAsync(cts.Token);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
     public async Task SendAsync(PlcMessage plcMessage)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
-        LegacyPlcTelegram t = new LegacyPlcTelegram();
-        t.Identifier = plcMessage.Identifier.ToString();
-        t.Sender = plcMessage.Sender;
-        t.Receiver = plcMessage.Receiver;
+        LegacyPlcTelegram t = new()
+        {
+            Identifier = plcMessage.Identifier.ToString(),
+            Sender = plcMessage.Sender,
+            Receiver = plcMessage.Receiver
+        };
         switch (plcMessage.Identifier)
         {
             case PlcMessageIdentifiers.STAT:
@@ -105,19 +107,21 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         }
         await SendToGLogWareAsync(t, true);
         _lastSentPlcMessage = plcMessage;
-        _driverNotificationEventArgs = new DriverNotificationEventArgs();
-        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSent;
-        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
+        _driverNotificationEventArgs = new ()
+        { 
+            NotificationType = DriverNotificationType.TelegramSent,
+            PlcMessage = _lastSentPlcMessage
+        };
         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion
 
     #region Private methods
     private async Task TcpAcceptLoopAsync(CancellationToken token)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _lastSentTelegram = new LegacyPlcTelegram();
         _ackTelegram = new LegacyPlcTelegram();
@@ -131,7 +135,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
 
         TcpListener listener = new TcpListener(IPAddress.Any, _port);
         listener.Start();
-        _logger.LogInformation($"Listening on port {_port} ...");
+        _logger.LogInformation("Listening on port {Port} ...", _port);
 
         try
         {
@@ -139,11 +143,13 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
             {
                 try
                 {
-                    _logger.LogInformation($"Waiting for a new incoming connection request!");
+                    _logger.LogInformation("Waiting for a new incoming connection request!");
                     _tcpClient = await listener.AcceptTcpClientAsync(token);
-                    _logger.LogInformation($"Client connected from {_tcpClient.Client.RemoteEndPoint} !");
-                    _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                    _driverNotificationEventArgs.NotificationType = DriverNotificationType.Online;
+                    _logger.LogInformation("Client connected from {RemoteEndPoint} !", _tcpClient.Client.RemoteEndPoint);
+                    _driverNotificationEventArgs = new()
+                    {
+                        NotificationType = DriverNotificationType.Online
+                    };
                     DriverNotification?.Invoke(this, _driverNotificationEventArgs);
 
                     //await SendCurrentSTAT();
@@ -151,7 +157,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     using NetworkStream stream = _tcpClient.GetStream();
                     await TcpReceiveLoopAsync(stream, token);
 
-                    _logger.LogWarning($"Connection closed by the client !");
+                    _logger.LogWarning("Connection closed by the client !");
                     _tcpClient.Dispose();
                     _tcpClient = null;
                 }
@@ -161,28 +167,30 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                 }
                 catch (SocketException ex)
                 {
-                    _logger.LogWarning(ex, $"Socket error !");
+                    _logger.LogWarning(ex, "Socket error !");
                 }
                 catch (IOException ex)
                 {
-                    _logger.LogWarning(ex, $"Connection interrupted !");
+                    _logger.LogWarning(ex, "Connection interrupted !");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Unexpected error !");
+                    _logger.LogError(ex, "Unexpected error !");
                 }
-                _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                _driverNotificationEventArgs.NotificationType = DriverNotificationType.Offline;
+                _driverNotificationEventArgs = new()
+                { 
+                    NotificationType = DriverNotificationType.Offline
+                };
                 DriverNotification?.Invoke(this, _driverNotificationEventArgs);
             }
         }
         finally
         {
             listener.Stop();
-            _logger.LogInformation($"Listener stopped.");
+            _logger.LogInformation("Listener stopped.");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
@@ -190,9 +198,9 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
     {
         int bytesRead = 0;
         int offset = 0;
-        LegacyPlcTelegram t = new LegacyPlcTelegram();
+        LegacyPlcTelegram t = new();
 
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -224,13 +232,13 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
             _logger.LogWarning(ex, "Socket error");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
         await Task.CompletedTask;
     }
 
     private async Task ProcessTelegramAsync(LegacyPlcTelegram t)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         string logMsg = string.Empty;
 
@@ -252,9 +260,11 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     {
                         _watchdogRetry.Stop();
                         _semaphoreSend.Release();
-                        _driverNotificationEventArgs = new DriverNotificationEventArgs();
-                        _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramSentAcknowledged;
-                        _driverNotificationEventArgs.PlcMessage = _lastSentPlcMessage;
+                        _driverNotificationEventArgs = new()
+                        {
+                            NotificationType = DriverNotificationType.TelegramSentAcknowledged,
+                            PlcMessage = _lastSentPlcMessage
+                        };
                         DriverNotification?.Invoke(this, _driverNotificationEventArgs);
                     }
                     else
@@ -295,7 +305,7 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
             }
             _lastReceivedCounter = t.Counter;
 
-            PlcMessage plcMessage = new PlcMessage();
+            PlcMessage plcMessage = new();
             plcMessage.Sender = t.Sender;
             plcMessage.Receiver = t.Receiver;
             switch (t.Identifier)
@@ -311,20 +321,22 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                     break;
             }
 
-            _driverNotificationEventArgs = new DriverNotificationEventArgs();
-            _driverNotificationEventArgs.NotificationType = DriverNotificationType.TelegramReceived;
-            _driverNotificationEventArgs.PlcMessage = plcMessage;
+            _driverNotificationEventArgs = new()
+            {
+                NotificationType = DriverNotificationType.TelegramReceived,
+                PlcMessage = plcMessage
+            };
             DriverNotification?.Invoke(this, _driverNotificationEventArgs);
             
             break;
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private bool ValidateTelegram(LegacyPlcTelegram t)
     {        
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         byte b;
         string errorText = string.Empty;
@@ -332,14 +344,14 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         while (true)
         {
             t.Parse();
-            //_logger.LogInformation($"AsciiString=[{t.AsciiString}]");
-            //_logger.LogInformation($"AckFlag=[{t.AckFlag}]");
-            //_logger.LogInformation($"Counter=[{t.Counter}]");
-            //_logger.LogInformation($"Receiver=[{t.Receiver}]");
-            //_logger.LogInformation($"Sender=[{t.Sender}]");
-            //_logger.LogInformation($"Identifier=[{t.Identifier}]");
-            //_logger.LogInformation($"Data=[{t.Data}]");
-            //_logger.LogInformation($"HexaDump=[{t.HexaDump()}]");
+            _logger.LogKeyValue("AsciiString",t.AsciiString) ;
+            _logger.LogKeyValue("AckFlag",t.AckFlag);
+            _logger.LogKeyValue("Counter",t.Counter);
+            _logger.LogKeyValue("Receiver",t.Receiver);
+            _logger.LogKeyValue("Sender",t.Sender);
+            _logger.LogKeyValue("Identifier",t.Identifier);
+            _logger.LogKeyValue("Data",t.Data);
+            _logger.LogKeyValue("HexaDump",t.HexaDump());
 
             b = t.Bytes[0];
             if (b != LegacyPlcTelegramConstants.STX)
@@ -410,14 +422,14 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
         }
 
 
-        _logger.LogInformation($"rValue=[{rValue}]");
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LogKeyValue("rValue",rValue);
+        _logger.LeaveMethod();
         return rValue;
     }
 
     private async Task SendToGLogWareAsync(LegacyPlcTelegram t, bool isNew = false)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -460,29 +472,29 @@ public class LegacyPlcSimulatorDriver : IPlcDriver
                 }
                 else
                 {
-                    _logger.LogError($"_tcpClient is not connected !");
+                    _logger.LogError("_tcpClient is not connected !");
                 }
             }
             else
             {
-                _logger.LogError($"_tcpClient is null !");
+                _logger.LogError("_tcpClient is null !");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error !");
+            _logger.LogError(ex, "Error !");
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async void OnWatchdogRetryAsync(object source, ElapsedEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         await SendToGLogWareAsync(_lastSentTelegram, false);
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
     #endregion
 }

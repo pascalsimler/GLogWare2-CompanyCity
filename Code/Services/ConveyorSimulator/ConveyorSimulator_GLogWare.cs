@@ -12,22 +12,26 @@ public partial class ConveyorSimulator
 
     private void LoadGLogWareConfiguration()
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _plcSimulatorDriver.LoadConfiguration(_configPath);
+
+        _logger.LeaveMethod();
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         _plcSimulatorDriver.DriverNotification += OnPlcSimulatorDriverNotification;
         await _plcSimulatorDriver.StartAsync(cancellationToken);
+
+        _logger.LeaveMethod();
     }
 
     private async void OnPlcSimulatorDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
@@ -39,26 +43,26 @@ public partial class ConveyorSimulator
             switch (_driverState)
             {
                 case DriverNotificationType.Online:
-                    _logger.LogInformation($"GLogWare is now CONNECTED !");
+                    _logger.LogInformation("GLogWare is now CONNECTED !");
                     break;
                 case DriverNotificationType.Offline:
-                    _logger.LogInformation($"GLogWare is now DISCONNECTED !");
+                    _logger.LogInformation("GLogWare is now DISCONNECTED !");
                     break;
                 case DriverNotificationType.TelegramSent:
-                    _logger.LogInformation($"GLogWare has a telegram to send");
+                    _logger.LogInformation("GLogWare has a telegram to send");
                     break;
                 case DriverNotificationType.TelegramSentAcknowledged:
-                    _logger.LogInformation($"GLogWare acknowledged the sent telegram");
+                    _logger.LogInformation("GLogWare acknowledged the sent telegram");
                     break;
             }
         }
 
-        _logger.LogInformation(LogMessages.LeaveMethod);
+        _logger.LeaveMethod();
     }
 
     private async Task ProcessGLogWareMessage(PlcMessage pm)
     {
-        _logger.LogInformation(LogMessages.EnterMethod);
+        _logger.EnterMethod();
 
         try
         {
@@ -76,5 +80,7 @@ public partial class ConveyorSimulator
         {
             _logger.LogError(ex, "Error processing GLogWareMessage");
         }
+
+        _logger.LeaveMethod();
     }
 }
