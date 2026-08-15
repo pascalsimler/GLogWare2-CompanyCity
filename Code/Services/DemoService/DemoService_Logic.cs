@@ -9,27 +9,29 @@ public partial class DemoService
 
     private async Task DoWork()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         try
         {
             _counter++;
             string logMsg = $"Counter=[{_counter}]";
-            _logger.LogInformation(logMsg);
-            Protocol protocol = new Protocol();
-            protocol.Message = logMsg;
+            logger.LogInformation(logMsg);
+            Protocol protocol = new()
+            {
+                Message = logMsg
+            };
             _db.Protocols.Add(protocol);
             await _db.SaveChangesAsync();
-            _logger.LogInformation("Start long procesing task");
+            logger.LogInformation("Start long procesing task");
             await Task.Delay(5000);
-            _logger.LogInformation("Finished long processing task");
-            //await SendToMqtt($"{topic}-Response", message);
+            logger.LogInformation("Finished long processing task");
+            //await messageBus.PublishAsync($"{topic}-Response", message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            logger.LogError(ex, "Error in DoWork");
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

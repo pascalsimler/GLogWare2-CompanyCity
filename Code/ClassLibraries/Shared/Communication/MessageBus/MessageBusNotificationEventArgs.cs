@@ -1,4 +1,4 @@
-﻿namespace Gudel.GLogWare.MessageBus;
+﻿namespace Gudel.GLogWare.Interfaces;
 
 public class MessageBusNotificationEventArgs : EventArgs
 {

@@ -16,7 +16,7 @@ public partial class BridgeManager
     #region Orders in general
     private async Task<bool> VerifyGeneralConditionsToStartOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = false;
         while (true)
@@ -26,21 +26,21 @@ public partial class BridgeManager
                 .FirstOrDefault();
             if (_resource == null)
             {
-                _logger.LogError(
+                logger.LogError(
                     "Resource.Name=[{OP}] does not exist !", OP);
                 break;
             }
 
             if (!_resource.IsOnline)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Communication with PLC of the bridge is currently offline !");
                 break;
             }
 
             if (_resource.Mode != nameof(ResourceModeIdentifiers.AUTOMATIC))
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Bridge is in mode=[{IsMode}]!=[{ShouldBeMode}]", _resource.Mode, nameof(ResourceModeIdentifiers.AUTOMATIC));
                 break;
             }
@@ -60,14 +60,14 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
 
     private async Task<bool> TryToStartNewOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
@@ -78,7 +78,7 @@ public partial class BridgeManager
                 break;
             }
 
-            _logger.LogKeyValue("_lastJobType", _lastJobType.ToString());
+            logger.LogKeyValue("_lastJobType", _lastJobType.ToString());
             switch (_lastJobType)
             {
                 case JobTypeIdentifiers.INFEED:
@@ -111,8 +111,8 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
     #endregion
@@ -120,14 +120,14 @@ public partial class BridgeManager
     #region Input orders
     private async Task<bool> VerifyConditionsToStartInputOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
         {
             if (!_resource!.InfeedEnabled)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Infeeds are not enabled for that bridge !");
                 rValue = false;
                 break;
@@ -136,14 +136,14 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
 
     private async Task<bool> TryToStartInputOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
@@ -159,8 +159,8 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
     #endregion
@@ -168,14 +168,14 @@ public partial class BridgeManager
     #region Output orders
     private async Task<bool> VerifyConditionsToStartOutputOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
         {
             if (!_resource!.OutfeedEnabled)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Outfeeds are not enabled for that bridge !");
                 rValue = false;
                 break;
@@ -184,14 +184,14 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
 
     private async Task<bool> TryToStartOutputOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
@@ -207,8 +207,8 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
     #endregion
@@ -216,14 +216,14 @@ public partial class BridgeManager
     #region Relocation orders
     private async Task<bool> VerifyConditionsToStartRelocationOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
         {
             if (!_resource!.RelocationEnabled)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Relocations are not enabled for that bridge !");
                 rValue = false;
                 break;
@@ -232,14 +232,14 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
 
     private async Task<bool> TryToStartRelocationOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (!await VerifyConditionsToStartRelocationOrder()) return false;
 
@@ -251,7 +251,7 @@ public partial class BridgeManager
     #region Palletizing orders
     private async Task<bool> VerifyConditionsToStartPalletizingOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         bool rValue = true;
         while (true)
@@ -259,14 +259,14 @@ public partial class BridgeManager
             break;
         }
 
-        _logger.LogKeyValue("rValue", rValue);
-        _logger.LeaveMethod();
+        logger.LogKeyValue("rValue", rValue);
+        logger.LeaveMethod();
         return rValue;
     }
 
     private async Task<bool> TryToStartPalletizingOrder()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (!await VerifyConditionsToStartPalletizingOrder()) return false;
 
@@ -278,15 +278,15 @@ public partial class BridgeManager
     #region PLC notifications
     private async Task Process_STAT(STATBridge stat)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         string json = GLogWareMessage.Serialize<STATBridge>(stat);
-        _logger.LogKeyValue("stat", $"\r\n{json}\r\n]");
+        logger.LogKeyValue("stat", $"\r\n{json}\r\n]");
         
         var r = _db.Resources.Where(x => x.Name == OP).FirstOrDefault();
         if (r == null) 
         {
-            _logger.LogError("Unknown resource [{OP}]", OP);
+            logger.LogError("Unknown resource [{OP}]", OP);
             return;
         }
 
@@ -302,15 +302,15 @@ public partial class BridgeManager
         r.ErrorFlag = stat.ErrorFlag;
         await _db.SaveChangesAsync();
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task Process_COMP(COMP comp)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         string json = GLogWareMessage.Serialize<COMP>(comp);
-        _logger.LogKeyValue("comp", $"\r\n{json}\r\n]");
+        logger.LogKeyValue("comp", $"\r\n{json}\r\n]");
 
         var q = _db.Jobs.Where(x =>
                     x.Bridge == OP &&
@@ -320,10 +320,10 @@ public partial class BridgeManager
         int count = 0;
         foreach (var j in q)
         {
-            _logger.LogKeyValue($"jobs[{count}].jobId", j.Jobid);
-            _logger.LogKeyValue($"jobs[{count}].Type", j.Type);
-            _logger.LogKeyValue($"jobs[{count}].SourcePlace", j.SourcePlace);
-            _logger.LogKeyValue($"jobs[{count}].DestinationPlace", j.DestinationPlace);
+            logger.LogKeyValue($"jobs[{count}].jobId", j.Jobid);
+            logger.LogKeyValue($"jobs[{count}].Type", j.Type);
+            logger.LogKeyValue($"jobs[{count}].SourcePlace", j.SourcePlace);
+            logger.LogKeyValue($"jobs[{count}].DestinationPlace", j.DestinationPlace);
             count++;
         }
 
@@ -338,10 +338,10 @@ public partial class BridgeManager
         }
         else
         {
-            _logger.LogError("Found [{Count}] jobs where an unique one is expected !", count);
+            logger.LogError("Found [{Count}] jobs where an unique one is expected !", count);
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
     #endregion
 

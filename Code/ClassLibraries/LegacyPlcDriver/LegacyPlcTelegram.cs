@@ -58,12 +58,12 @@ public class LegacyPlcTelegram
     {
         AsciiString =
             Convert.ToChar(LegacyPlcTelegramConstants.STX).ToString() +
-            ((AckFlag.Length >= 1) ? AckFlag.Substring(0, 1) : AckFlag.PadRight(1)) +
-            ((Counter.Length >= 1) ? Counter.Substring(0, 1) : Counter.PadRight(1)) +
-            ((Receiver.Length >= 8) ? Receiver.Substring(0, 8) : Receiver.PadRight(8)) +
-            ((Sender.Length >= 8) ? Sender.Substring(0, 8) : Sender.PadRight(8)) +
-            ((Identifier.Length >= 4) ? Identifier.Substring(0, 4) : Identifier.PadRight(4)) +
-            ((Data.Length >= 216) ? Data.Substring(0, 216) : Data.PadRight(216, '.')) +
+            ((AckFlag.Length >= 1) ? AckFlag[..1] : AckFlag.PadRight(1)) +
+            ((Counter.Length >= 1) ? Counter[..1] : Counter.PadRight(1)) +
+            ((Receiver.Length >= 8) ? Receiver[..8] : Receiver.PadRight(8)) +
+            ((Sender.Length >= 8) ? Sender[..8] : Sender.PadRight(8)) +
+            ((Identifier.Length >= 4) ? Identifier[..4] : Identifier.PadRight(4)) +
+            ((Data.Length >= 216) ? Data[..216] : Data.PadRight(216, '.')) +
             Convert.ToChar(LegacyPlcTelegramConstants.ETX).ToString()
         ;
 
@@ -86,11 +86,11 @@ public class LegacyPlcTelegram
     public string HexaDump()
     {
         byte b;
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.AppendLine();
         string line = string.Empty;
-        StringBuilder sbHexa = new StringBuilder();
-        StringBuilder sbChar = new StringBuilder();
+        StringBuilder sbHexa = new();
+        StringBuilder sbChar = new();
 
         for (int i = 0; i <= Bytes.Length; i++)
         {
@@ -107,7 +107,7 @@ public class LegacyPlcTelegram
             }
             if (sbHexa.Length > 0) sbHexa.Append(" ");
             b = Bytes[i];
-            sbHexa.Append(b.ToString("X2"));
+            sbHexa.Append($"{b:X2}");
             char display = (b >= 0x20 && b < 0x7F) ? (char)b : '.';
             sbChar.Append(display);
         }

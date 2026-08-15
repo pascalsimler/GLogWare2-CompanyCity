@@ -1,6 +1,6 @@
-﻿using Gudel.GLogWare.Logging;
+﻿using Gudel.GLogWare.Interfaces;
+using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Messages;
-using Gudel.GLogWare.PlcDriver;
 
 namespace Gudel.GLogWare.Services.ConveyorManager;
 
@@ -12,27 +12,27 @@ public partial class ConveyorManager
 
     private void LoadPlcConfiguration()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
-        _plcDriver.LoadConfiguration(_configPath);
+        plcDriver.LoadConfiguration(_configPath);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task StartPlcDriverAsync(CancellationToken cancellationToken)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
         
-        _plcDriver.DriverNotification += OnPlcDriverNotification;
-        await _plcDriver.StartAsync(cancellationToken);
+        plcDriver.DriverNotification += OnPlcDriverNotification;
+        await plcDriver.StartAsync(cancellationToken);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async void OnPlcDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        _logger.EnterMethod();
-        _logger.LogKeyValue("notificationType", e.NotificationType);
+        logger.EnterMethod();
+        logger.LogKeyValue("notificationType", e.NotificationType);
 
         if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
@@ -44,26 +44,26 @@ public partial class ConveyorManager
             switch (_driverState)
             {
                 case DriverNotificationType.Online:
-                    _logger.LogInformation("PLC is now ONLINE");
+                    logger.LogInformation("PLC is now ONLINE");
                     break;
                 case DriverNotificationType.Offline:
-                    _logger.LogInformation("PLC is now OFFLINE");
+                    logger.LogInformation("PLC is now OFFLINE");
                     break;
                 case DriverNotificationType.TelegramSent:
-                    _logger.LogInformation("PLC has a telegram to send");
+                    logger.LogInformation("PLC has a telegram to send");
                     break;
                 case DriverNotificationType.TelegramSentAcknowledged:
-                    _logger.LogInformation("PLC acknowledged the sent telegram");
+                    logger.LogInformation("PLC acknowledged the sent telegram");
                     break;
             }
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task ProcessPlcMessage(PlcMessage pm)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         await Lock();
         try
@@ -84,14 +84,13 @@ public partial class ConveyorManager
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing GLogWareMessage");
+            logger.LogError(ex, "Error processing GLogWareMessage");
         }
         finally
         {
             Unlock();
-            ResetTimer(_watchdogWakeup);
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

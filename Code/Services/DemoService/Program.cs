@@ -2,10 +2,10 @@ using Gudel.GLogWare.Services.DemoService;
 using Serilog;
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.Logging;
-using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.MQTTMessageBus;
 using Gudel.GLogWare.EFCore;
 using Gudel.GLogWare.Infrastructure;
+using Gudel.GLogWare.Interfaces;
 
 DemoService.ServiceName = "DemoService";
 

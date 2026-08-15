@@ -1,6 +1,6 @@
 ﻿using Gudel.GLogWare.Messages;
 
-namespace Gudel.GLogWare.PlcDriver;
+namespace Gudel.GLogWare.Interfaces;
 
 public interface IPlcDriver
 {

@@ -13,7 +13,7 @@ public partial class ConveyorManager
 
     private async Task<bool> ProcessWaitOnRouteJobs()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         var waitOnRouteJobs = _db.Jobs
             .Include(j => j.ActualPlaceRecord)
@@ -22,36 +22,35 @@ public partial class ConveyorManager
 
         foreach (Job job in waitOnRouteJobs)
         {
-            _logger.LogKeyValue("JobId", job.Jobid);
-            _logger.LogKeyValue("ActualPlace", job.ActualPlace);
-            _logger.LogKeyValue("ActualPlaceRecord.PlaceType", job.ActualPlaceRecord.PlaceType);
-            _logger.LogInformation($"----------------------------------");
+            logger.LogKeyValue("JobId", job.Jobid);
+            logger.LogKeyValue("ActualPlace", job.ActualPlace);
+            logger.LogKeyValue("ActualPlaceRecord.PlaceType", job.ActualPlaceRecord.PlaceType);
+            logger.LogInformation($"----------------------------------");
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
 
         return false;
     }
 
     private async Task Process_STAT(STATConveyor stat)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         string json = GLogWareMessage.Serialize<STATConveyor>(stat);
-        _logger.LogKeyValue("stat", $"\r\n{json}\r\n");
+        logger.LogKeyValue("stat", $"\r\n{json}\r\n");
 
-      
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task Process_ARIV(ARIV ariv)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         string json = GLogWareMessage.Serialize<ARIV>(ariv);
-        _logger.LogKeyValue($"ariv", $"\r\n{json}\r\n");
+        logger.LogKeyValue($"ariv", $"\r\n{json}\r\n");
 
      
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

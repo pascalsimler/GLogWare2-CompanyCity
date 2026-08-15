@@ -18,47 +18,47 @@ public class Resource : BaseTracking, ISeedData<Resource>
 
     public static IEnumerable<Resource> SeedData()
     {
-        return new List<Resource> {
-            new Resource { 
+        return [
+            new() { 
                 Name ="OP7100BR", 
                 Description = "Bridge 1 of Gantry 1",
             },
-            new Resource {
+            new() {
                 Name ="OP7200BR",
                 Description = "Bridge 2 of Gantry 1",
             },
-            new Resource {
+            new() {
                 Name ="OP7300BR",
                 Description = "Bridge 3 of Gantry 1",
             },
-            new Resource {
+            new() {
                 Name ="OP7400BR",
                 Description = "Bridge 4 of Gantry 1",
             },
-            new Resource {
+            new() {
                 Name ="OP7500BR",
                 Description = "Bridge 5 of Gantry 1",
             },
-             new Resource {
+             new() {
                 Name ="OP8100BR",
                 Description = "Bridge 1 of Gantry 2",
             },
-            new Resource {
+            new() {
                 Name ="OP8200BR",
                 Description = "Bridge 2 of Gantry 2",
             },
-            new Resource {
+            new() {
                 Name ="OP8300BR",
                 Description = "Bridge 3 of Gantry 2",
             },
-            new Resource {
+            new() {
                 Name ="OP8400BR",
                 Description = "Bridge 4 of Gantry 2",
             },
-            new Resource {
+            new() {
                 Name ="OP8500BR",
                 Description = "Bridge 5 of Gantry 2",
             },
-        };
+        ];
     }
 }

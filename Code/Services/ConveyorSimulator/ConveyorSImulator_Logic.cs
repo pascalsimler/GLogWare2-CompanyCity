@@ -13,9 +13,9 @@ public partial class ConveyorSimulator
 
     private void InitSimulation()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
-        _bridgeConfiguration = new BridgeConfiguration()
+        _bridgeConfiguration = new()
         {
             DelaySendCOMP = 1000
         };
@@ -32,22 +32,23 @@ public partial class ConveyorSimulator
             GripperOccupied = false,
             ErrorFlag = false
         };
-        _logger.LeaveMethod();
+
+        logger.LeaveMethod();
     }
 
     private void SetBridgeConfiguration(BridgeConfiguration bc)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         _bridgeConfiguration = bc;
-        _logger.LogKeyValue("DelaySendCOMP", _bridgeConfiguration.DelaySendCOMP);
+        logger.LogKeyValue("DelaySendCOMP", _bridgeConfiguration.DelaySendCOMP);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task ProcessPlcMessage(PlcMessage pm)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         switch (pm.Identifier)
         {
@@ -68,25 +69,28 @@ public partial class ConveyorSimulator
                 break;
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task Process_TARG(TARG targ)
     {
+        logger.EnterMethod();
+
+        logger.LeaveMethod();
     }
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         await CheckOrderExecution();
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task CheckOrderExecution()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (_currentORDS != null)
         {
@@ -94,28 +98,34 @@ public partial class ConveyorSimulator
             _currentORDS = null;
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task SendCurrentSTAT()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (_currentSTAT == null) return;
 
-        PlcMessage pm = new PlcMessage();
-        pm.Identifier = PlcMessageIdentifiers.STAT;
-        pm.Data = _currentSTAT;
-        GLogWareMessage m = new GLogWareMessage();
-        m.Identifier = GLogWareMessageIdentifiers.ToGLogWare;
-        m.Data = pm;
+        PlcMessage pm = new()
+        {
+            Identifier = PlcMessageIdentifiers.STAT,
+            Data = _currentSTAT
+        };
+        GLogWareMessage m = new()
+        {
+            Identifier = GLogWareMessageIdentifiers.ToGLogWare,
+            Data = pm
+        };
 
         await SendGLogWareMessage(_subscriptionTopic, m);
+
+        logger.LeaveMethod();
     }
 
     private async Task SendCOMP(string jobId, string feedbackCode)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         COMP comp = new()
         {
@@ -139,6 +149,6 @@ public partial class ConveyorSimulator
 
         await SendGLogWareMessage(_subscriptionTopic, m);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

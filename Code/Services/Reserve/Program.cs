@@ -1,8 +1,8 @@
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore;
 using Gudel.GLogWare.Infrastructure;
+using Gudel.GLogWare.Interfaces;
 using Gudel.GLogWare.Logging;
-using Gudel.GLogWare.MessageBus;
 using Gudel.GLogWare.MQTTMessageBus;
 using Gudel.GLogWare.Services.Reserve;
 using Serilog;

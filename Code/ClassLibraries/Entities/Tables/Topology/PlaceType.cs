@@ -7,22 +7,22 @@ public class PlaceType : BaseTracking, ISeedData<PlaceType>
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 
-    public ICollection<Place> Places { get; set; } = new List<Place>();
+    public ICollection<Place> Places { get; set; } = [];
 
 
     public static IEnumerable<PlaceType> SeedData()
     {
-        return new List<PlaceType>() {
-            new PlaceType {
+        return [
+            new() {
                 Name = nameof(PlaceTypeIdentifiers.GANTRY_PICK),
                 TranslationKey = $"{nameof(PlaceType)}.{nameof(PlaceTypeIdentifiers.GANTRY_PICK)}",
                 Description = "Conveyor pick position"
             },
-            new PlaceType {
+            new() {
                 Name = nameof(PlaceTypeIdentifiers.GANTRY_DROP),
                 TranslationKey = $"{nameof(PlaceType)}.{nameof(PlaceTypeIdentifiers.GANTRY_DROP)}",
                 Description = "Conveyor drop position"
             }
-        };
+        ];
     }
 }

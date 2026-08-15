@@ -12,52 +12,31 @@ public class GLogWareMessage
     public GLogWareMessageIdentifiers Identifier { get; set; }
     public object? Data { get; set; }
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     public string Serialize()
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            Converters = { new JsonStringEnumConverter() }
-        };
-
-        return JsonSerializer.Serialize(this, options);
+        return JsonSerializer.Serialize(this, JsonOptions);
     }
 
     public static string Serialize<T>(T o)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            Converters = { new JsonStringEnumConverter() }
-        };
-
-        return JsonSerializer.Serialize(o, options);
+        return JsonSerializer.Serialize(o, JsonOptions);
     }
 
     public static GLogWareMessage? DeSerialize(string jsonPayload)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            Converters = { new JsonStringEnumConverter() }
-        };
-
-        return JsonSerializer.Deserialize<GLogWareMessage>(jsonPayload, options);
+        return JsonSerializer.Deserialize<GLogWareMessage>(jsonPayload, JsonOptions);
     }
 
     public static T? DeSerialize<T>(string jsonPayload)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            Converters = { new JsonStringEnumConverter() }
-        };
-
-        return JsonSerializer.Deserialize<T>(jsonPayload, options);
+        return JsonSerializer.Deserialize<T>(jsonPayload, JsonOptions);
     }
 
 }

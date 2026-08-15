@@ -7,31 +7,31 @@ public class SkuType : ISeedData<SkuType>
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 
-    public ICollection<Sku> Skus { get; set; } = new List<Sku>();
+    public ICollection<Sku> Skus { get; set; } = [];
 
     public static IEnumerable<SkuType> SeedData()
     {
-        return new List<SkuType>() {
-            new SkuType {
+        return [
+            new() {
                 Identifier = nameof(SkuTypeIdentifiers.TIRE),
                 TranslationKey = $"{nameof(SkuType)}.{nameof(SkuTypeIdentifiers.TIRE)}",
                 Description = "Tire"
             },
-            new SkuType {
+            new() {
                 Identifier = nameof(SkuTypeIdentifiers.WHEEL),
                 TranslationKey = $"{nameof(SkuType)}.{nameof(SkuTypeIdentifiers)}",
                 Description = "Wheel"
             },
-            new SkuType {
+            new() {
                 Identifier = nameof(SkuTypeIdentifiers.CRATE),
                 TranslationKey = $"{nameof(SkuType)}.{nameof(SkuTypeIdentifiers.CRATE)}",
                 Description = "Crate"
             },
-            new SkuType {
+            new() {
                 Identifier = nameof(SkuTypeIdentifiers.PALLET),
                 TranslationKey = $"{nameof(SkuType)}.{nameof(SkuTypeIdentifiers.PALLET)}",
                 Description = "Pallet"
             },
-        };
+        ];
     }
 }

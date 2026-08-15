@@ -6,35 +6,35 @@ public  class ParameterType: ISeedData<ParameterType>
     public string Identifier { get; set; } = null!;
     public string? Description { get; set; }
 
-    public ICollection<Parameter> Parameters { get; set; } = new List<Parameter>();
+    public ICollection<Parameter> Parameters { get; set; } = [];
 
     public static IEnumerable<ParameterType> SeedData()
     {
-        return new List<ParameterType>() {
-            new ParameterType {
+        return [
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.STRING),
                 Description = "NVARCHAR"
             },
-            new ParameterType {
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.NUMBER),
                 Description = "NUMBER, INT, DECIMAL, DOUBLE"
             },
-            new ParameterType {
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.BOOL),
                 Description = "BIT"
             },
-            new ParameterType {
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.DATE),
                 Description = "DATE"
             },
-            new ParameterType {
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.TIME),
                 Description = "TIME"
             },
-            new ParameterType {
+            new() {
                 Identifier = nameof(ParameterTypeIdentifiers.DATETIME),
                 Description = "DATETIME"
             },
-        };
+        ];
     }
 }

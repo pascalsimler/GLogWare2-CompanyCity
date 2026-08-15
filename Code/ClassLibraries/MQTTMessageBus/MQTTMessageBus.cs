@@ -1,5 +1,5 @@
-﻿using Gudel.GLogWare.Logging;
-using Gudel.GLogWare.MessageBus;
+﻿using Gudel.GLogWare.Interfaces;
+using Gudel.GLogWare.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
@@ -9,19 +9,17 @@ using MQTTnet.Protocol;
 
 namespace Gudel.GLogWare.MQTTMessageBus;
 
-public class MQTTMessageBus : IMessageBus
+public class MQTTMessageBus(
+    ILogger<MQTTMessageBus> logger,
+    IConfiguration configuration
+) : IMessageBus
 {
-    #region Injected members
-    private readonly ILogger _logger;
-    private readonly IConfiguration _configuration;
-    #endregion
-
     #region Private members
-    private string _ip { get; set; } = "127.0.0.1";
-    private int _port { get; set; } = 1883;
-    private string _rootTopic { get; set; } = string.Empty;
-    private string _clientId { get; set; } = string.Empty;
-    private string[] _subscriptionTopics { get; set; } = Array.Empty<string>();
+    private string _ip  = "127.0.0.1";
+    private int _port = 1883;
+    private string _rootTopic = string.Empty;
+    private string _clientId = string.Empty;
+    private string[] _subscriptionTopics = [];
     private IManagedMqttClient? _mqttClient = null;
     #endregion
 
@@ -29,41 +27,30 @@ public class MQTTMessageBus : IMessageBus
     public event EventHandler<MessageBusNotificationEventArgs>? MessageBusNotification;
     #endregion
 
-    #region Constructors
-    public MQTTMessageBus(
-        ILogger<MQTTMessageBus> logger,
-        IConfiguration configuration
-    ) 
-    {
-        _logger = logger;
-        _configuration = configuration;
-    }
-    #endregion
-
     #region Public members
     public void Init(string clientId, string[] subscriptionTopics)
     {
-        _logger.EnterMethod();
-        _logger.LogKeyValue("clientId", clientId);
-        _logger.LogKeyValue("subscriptionTopics", string.Join(", ", subscriptionTopics));
+        logger.EnterMethod();
+        logger.LogKeyValue("clientId", clientId);
+        logger.LogKeyValue("subscriptionTopics", string.Join(", ", subscriptionTopics));
         _clientId = clientId;
         _subscriptionTopics = subscriptionTopics;
 
         string path = "MQTTBroker";
-        _ip = _configuration[$"{path}:Ip"] ?? _ip;
-        if (int.TryParse(_configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
-        _rootTopic = _configuration[$"{path}:RootTopic"] ?? _rootTopic;
+        _ip = configuration[$"{path}:Ip"] ?? _ip;
+        if (int.TryParse(configuration[$"{path}:Port"], out int tmpPort)) _port = tmpPort;
+        _rootTopic = configuration[$"{path}:RootTopic"] ?? _rootTopic;
        
-        _logger.LogKeyValue("_ip", _ip);
-        _logger.LogKeyValue("_port", _port);
-        _logger.LogKeyValue("_rootTopic", _rootTopic);
+        logger.LogKeyValue("_ip", _ip);
+        logger.LogKeyValue("_port", _port);
+        logger.LogKeyValue("_rootTopic", _rootTopic);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     public async Task StartAsync()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         _mqttClient = new MqttFactory().CreateManagedMqttClient();
         _mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
@@ -90,14 +77,14 @@ public class MQTTMessageBus : IMessageBus
 
         await _mqttClient.StartAsync(mqttOptions);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     public async Task PublishAsync(string topic, string message)
     {
-        _logger.EnterMethod();
-        _logger.LogKeyValue("topic", topic);
-        _logger.LogKeyValue("message", message);
+        logger.EnterMethod();
+        logger.LogKeyValue("topic", topic);
+        logger.LogKeyValue("message", message);
 
         var mqttMessage =
             new MqttApplicationMessageBuilder()
@@ -111,7 +98,7 @@ public class MQTTMessageBus : IMessageBus
             await _mqttClient.EnqueueAsync(mqttMessage);
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
     #endregion region
 

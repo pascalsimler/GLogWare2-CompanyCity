@@ -7,21 +7,21 @@ public class StatisticCategory : ISeedData<StatisticCategory>
     public string? TranslationKey { get; set; }
     public string? Description { get; set; }
 
-    public ICollection<Statistic> Statistics { get; set; } = new List<Statistic>();
+    public ICollection<Statistic> Statistics { get; set; } = [];
 
     public static IEnumerable<StatisticCategory> SeedData()
     {
-        return new List<StatisticCategory>() {
-            new StatisticCategory {
+        return [
+            new() {
                 Identifier = nameof(StatisticCategoryIdentifiers.Bridge),
                 TranslationKey = $"{nameof(LogPlcDirection)}.{nameof(StatisticCategoryIdentifiers.Bridge)}",
                 Description = "Bridge movements statistics"
             },
-            new StatisticCategory {
+            new() {
                 Identifier = nameof(StatisticCategoryIdentifiers.FillLevel),
                 TranslationKey = $"{nameof(LogPlcDirection)}.{nameof(StatisticCategoryIdentifiers.FillLevel)}",
                 Description = "Gantry Fill level statistics"
             },
-        };
+        ];
     }
 }

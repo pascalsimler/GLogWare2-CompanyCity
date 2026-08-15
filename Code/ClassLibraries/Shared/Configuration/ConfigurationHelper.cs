@@ -19,20 +19,20 @@ public static class ConfigurationHelper
     /// <returns>the absolute path to the GLogWare customer project folder</returns>
     public static string GetProjectRootPath()
     {
-        int index = -1;
-        string path = "/";
+        int index;
+        string path;
 
         string assemblyPath = System.AppContext.BaseDirectory;
 
         if ((index = assemblyPath.IndexOf(CodeSubFolder)) > -1)
         {
             // Execution out from within Visual Studio
-            path = assemblyPath.Substring(0, index); 
+            path = assemblyPath[..index]; 
         }
         else if ((index = assemblyPath.IndexOf(RuntimeSubFolder)) > -1)
         {
             //Execution out from a native operating system service
-            path = assemblyPath.Substring(0, index);
+            path = assemblyPath[..index];
         }
         else if (Directory.Exists(DockerSrcPath))
         {
@@ -57,7 +57,7 @@ public static class ConfigurationHelper
     /// <returns>Absolute path of the logfile subfolder for the given service</returns>
     public static string GetLogFilePath(string projectRootPath, string serviceName, string OP)
     {
-        string path = string.Empty;
+        string path;
 
         string logDirectory = Path.Combine(projectRootPath, LogfilesSubFolder, serviceName, OP);
         if (!Directory.Exists(logDirectory))
@@ -76,7 +76,7 @@ public static class ConfigurationHelper
     /// <returns>Absolute path of the logfile subfolder for the given service</returns>
     public static string GetLogFilePath(string projectRootPath, string serviceName)
     {
-        string path = string.Empty;
+        string path;
 
         string logDirectory = Path.Combine(projectRootPath, LogfilesSubFolder, serviceName);
         if (!Directory.Exists(logDirectory))
@@ -94,7 +94,7 @@ public static class ConfigurationHelper
     /// <returns>Absolute path of the GLogWare configuration subfolder</returns>
     public static string GetConfigPath(string projectRootPath)
     {
-        string path = string.Empty;
+        string path;
        
         path = Path.Combine(projectRootPath, ConfigSubFolder);
         return path;

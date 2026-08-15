@@ -13,7 +13,7 @@ public partial class BridgeSimulator
 
     private void InitSimulation()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         _bridgeConfiguration = new BridgeConfiguration()
         {
@@ -33,22 +33,22 @@ public partial class BridgeSimulator
             ErrorFlag = false
         };
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private void SetBridgeConfiguration(BridgeConfiguration bc)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         _bridgeConfiguration = bc;
-        _logger.LogKeyValue("DelaySendCOMP", _bridgeConfiguration.DelaySendCOMP);
+        logger.LogKeyValue("DelaySendCOMP", _bridgeConfiguration.DelaySendCOMP);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task ProcessPlcMessage(PlcMessage pm)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         switch (pm.Identifier)
         {
@@ -69,12 +69,12 @@ public partial class BridgeSimulator
                 break;
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task Process_ORDS(ORDS ords)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (_currentSTAT == null)
         {
@@ -98,21 +98,21 @@ public partial class BridgeSimulator
             }
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async void OnOrderExecutionCompleted(object source, ElapsedEventArgs e)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         await CheckOrderExecution();
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task CheckOrderExecution()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (_currentORDS != null)
         {
@@ -120,12 +120,12 @@ public partial class BridgeSimulator
             _currentORDS = null;
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task SendCurrentSTAT()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (_currentSTAT != null)
         {
@@ -143,20 +143,20 @@ public partial class BridgeSimulator
             await SendGLogWareMessage(_subscriptionTopic, m);
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task SendCOMP(string jobId, string feedbackCode)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
-        COMP comp = new COMP()
+        COMP comp = new()
         {
             Jobid = jobId,
             FeedbackCode = feedbackCode
         };
 
-        PlcMessage pm = new PlcMessage()
+        PlcMessage pm = new()
         {
             Identifier = PlcMessageIdentifiers.COMP,
             Sender = OP!,
@@ -164,7 +164,7 @@ public partial class BridgeSimulator
             Data = comp
         };
 
-        GLogWareMessage m = new GLogWareMessage()
+        GLogWareMessage m = new()
         {
             Identifier = GLogWareMessageIdentifiers.ToGLogWare,
             Data = pm
@@ -172,6 +172,6 @@ public partial class BridgeSimulator
 
         await SendGLogWareMessage(_subscriptionTopic, m);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

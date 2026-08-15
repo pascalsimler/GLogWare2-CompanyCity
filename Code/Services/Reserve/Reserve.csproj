@@ -9,6 +9,7 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>Gudel.GLogWare.Services.$(MSBuildProjectName)</AssemblyName>
     <AssemblyTitle>Gudel.GLogWare.Services.$(MSBuildProjectName)</AssemblyTitle>
+    <RootNamespace>Gudel.GLogWare.Services.$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

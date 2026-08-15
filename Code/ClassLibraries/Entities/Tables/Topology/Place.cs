@@ -21,18 +21,18 @@ public class Place : BaseTracking, ISeedData<Place>
     public Area AreaRecord { get; set; } = null!;
     public PlaceType PlaceTypeRecord { get; set; } = null!;
 
-    public ICollection<Sku> Skus { get; set; } = new List<Sku>();
-    public ICollection<Job> JobSourcePlaces { get; set; } = new List<Job>();
-    public ICollection<Job> JobDestinationPlaces { get; set; } = new List<Job>();
-    public ICollection<Job> JobActualPlaces { get; set; } = new List<Job>();
-    public ICollection<Job> JobNextPlaces { get; set; } = new List<Job>();
-    public ICollection<Route> RouteDecisionPlaces { get; set; } = new List<Route>();
-    public ICollection<Route> RouteDestinationPlaces { get; set; } = new List<Route>();
-    public ICollection<Route> RouteNextPlaces { get; set; } = new List<Route>();
+    public ICollection<Sku> Skus { get; set; } = [];
+    public ICollection<Job> JobSourcePlaces { get; set; } = [];
+    public ICollection<Job> JobDestinationPlaces { get; set; } = [];
+    public ICollection<Job> JobActualPlaces { get; set; } = [];
+    public ICollection<Job> JobNextPlaces { get; set; } = [];
+    public ICollection<Route> RouteDecisionPlaces { get; set; } = [];
+    public ICollection<Route> RouteDestinationPlaces { get; set; } = [];
+    public ICollection<Route> RouteNextPlaces { get; set; } = [];
 
     public static IEnumerable<Place> SeedData()
     {
-        List<Place> places = new List<Place>();
+        List<Place> places = [];
         Place p;
 
         for (int g=1; g<=2; g++)
@@ -41,19 +41,21 @@ public class Place : BaseTracking, ISeedData<Place>
             {
                 for (int y = 1; y <= 17; y++)
                 {
-                    p = new Place();
-                    p.Name = $"{AreaIdentifiers.GANTRY.ToString()}-{g:0}-{x:00}.{y:00}";
-                    p.Area = AreaIdentifiers.GANTRY.ToString();
-                    p.PlaceType = null;
-                    p.G = g.ToString();
-                    p.XCell = x.ToString();
-                    p.YCell = y.ToString();
-                    p.Distance = (x-15) * (x-15) + (y-8) * (y-8);
-                    p.Bridge = (g) switch
+                    p = new()
                     {
-                        1 => (x < 36) ? "OP7100BR" : "OP7200BR",
-                        2 => (x < 36) ? "OP7300BR" : "OP7400BR",
-                        _ => throw new NotImplementedException(),
+                        Name = $"{AreaIdentifiers.GANTRY}-{g:0}-{x:00}.{y:00}",
+                        Area = AreaIdentifiers.GANTRY.ToString(),
+                        PlaceType = null,
+                        G = g.ToString(),
+                        XCell = x.ToString(),
+                        YCell = y.ToString(),
+                        Distance = (x - 15) * (x - 15) + (y - 8) * (y - 8),
+                        Bridge = (g) switch
+                        {
+                            1 => (x < 36) ? "OP7100BR" : "OP7200BR",
+                            2 => (x < 36) ? "OP7300BR" : "OP7400BR",
+                            _ => throw new NotImplementedException(),
+                        },
                     };
                     places.Add(p);
                 }

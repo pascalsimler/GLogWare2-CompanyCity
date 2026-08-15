@@ -1,6 +1,6 @@
-﻿using Gudel.GLogWare.Logging;
+﻿using Gudel.GLogWare.Interfaces;
+using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Messages;
-using Gudel.GLogWare.PlcDriver;
 
 namespace Gudel.GLogWare.Services.BridgeSimulator;
 
@@ -12,26 +12,26 @@ public partial class BridgeSimulator
 
     private void LoadGLogWareConfiguration()
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
-        _plcSimulatorDriver.LoadConfiguration(_configPath);
+        plcSimulatorDriver.LoadConfiguration(_configPath);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task StartPlcSimulatorDriverAsync(CancellationToken cancellationToken)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
-        _plcSimulatorDriver.DriverNotification += OnPlcSimulatorDriverNotification;
-        await _plcSimulatorDriver.StartAsync(cancellationToken);
+        plcSimulatorDriver.DriverNotification += OnPlcSimulatorDriverNotification;
+        await plcSimulatorDriver.StartAsync(cancellationToken);
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async void OnPlcSimulatorDriverNotification(object? sender, DriverNotificationEventArgs e)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         if (e.NotificationType == DriverNotificationType.TelegramReceived)
         {
@@ -43,26 +43,26 @@ public partial class BridgeSimulator
             switch (_driverState)
             {
                 case DriverNotificationType.Online:
-                    _logger.LogInformation("GLogWare is now CONNECTED !");
+                    logger.LogInformation("GLogWare is now CONNECTED !");
                     break;
                 case DriverNotificationType.Offline:
-                    _logger.LogInformation("GLogWare is now DISCONNECTED !");
+                    logger.LogInformation("GLogWare is now DISCONNECTED !");
                     break;
                 case DriverNotificationType.TelegramSent:
-                    _logger.LogInformation("GLogWare has a telegram to send");
+                    logger.LogInformation("GLogWare has a telegram to send");
                     break;
                 case DriverNotificationType.TelegramSentAcknowledged:
-                    _logger.LogInformation("GLogWare acknowledged the sent telegram");
+                    logger.LogInformation("GLogWare acknowledged the sent telegram");
                     break;
             }
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 
     private async Task ProcessGLogWareMessage(PlcMessage pm)
     {
-        _logger.EnterMethod();
+        logger.EnterMethod();
 
         try
         {
@@ -78,9 +78,9 @@ public partial class BridgeSimulator
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing GLogWareMessage");
+            logger.LogError(ex, "Error processing GLogWareMessage");
         }
 
-        _logger.LeaveMethod();
+        logger.LeaveMethod();
     }
 }

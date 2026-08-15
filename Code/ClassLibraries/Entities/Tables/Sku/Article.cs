@@ -6,5 +6,5 @@ public class Article : BaseTracking
     public string? Description { get; set; }
     public string? Remarks { get; set; }
 
-    public ICollection<Sku> Skus { get; set; } = new List<Sku>();
+    public ICollection<Sku> Skus { get; set; } = [];
 }

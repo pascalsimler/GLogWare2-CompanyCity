@@ -1,5 +1,5 @@
-﻿using Gudel.GLogWare.Logging;
-using Gudel.GLogWare.MessageBus;
+﻿using Gudel.GLogWare.Interfaces;
+using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.Messages;
 
 namespace SimulatorWebApp.Services;
