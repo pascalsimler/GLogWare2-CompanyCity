@@ -1,0 +1,1 @@
+docker run -d --pull always -e OR_I_ACCEPT_EULA=true -e INITIAL_USERNAME=admin -e INITIAL_PASSWORD=*Gudel1954* -v opc-router-5-db:/data/database -v opc-router-5-userdata:/inray -v opc-router5-logs:/var/log/opcrouter --name opcrouter5 -p 8080:8080 -e TZ=Europe/Berlin opcrouter/runtime:latest

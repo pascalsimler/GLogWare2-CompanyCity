@@ -1,0 +1,8 @@
+openssl req -newkey rsa:2048 -nodes -keyout keycloak.key \
+  -x509 -days 365 -out keycloak.crt
+
+
+openssl pkcs12 -export -name keycloak \
+  -inkey keycloak.key \
+  -in keycloak.crt \
+  -out keycloak.p12
