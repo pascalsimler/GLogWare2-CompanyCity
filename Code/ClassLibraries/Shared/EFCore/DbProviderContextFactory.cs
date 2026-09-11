@@ -33,16 +33,16 @@ public abstract class DbProviderContextFactory<TDbContext>
         optionsBuilder.UseSqlServer(connectionString);
 #endif
 #if ORACLE
-        optionBuilder.UseOracle(
+        optionsBuilder.UseOracle(
             connectionString, 
             x => x.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
         );
 #endif
 #if POSTGRES
-        optionBuilder.UseNpgsql(connectionString)
+        optionsBuilder.UseNpgsql(connectionString);
 #endif
 #if MYSQL
-        optionBuilder.UseMySQL(connectionString)
+        optionsBuilder.UseMySQL(connectionString);
 #endif
 
         return CreateContext(optionsBuilder.Options);

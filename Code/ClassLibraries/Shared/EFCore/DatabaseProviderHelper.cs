@@ -176,7 +176,7 @@ public static class DatabaseProviderHelper
         optionsBuilder.UseNpgsql(connectionString);
 #endif
 #if MYSQL
-        optionsBuilder.UseMySQL(connectionString
+        optionsBuilder.UseMySQL(connectionString);
 #endif
 
         return (TDbContext)Activator.CreateInstance(typeof(TDbContext), optionsBuilder.Options)!;
