@@ -3,12 +3,11 @@
 <g transform="translate(@Cx, @Cy)"
    style="cursor:pointer"
    @onclick="OnClick">
-    <circle cx="0"
-            cy="0"
-            r="@Radius"
-            fill="@Fill"
-            stroke="@Stroke"
-            stroke-width="1.2" />
+    <path d="@RingPath"
+          fill="@Fill"
+          fill-rule="evenodd"
+          stroke="@Stroke"
+          stroke-width="1.2" />
     <text x="0"
           y="0"
           text-anchor="middle"
@@ -32,6 +31,22 @@
 
     private string Fill => Selected ? "#ff7b7b" : Zob;
     private string Stroke => Selected ? "#b30000" : "#0366d6";
+
+    private double Radius1;
+    private double Radius2;
+
+    private string RingPath =>
+        FormattableString.Invariant(
+            $"M {Radius2} 0 A {Radius2} {Radius2} 0 1 0 {-Radius2} 0 A {Radius2} {Radius2} 0 1 0 {Radius2} 0 Z M {Radius1} 0 A {Radius1} {Radius1} 0 1 0 {-Radius1} 0 A {Radius1} {Radius1} 0 1 0 {Radius1} 0 Z");
+
+    protected override void OnInitialized()
+    {
+        double min = 0.6 * Radius;
+        double minWidth = 0.15 * Radius;
+
+        Radius1 = min + (Radius - minWidth - min) * Random.Shared.NextDouble();
+        Radius2 = Radius1 + minWidth + (Radius - Radius1 - minWidth) * Random.Shared.NextDouble();
+    }
 
     private async Task OnClick()
     {

@@ -18,7 +18,7 @@ public partial class Visualization : IAsyncDisposable
     private const string UnselectedFill = "#bde0fe"; // couleur normale
     private const string SelectedStroke = "#b30000";
     private const string UnselectedStroke = "#0366d6";
-    private const int FontSize = 40;
+    private const int FontSize = 20;
 
     private Random _rng = new();
     private List<Cell> _cells = new();
