@@ -35,9 +35,8 @@
     private double Radius1;
     private double Radius2;
 
-    private string RingPath =>
-        FormattableString.Invariant(
-            $"M {Radius2} 0 A {Radius2} {Radius2} 0 1 0 {-Radius2} 0 A {Radius2} {Radius2} 0 1 0 {Radius2} 0 Z M {Radius1} 0 A {Radius1} {Radius1} 0 1 0 {-Radius1} 0 A {Radius1} {Radius1} 0 1 0 {Radius1} 0 Z");
+    private string RingPath => Recalculate();
+   
 
     protected override void OnInitialized()
     {
@@ -55,4 +54,16 @@
             await OnToggle.InvokeAsync();
         }
     }
+
+    private string Recalculate()
+{
+    double min = 0.6 * Radius;
+    double minWidth = 0.15 * Radius;
+
+    Radius1 = min + (Radius - minWidth - min) * Random.Shared.NextDouble();
+    Radius2 = Radius1 + minWidth + (Radius - Radius1 - minWidth) * Random.Shared.NextDouble();
+    return FormattableString.Invariant(
+        $"M {Radius2} 0 A {Radius2} {Radius2} 0 1 0 {-Radius2} 0 A {Radius2} {Radius2} 0 1 0 {Radius2} 0 Z M {Radius1} 0 A {Radius1} {Radius1} 0 1 0 {-Radius1} 0 A {Radius1} {Radius1} 0 1 0 {Radius1} 0 Z");
+}
+
 }

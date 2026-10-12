@@ -121,7 +121,7 @@ public static class DatabaseProviderHelper
         SetDatabaseProvider();
 
 #if SQLSERVER
-        services.AddDbContextFactory<TDbContext>(
+        services.AddPooledDbContextFactory<TDbContext>(
             options => options.UseSqlServer(
                 connectionString,
                 x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
@@ -129,7 +129,7 @@ public static class DatabaseProviderHelper
         );
 #endif
 #if ORACLE
-        services.AddDbContextFactory<TDbContext>(
+        services.AddPooledDbContextFactory<TDbContext>(
             options => options.UseOracle(
                 connectionString, 
                 x => {
@@ -140,7 +140,7 @@ public static class DatabaseProviderHelper
         );
 #endif
 #if POSTGRES
-        services.AddDbContextFactory<TDbContext>(
+        services.AddPooledDbContextFactory<TDbContext>(
             options => options.UseNpgsql(
                 connectionString, 
                 x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
@@ -148,7 +148,7 @@ public static class DatabaseProviderHelper
         );
 #endif
 #if MYSQL
-        services.AddDbContextFactory<TDbContext>(
+        services.AddPooledDbContextFactory<TDbContext>(
             options => options.UseMySQL(
                 connectionString, 
                 x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)

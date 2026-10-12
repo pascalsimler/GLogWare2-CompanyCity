@@ -9,8 +9,6 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
 {
     #region Entity Sets
 
-    #region Tables
-    
     #region Topology
     public DbSet<ResourceMode> ResourceModes => Set<ResourceMode>();
     public DbSet<Resource> Resources => Set<Resource>();
@@ -48,14 +46,10 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     public DbSet<ParameterType> ParameterTypes => Set<ParameterType>();
     public DbSet<Parameter> Parameters => Set<Parameter>();
     #endregion
-    
-    #endregion
-
-    #region Views
-    //public DbSet<VInventory> VInventories => Set<VInventory>();
-    #endregion
 
     #endregion
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
     #region Overrides
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -128,8 +122,8 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
         // apply properties efined in dedicated Configuration classses for each entity
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(GLogWareDbContext).Assembly);
 
-        //Views
-        //modelBuilder.Entity<VInventory>().HasNoKey().ToView("VInventory");
+        // Views scaffolded in Views\GLogWareDbContext.cs
+        OnModelCreatingPartial(modelBuilder);
 
         // Seeding data. Data to seed is performed trough the SeedData method of the entity class itself
         var seedableTypes = typeof(Area).Assembly
@@ -177,5 +171,4 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     }
 
     #endregion
-
 }

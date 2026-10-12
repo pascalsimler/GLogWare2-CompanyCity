@@ -23,4 +23,9 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
 	</ItemGroup>
 	
+	<ItemGroup>
+	  <Folder Include="Views\" />
+	  <Folder Include="SQLScripts\SqlServer\Views\" />
+	</ItemGroup>
+	
 </Project>

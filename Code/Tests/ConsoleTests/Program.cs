@@ -7,8 +7,6 @@ using Microsoft.Extensions.Configuration;
 Console.WriteLine(DateTimeOffset.Now);
 string projectRootPath = ConfigurationHelper.GetProjectRootPath();
 Console.WriteLine($"projectRootPath=[{projectRootPath}]");
-string databaseProvider = DatabaseProviderHelper.databaseProvider.ToString();
-Console.WriteLine($"databaseProvider=[{databaseProvider}]");
 
 var configuration = new ConfigurationBuilder()
       .SetBasePath(projectRootPath) // base path for relative files
@@ -17,16 +15,18 @@ var configuration = new ConfigurationBuilder()
           optional: false,
           reloadOnChange: true)
       .Build();
-string connectionString = configuration[$"Database:ConnectionString_{databaseProvider}"]!;
+string connectionString = configuration[$"Database:GLogWareBusiness:ConnectionString"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
 GLogWareDbContext db = DatabaseProviderHelper.GetDbProviderContext<GLogWareDbContext>(connectionString);
 Console.WriteLine("DbContext successfully created");
 
-//foreach (var inv in db.VInventories)
-//{
-//    Console.WriteLine($"{inv.Place} - {inv.Amount}");
-//}
+foreach (var inv in db.VInventories)
+{
+    Console.WriteLine($"{inv.Name} - {inv.TireCount}");
+}
+Console.Write("Press any key to continue ...");
+Console.ReadLine();
 
 while (true)
 {
