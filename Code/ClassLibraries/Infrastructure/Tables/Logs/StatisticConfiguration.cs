@@ -1,6 +1,8 @@
 ﻿using Gudel.GLogWare.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
+using System.Xml;
 
 namespace Gudel.GLogWare.Infrastructure;
 
@@ -22,6 +24,13 @@ public class StatisticConfiguration : IEntityTypeConfiguration<Statistic>
             .IsUnicode(false)
             .IsRequired()
             .HasComment("Statistic element");
+
+        for (int i = 1; i <= 20; i++)
+        {
+            entity.Property<int>($"Counter{i:00}")
+                .HasDefaultValue(0)
+                .HasComment($"Statistic Counter{i:00}");
+        }
 
         // Table relations
         entity.HasOne(e => e.StatisticCategoryRecord)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Gudel.GLogWare.Infrastructure.Views;
 
-public partial class VInventory
+public partial class ViewInventory
 {
     public string Name { get; set; } = null!;
 

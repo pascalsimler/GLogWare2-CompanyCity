@@ -41,7 +41,7 @@ public partial class Visualization : IAsyncDisposable
 
         _refreshCts = new CancellationTokenSource();
         _refreshTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
-        _ = RefreshLoopAsync(_refreshCts.Token);
+        //_ = RefreshLoopAsync(_refreshCts.Token);
     }
 
     private async Task RefreshLoopAsync(CancellationToken cancellationToken)

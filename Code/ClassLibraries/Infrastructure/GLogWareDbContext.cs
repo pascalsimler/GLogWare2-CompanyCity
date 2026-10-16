@@ -59,7 +59,12 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
         // apply BaseTracking properties on all entities inhereting from it.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entityType.SetTableName(DatabaseProviderHelper.ToProviderName(entityType.GetTableName()!));
+            string tableName = entityType.GetTableName()!;
+            entityType.SetTableName(
+                tableName.StartsWith("view", StringComparison.OrdinalIgnoreCase) ?
+                null :
+                DatabaseProviderHelper.ToProviderName(tableName)
+            );
 
             foreach (var property in entityType.GetProperties())
             {

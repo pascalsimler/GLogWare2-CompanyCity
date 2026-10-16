@@ -21,9 +21,21 @@ Console.WriteLine($"connectionString=[{connectionString}");
 GLogWareDbContext db = DatabaseProviderHelper.GetDbProviderContext<GLogWareDbContext>(connectionString);
 Console.WriteLine("DbContext successfully created");
 
-foreach (var inv in db.VInventories)
+foreach (var inv in db.ViewInventories)
 {
     Console.WriteLine($"{inv.Name} - {inv.TireCount}");
+}
+Console.Write("Press any key to continue ...");
+Console.ReadLine();
+
+var q = db.ViewStatisticFillLevels
+    .Where(f => f.Area == "KOM-1")
+    .OrderBy(f => f.Day)
+    .ThenBy(f => f.Hour)
+    ;
+foreach (var f in q)
+{
+    Console.WriteLine($"{f.Area} - {f.Day} - {f.Hour} - {f.CountOccupied} ({f.PercentOccupied} %)");
 }
 Console.Write("Press any key to continue ...");
 Console.ReadLine();

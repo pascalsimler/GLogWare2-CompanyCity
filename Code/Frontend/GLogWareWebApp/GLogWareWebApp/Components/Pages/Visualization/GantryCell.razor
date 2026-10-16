@@ -3,6 +3,10 @@
 <g transform="translate(@Cx, @Cy)"
    style="cursor:pointer"
    @onclick="OnClick">
+    <circle cx="0"
+            cy="0"
+            r="@Radius.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+            fill="@Zob" />
     <path d="@RingPath"
           fill="@Fill"
           fill-rule="evenodd"
@@ -29,7 +33,7 @@
 
     [Parameter] public EventCallback OnToggle { get; set; }
 
-    private string Fill => Selected ? "#ff7b7b" : Zob;
+    private string Fill => "#000000";
     private string Stroke => Selected ? "#b30000" : "#0366d6";
 
     private double Radius1;
