@@ -59,7 +59,7 @@ var logger = startupLoggerFactory.CreateLogger("Startup");
 logger.LogKeyValue("BridgeManager.OP", BridgeManager.OP);
 logger.LogKeyValue("BridgeManager.ServiceName", BridgeManager.ServiceName);
 logger.LogKeyValue("projectRootPath", projectRootPath);
-configKey = "Database:GLogWareBusiness:ConnectionString";
+configKey = "Database:GLogWare:ConnectionString";
 string connectionString = builder.Configuration[configKey]!;
 logger.LogKeyValue(configKey, connectionString);
 configKey = "Project:Trigram";

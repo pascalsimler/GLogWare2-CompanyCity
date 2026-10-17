@@ -9,8 +9,6 @@
     <Project Path="Code/ClassLibraries/LegacyPlcDriver/LegacyPlcDriver.csproj" />
     <Project Path="Code/ClassLibraries/MQTTMessageBus/MQTTMessageBus.csproj" Id="e96f821a-4a12-40b9-88ae-2bd7d2ad1dfc" />
     <Project Path="Code/ClassLibraries/Shared/Shared.csproj" />
-    <Project Path="Code/ClassLibraries/UI.Entities/UI.Entities.csproj" Id="ffc97d94-4f59-42fc-83bf-f83fb0a9d1b1" />
-    <Project Path="Code/ClassLibraries/UI.Infrastructure/UI.Infrastructure.csproj" Id="b32c1ca1-e111-4144-abd8-2c4d2f90f734" />
   </Folder>
   <Folder Name="/Code/Frontend/">
     <Project Path="Code/Frontend/GLogWareWebApp/GLogWareWebApp.csproj" Id="0d531a36-dc96-420a-98a9-c0589ef3830a" />

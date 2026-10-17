@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gudel.GLogWare.Infrastructure;
 
-public partial class GLogWareDbContext 
+public partial class GLogWareDbContext
 {
     public virtual DbSet<ViewInventory> ViewInventories { get; set; }
 
@@ -16,6 +16,14 @@ public partial class GLogWareDbContext
     public virtual DbSet<ViewStatisticBridgePerHour> ViewStatisticBridgePerHours { get; set; }
 
     public virtual DbSet<ViewStatisticBridgePerHourConsolidated> ViewStatisticBridgePerHourConsolidateds { get; set; }
+
+    public virtual DbSet<ViewStatisticBridgePerMonth> ViewStatisticBridgePerMonths { get; set; }
+
+    public virtual DbSet<ViewStatisticBridgePerMonthConsolidated> ViewStatisticBridgePerMonthConsolidateds { get; set; }
+
+    public virtual DbSet<ViewStatisticBridgePerWeek> ViewStatisticBridgePerWeeks { get; set; }
+
+    public virtual DbSet<ViewStatisticBridgePerWeekConsolidated> ViewStatisticBridgePerWeekConsolidateds { get; set; }
 
     public virtual DbSet<ViewStatisticFillLevel> ViewStatisticFillLevels { get; set; }
 
@@ -41,9 +49,6 @@ public partial class GLogWareDbContext
             entity.Property(e => e.BridgeNr)
                 .HasMaxLength(16)
                 .IsUnicode(false);
-            entity.Property(e => e.Hour)
-                .HasMaxLength(1)
-                .IsUnicode(false);
         });
 
         modelBuilder.Entity<ViewStatisticBridgePerDayConsolidated>(entity =>
@@ -51,13 +56,6 @@ public partial class GLogWareDbContext
             entity
                 .HasNoKey()
                 .ToView("ViewStatisticBridgePerDayConsolidated");
-
-            entity.Property(e => e.BridgeNr)
-                .HasMaxLength(1)
-                .IsUnicode(false);
-            entity.Property(e => e.Hour)
-                .HasMaxLength(1)
-                .IsUnicode(false);
         });
 
         modelBuilder.Entity<ViewStatisticBridgePerHour>(entity =>
@@ -80,12 +78,45 @@ public partial class GLogWareDbContext
                 .HasNoKey()
                 .ToView("ViewStatisticBridgePerHourConsolidated");
 
-            entity.Property(e => e.BridgeNr)
-                .HasMaxLength(1)
-                .IsUnicode(false);
             entity.Property(e => e.Hour)
                 .HasMaxLength(6)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ViewStatisticBridgePerMonth>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ViewStatisticBridgePerMonth");
+
+            entity.Property(e => e.BridgeNr)
+                .HasMaxLength(16)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ViewStatisticBridgePerMonthConsolidated>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ViewStatisticBridgePerMonthConsolidated");
+        });
+
+        modelBuilder.Entity<ViewStatisticBridgePerWeek>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ViewStatisticBridgePerWeek");
+
+            entity.Property(e => e.BridgeNr)
+                .HasMaxLength(16)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ViewStatisticBridgePerWeekConsolidated>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ViewStatisticBridgePerWeekConsolidated");
         });
 
         modelBuilder.Entity<ViewStatisticFillLevel>(entity =>

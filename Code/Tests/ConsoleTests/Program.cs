@@ -15,7 +15,7 @@ var configuration = new ConfigurationBuilder()
           optional: false,
           reloadOnChange: true)
       .Build();
-string connectionString = configuration[$"Database:GLogWareBusiness:ConnectionString"]!;
+string connectionString = configuration[$"Database:GLogWare:ConnectionString"]!;
 Console.WriteLine($"connectionString=[{connectionString}");
 
 GLogWareDbContext db = DatabaseProviderHelper.GetDbProviderContext<GLogWareDbContext>(connectionString);

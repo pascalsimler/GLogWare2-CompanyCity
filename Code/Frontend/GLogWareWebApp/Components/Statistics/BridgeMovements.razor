@@ -1,0 +1,92 @@
+@page "/statistics/bridge-movements"
+
+<PageTitle>Bridge Movement Statistics</PageTitle>
+
+<div class="page-heading scada-heading">
+    <div>
+        <MudText Typo="Typo.h4">Gantry bridge movements</MudText>
+        <MudText Color="Color.Secondary">Number of bridge movements per gantry and day</MudText>
+    </div>
+    <MudSelect T="int" @bind-Value="_days" Label="Period" Variant="Variant.Outlined" Dense="true" Style="max-width:180px">
+        <MudSelectItem T="int" Value="7">Last 7 days</MudSelectItem>
+        <MudSelectItem T="int" Value="14">Last 14 days</MudSelectItem>
+        <MudSelectItem T="int" Value="30">Last 30 days</MudSelectItem>
+    </MudSelect>
+</div>
+
+<div class="scada-kpis">
+    <div><span>Total movements</span><strong>@Total.ToString("N0")</strong></div>
+    <div><span>Average per day</span><strong>@((Total / _days).ToString("N0"))</strong></div>
+    <div><span>Busiest gantry</span><strong>@Busiest</strong></div>
+    <div><span>Period</span><strong>@_days days</strong></div>
+</div>
+
+<MudGrid Spacing="3">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="scada-panel" Elevation="0">
+            <MudText Typo="Typo.h6">Totals per gantry</MudText>
+            @foreach (var g in Gantries)
+            {
+                var sum = Sum(g);
+                <div class="stat-bar-row">
+                    <span>@g</span>
+                    <div class="stat-bar"><div style="width:@(Pct(sum, Gantries.Max(Sum)))%"></div></div>
+                    <b>@sum.ToString("N0")</b>
+                </div>
+            }
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="8">
+        <MudPaper Class="scada-panel stat-panel" Elevation="0">
+            <MudText Typo="Typo.h6">Daily movements</MudText>
+            <div class="stat-scroll">
+                <table class="stat-table stat-table-wide">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            @foreach (var g in Gantries)
+                            {
+                                <th>@g</th>
+                            }
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var d = 0; d < _days; d++)
+                        {
+                            var day = d;
+                            <tr>
+                                <th>@Today.AddDays(-day).ToString("ddd dd.MM.")</th>
+                                @foreach (var g in Gantries)
+                                {
+                                    <td>@Moves(g, day).ToString("N0")</td>
+                                }
+                                <td class="stat-avg">@Gantries.Sum(g => Moves(g, day)).ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private static readonly string[] Gantries = ["GNT-01", "GNT-02", "GNT-03"];
+    private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+    private int _days = 7;
+
+    private int Total => Gantries.Sum(Sum);
+    private string Busiest => Gantries.MaxBy(Sum)!;
+
+    private int Sum(string gantry) => Enumerable.Range(0, _days).Sum(d => Moves(gantry, d));
+
+    private static int Pct(int value, int max) => max == 0 ? 0 : value * 100 / max;
+
+    // Deterministic sample data until a movement-counter source is connected
+    private static int Moves(string gantry, int daysAgo)
+    {
+        var seed = Array.IndexOf(Gantries, gantry) * 1000 + Today.AddDays(-daysAgo).DayNumber;
+        return 1200 + new Random(seed).Next(0, 600);
+    }
+}

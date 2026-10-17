@@ -5,8 +5,6 @@ namespace Gudel.GLogWare.Infrastructure.Views;
 
 public partial class ViewStatisticBridgePerHourConsolidated
 {
-    public string BridgeNr { get; set; } = null!;
-
     public DateOnly Day { get; set; }
 
     public string? Hour { get; set; }

@@ -1,0 +1,39 @@
+@typeparam T
+@using System.Globalization
+@using System.Text
+@inject IJSRuntime JS
+
+<MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.Download" OnClick="ExportAsync">Export to CSV</MudButton>
+
+@code {
+    public sealed record CsvColumn(string Header, Func<T, object?> Value);
+
+    [Parameter, EditorRequired] public Func<IEnumerable<T>> Items { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<CsvColumn> Columns { get; set; } = default!;
+    [Parameter] public string FileName { get; set; } = "export";
+
+    private async Task ExportAsync()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(string.Join(';', Columns.Select(c => Escape(c.Header))));
+        foreach (var item in Items())
+        {
+            sb.AppendLine(string.Join(';', Columns.Select(c => Escape(Format(c.Value(item))))));
+        }
+
+        // BOM so Excel detects UTF-8
+        var content = "\uFEFF" + sb;
+        await JS.InvokeVoidAsync("downloadTextFile", $"{FileName}-{DateTime.Now:yyyyMMdd-HHmmss}.csv", content, "text/csv;charset=utf-8");
+    }
+
+    private static string Format(object? v) => v switch
+    {
+        null => string.Empty,
+        DateTime d => d.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+        IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
+        _ => v.ToString() ?? string.Empty
+    };
+
+    private static string Escape(string s) =>
+        s.IndexOfAny([';', '"', '\r', '\n']) >= 0 ? "\"" + s.Replace("\"", "\"\"") + "\"" : s;
+}

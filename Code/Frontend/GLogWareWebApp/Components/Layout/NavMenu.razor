@@ -1,0 +1,99 @@
+﻿<nav class="operations-nav" aria-label="Main navigation">
+    <div class="nav-section-label">@(!Compact ? "OVERVIEW" : null)</div>
+    <NavLink class="nav-entry" href="" Match="NavLinkMatch.All" title="Dashboard">
+        <MudIcon Icon="@Icons.Material.Filled.SpaceDashboard" />
+        <span>Dashboard</span>
+    </NavLink>
+
+    <details class="nav-group" open>
+        <summary title="Manufacturing">
+            <MudIcon Icon="@Icons.Material.Filled.PrecisionManufacturing" />
+            <span>Manufacturing</span>
+            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+        </summary>
+        <div class="nav-children">
+            <NavLink class="nav-entry" href="manufacturing/orders" title="Work orders">
+                <MudIcon Icon="@Icons.Material.Filled.Assignment" />
+                <span>Work orders</span>
+            </NavLink>
+        </div>
+    </details>
+
+    <details class="nav-group" open>
+        <summary title="Warehouse">
+            <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
+            <span>Warehouse</span>
+            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+        </summary>
+        <div class="nav-children">
+            <NavLink class="nav-entry" href="warehouse/inventory" title="Inventory">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory2" />
+                <span>Inventory</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="warehouse/receiving" title="Receiving">
+                <MudIcon Icon="@Icons.Material.Filled.MoveToInbox" />
+                <span>Receiving</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="warehouse/picking" title="Picking">
+                <MudIcon Icon="@Icons.Material.Filled.LocalShipping" />
+                <span>Picking</span>
+            </NavLink>
+        </div>
+    </details>
+
+    <details class="nav-group" open>
+        <summary title="SCADA">
+            <MudIcon Icon="@Icons.Material.Filled.MonitorHeart" />
+            <span>SCADA</span>
+            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+        </summary>
+        <div class="nav-children">
+            <NavLink class="nav-entry" href="scada" Match="NavLinkMatch.All" title="SCADA overview">
+                <MudIcon Icon="@Icons.Material.Filled.GridView" />
+                <span>Overview</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="scada/conveyors" title="Conveyors">
+                <MudIcon Icon="@Icons.Material.Filled.ViewWeek" />
+                <span>Conveyors</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="scada/robots" title="Robots">
+                <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
+                <span>Robots</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="scada/stacker-cranes" title="Stacker cranes">
+                <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
+                <span>Stacker cranes</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="scada/gantries" title="Gantry systems">
+                <MudIcon Icon="@Icons.Material.Filled.OpenWith" />
+                <span>Gantries</span>
+            </NavLink>
+            <NavLink class="nav-entry nav-entry-deep" href="scada/gantries/stock" title="Tire stock map">
+                <MudIcon Icon="@Icons.Material.Filled.DonutLarge" />
+                <span>Tire stock map</span>
+            </NavLink>
+        </div>
+    </details>
+
+    <details class="nav-group" open>
+        <summary title="Statistics">
+            <MudIcon Icon="@Icons.Material.Filled.BarChart" />
+            <span>Statistics</span>
+            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+        </summary>
+        <div class="nav-children">
+            <NavLink class="nav-entry" href="statistics/fill-level" title="Fill level per gantry and hour">
+                <MudIcon Icon="@Icons.Material.Filled.GridOn" />
+                <span>Fill level</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="statistics/bridge-movements" title="Gantry bridge movements">
+                <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" />
+                <span>Bridge movements</span>
+            </NavLink>
+        </div>
+    </details>
+</nav>
+
+@code {
+    [Parameter] public bool Compact { get; set; }
+}

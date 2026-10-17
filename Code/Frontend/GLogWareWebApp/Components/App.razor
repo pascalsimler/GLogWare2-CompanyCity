@@ -19,6 +19,18 @@
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <script>
+        window.downloadTextFile = (fileName, content, mimeType) => {
+            const url = URL.createObjectURL(new Blob([content], { type: mimeType }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        };
+    </script>
 </body>
 
 </html>

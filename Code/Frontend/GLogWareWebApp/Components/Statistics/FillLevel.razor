@@ -1,0 +1,162 @@
+@page "/statistics/fill-level"
+
+<PageTitle>Fill Level Statistics</PageTitle>
+
+<div class="page-heading scada-heading">
+    <div>
+        <MudText Typo="Typo.h4">Fill level per gantry and hour</MudText>
+        <MudText Color="Color.Secondary">Average buffer occupancy for the selected period</MudText>
+    </div>
+    <MudDatePicker T="DateTime?" @bind-Date="_startDate" Label="Start date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
+    <MudTimePicker @bind-Time="_startTime" Label="Start time" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:140px" />
+    <MudDatePicker T="DateTime?" @bind-Date="_endDate" Label="End date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
+    <MudTimePicker @bind-Time="_endTime" Label="End time" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:140px" />
+    <MudSelect T="string" @bind-Value="_gantry" Label="Gantry" Variant="Variant.Outlined" Dense="true" Style="max-width:180px">
+        <MudSelectItem T="string" Value="@("All")">All gantries</MudSelectItem>
+        @foreach (var g in Gantries)
+        {
+            <MudSelectItem T="string" Value="@g">@g</MudSelectItem>
+        }
+    </MudSelect>
+</div>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-3">@_error</MudAlert>
+}
+else
+{
+    var rows = Visible.ToList();
+    var all = rows.SelectMany(x => x.Levels).ToList();
+
+    <div class="scada-kpis">
+        <div><span>Average fill level</span><strong>@all.Average().ToString("0")%</strong></div>
+        <div><span>Peak fill level</span><strong>@all.Max()%</strong></div>
+        <div><span>Lowest fill level</span><strong>@all.Min()%</strong></div>
+        <div><span>Gantries shown</span><strong>@rows.Count</strong></div>
+    </div>
+
+    <MudTabs Elevation="0" Rounded="true" PanelClass="pt-3">
+        <MudTabPanel Text="Line chart" Icon="@Icons.Material.Filled.ShowChart">
+            <MudPaper Class="scada-panel stat-panel" Elevation="0">
+                <MudChart ChartType="ChartType.Line" ChartSeries="@Series" ChartLabels="@Labels" Width="100%" Height="320px" />
+            </MudPaper>
+        </MudTabPanel>
+        <MudTabPanel Text="Data grid" Icon="@Icons.Material.Filled.TableChart">
+            <MudPaper Class="scada-panel stat-panel" Elevation="0">
+                <MudDataGrid T="FillPoint" @ref="_grid" Items="@Points" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" Height="420px">
+                    <ToolBarContent>
+                        <MudSpacer />
+                        <CsvExportButton T="FillPoint" FileName="fill-level" Items="@(() => _grid?.FilteredItems ?? Points)" Columns="@_csvColumns" />
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Time" Title="Time" Format="dd.MM.yyyy HH:mm" />
+                        <PropertyColumn Property="x => x.Gantry" Title="Gantry" />
+                        <PropertyColumn Property="x => x.Level" Title="Fill level (%)" />
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="FillPoint" PageSizeOptions="new[] { 25, 50, 100 }" />
+                    </PagerContent>
+                </MudDataGrid>
+            </MudPaper>
+        </MudTabPanel>
+    </MudTabs>
+}
+@code {
+    private const int MaxHours = 24 * 14;
+
+    private sealed record FillRow(string Gantry, int[] Levels);
+    private sealed record FillPoint(DateTime Time, string Gantry, int Level);
+
+    private MudDataGrid<FillPoint>? _grid;
+
+    private readonly IReadOnlyList<CsvExportButton<FillPoint>.CsvColumn> _csvColumns =
+    [
+        new("Time", x => x.Time),
+        new("Gantry", x => x.Gantry),
+        new("Fill level (%)", x => x.Level)
+    ];
+
+    private static readonly string[] Gantries = ["GNT-01", "GNT-02", "GNT-03"];
+
+    private DateTime? _startDate = DateTime.Today.AddDays(-1);
+    private TimeSpan? _startTime = TimeSpan.Zero;
+    private DateTime? _endDate = DateTime.Today;
+    private TimeSpan? _endTime = TimeSpan.Zero;
+    private string _gantry = "All";
+    private string? _error;
+    private List<DateTime> _hours = [];
+    private List<FillRow> _data = [];
+
+    private IEnumerable<FillRow> Visible => _data.Where(x => _gantry == "All" || x.Gantry == _gantry);
+
+    private List<FillPoint> Points => Visible
+        .SelectMany(r => r.Levels.Select((l, i) => new FillPoint(_hours[i], r.Gantry, l)))
+        .OrderBy(p => p.Time).ThenBy(p => p.Gantry).ToList();
+
+    private List<ChartSeries<double>> Series => Visible
+        .Select(r => new ChartSeries<double> { Name = r.Gantry, Data = r.Levels.Select(l => (double)l).ToArray() })
+        .ToList();
+
+    private string[] Labels
+    {
+        get
+        {
+            return _hours.Select(t => t.Hour % 6 == 0 ? t.ToString("dd.MM HH:mm") : string.Empty).ToArray();
+        }
+    }
+
+    protected override void OnParametersSet() => Recalculate();
+
+    protected override void OnAfterRender(bool firstRender) { }
+
+    protected override bool ShouldRender()
+    {
+        Recalculate();
+        return true;
+    }
+
+    private void Recalculate()
+    {
+        _error = null;
+        if (_startDate is null || _endDate is null)
+        {
+            _error = "Please select a start and end date.";
+            return;
+        }
+
+        var start = _startDate.Value.Date + (_startTime ?? TimeSpan.Zero);
+        var end = _endDate.Value.Date + (_endTime ?? TimeSpan.Zero);
+        if (end <= start)
+        {
+            _error = "The end must be after the start.";
+            return;
+        }
+
+        var first = new DateTime(start.Year, start.Month, start.Day, start.Hour, 0, 0);
+        var count = (int)Math.Ceiling((end - first).TotalHours);
+        if (count > MaxHours)
+        {
+            _error = $"The period is limited to {MaxHours / 24} days.";
+            return;
+        }
+
+        _hours = Enumerable.Range(0, count).Select(i => first.AddHours(i)).ToList();
+        _data = Gantries.Select((g, i) => new FillRow(g, BuildLevels(i, _hours))).ToList();
+    }
+
+    // Deterministic sample data until a fill-level source is connected
+    private static int[] BuildLevels(int seed, List<DateTime> hours) =>
+        hours.Select(t =>
+        {
+            var rnd = new Random(HashCode.Combine(seed, t.Year, t.DayOfYear, t.Hour));
+            var h = t.Hour + seed * 4;
+            return Math.Clamp((int)(55 + 30 * Math.Sin(h / 24.0 * 2 * Math.PI) + rnd.Next(-8, 9)), 0, 100);
+        }).ToArray();
+
+    private static string CellStyle(int level)
+    {
+        var hue = 120 - level * 1.2;
+        return $"background:hsl({hue:0},65%,{25 + level * 0.15:0}%);";
+    }
+}

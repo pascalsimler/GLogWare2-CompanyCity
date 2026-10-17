@@ -1,14 +1,103 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-@Body
+<div class="app-shell @(_navigationCollapsed ? "nav-collapsed" : null)">
+    <aside class="navigation-panel">
+        <div class="brand">
+            <MudIcon Icon="@Icons.Material.Filled.AllInbox" Size="Size.Large" />
+            <div class="brand-copy">
+                <strong>FlowOps</strong>
+                <span>MFC + WMS</span>
+            </div>
+        </div>
+        <NavMenu Compact="_navigationCollapsed" />
+        <div class="site-indicator">
+            <MudIcon Icon="@Icons.Material.Filled.LocationOn" />
+            <div class="brand-copy">
+                <strong>Plant DE-01</strong>
+                <span>Online</span>
+            </div>
+        </div>
+    </aside>
+
+    <section class="workspace">
+        <header class="title-bar">
+            <div class="title-left">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                               OnClick="ToggleNavigation" aria-label="Toggle navigation" />
+                <div>
+                    <div class="application-title">Manufacturing &amp; Warehouse Control</div>
+                    <div class="application-subtitle">@DateTime.Now.ToString("dddd, dd MMMM yyyy")</div>
+                </div>
+            </div>
+            <div class="title-actions">
+                <MudBadge Content="3" Color="Color.Error" Overlap="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone" Color="Color.Inherit" />
+                </MudBadge>
+                <MudAvatar Color="Color.Tertiary" Size="Size.Medium">PS</MudAvatar>
+                <div class="user-copy">
+                    <strong>Plant Supervisor</strong>
+                    <span>Operations</span>
+                </div>
+            </div>
+        </header>
+<!--
+        <div class="toolbar">
+            <MudBreadcrumbs Items="_breadcrumbs" />
+            <MudSpacer />
+            <MudChip T="string" Icon="@Icons.Material.Filled.Circle" Color="Color.Success"
+                     Size="Size.Small" Variant="Variant.Text">All systems operational</MudChip>
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" />
+            <MudIconButton Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" />
+        </div>
+-->
+        <main class="page-content">
+            @Body
+        </main>
+
+        <footer class="footer-bar">
+            <span>FlowOps Control Center v1.0</span>
+            <span>Last synchronized @DateTime.Now.ToString("HH:mm") · In-memory demonstration data</span>
+        </footer>
+    </section>
+</div>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool _navigationCollapsed;
+    private readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Operations", href: null, disabled: true),
+        new("Control center", href: null, disabled: true)
+    ];
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#155eef",
+            Secondary = "#0e9384",
+            Tertiary = "#7f56d9",
+            Background = "#f4f6f9",
+            Surface = "#ffffff",
+            AppbarBackground = "#101828",
+            TextPrimary = "#101828"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "10px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["Inter", "sans-serif"] }
+        }
+    };
+
+    private void ToggleNavigation() => _navigationCollapsed = !_navigationCollapsed;
+}

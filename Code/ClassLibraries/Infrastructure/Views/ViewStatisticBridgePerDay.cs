@@ -9,8 +9,6 @@ public partial class ViewStatisticBridgePerDay
 
     public DateOnly Day { get; set; }
 
-    public string Hour { get; set; } = null!;
-
     public int? CountStacksIn { get; set; }
 
     public int? CountStacksOut { get; set; }

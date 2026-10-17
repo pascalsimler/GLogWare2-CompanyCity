@@ -8,6 +8,10 @@ dotnet ef dbcontext scaffold ^
     --table ViewStatisticBridgePerHourConsolidated ^
     --table ViewStatisticBridgePerDay ^
     --table ViewStatisticBridgePerDayConsolidated ^
+    --table ViewStatisticBridgePerWeek ^
+    --table ViewStatisticBridgePerWeekConsolidated ^
+    --table ViewStatisticBridgePerMonth ^
+    --table ViewStatisticBridgePerMonthConsolidated ^
     --context GLogWareDbContext ^
     --context-dir Views ^
     --output-dir Views ^
