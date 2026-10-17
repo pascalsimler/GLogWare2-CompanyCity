@@ -177,6 +177,10 @@ h1:focus { outline: none; }
 @media (max-width: 600px) {
     .app-shell, .app-shell.nav-collapsed { display: block; }
     .navigation-panel { display: none; }
+    .nav-collapsed .nav-group summary span, .nav-collapsed .nav-chevron { display: revert; }
+    .nav-collapsed .nav-children { display: block; }
+    .app-shell.nav-open .navigation-panel { display: flex; position: fixed; top: 0; left: 0; bottom: 0; width: 250px; overflow-y: auto; z-index: 1300; }
+    .nav-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1200; }
     .title-bar, .toolbar, .page-content, .footer-bar { padding-left: 16px; padding-right: 16px; }
     .application-subtitle, .toolbar .mud-breadcrumbs, .footer-bar span:last-child { display: none; }
     .page-heading { align-items: flex-start; flex-direction: column; }

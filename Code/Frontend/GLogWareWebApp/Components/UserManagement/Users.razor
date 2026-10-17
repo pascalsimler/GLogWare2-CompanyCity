@@ -1,0 +1,40 @@
+@page "/user-management/users"
+
+<PageTitle>Users</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Users</MudText>
+        <MudText Color="Color.Secondary">Manage user accounts and their assigned roles</MudText>
+    </div>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">New user</MudButton>
+</div>
+
+<MudPaper Elevation="0">
+    <MudTable Items="_users" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh>Status</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.Email</MudTd>
+            <MudTd>@context.Role</MudTd>
+            <MudTd><MudChip T="string" Size="Size.Small" Color="@(context.Active ? Color.Success : Color.Default)">@(context.Active ? "Active" : "Disabled")</MudChip></MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private record UserRow(string Name, string Email, string Role, bool Active);
+
+    private readonly List<UserRow> _users =
+    [
+        new("Anna Jansen", "anna.jansen@example.com", "Administrator", true),
+        new("Peter de Vries", "peter.devries@example.com", "Supervisor", true),
+        new("Sara Bakker", "sara.bakker@example.com", "Operator", true),
+        new("Tom Visser", "tom.visser@example.com", "Viewer", false)
+    ];
+}

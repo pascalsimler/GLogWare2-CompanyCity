@@ -1,0 +1,40 @@
+@page "/user-management/roles"
+
+<PageTitle>Roles</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Roles</MudText>
+        <MudText Color="Color.Secondary">Define roles and the permissions they grant</MudText>
+    </div>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">New role</MudButton>
+</div>
+
+<MudPaper Elevation="0">
+    <MudTable Items="_roles" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Role</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Users</MudTh>
+            <MudTh>Permissions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.Description</MudTd>
+            <MudTd>@context.Users</MudTd>
+            <MudTd>@context.Permissions</MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private record RoleRow(string Name, string Description, int Users, int Permissions);
+
+    private readonly List<RoleRow> _roles =
+    [
+        new("Administrator", "Full access to all areas", 1, 12),
+        new("Supervisor", "Manage orders and warehouse operations", 1, 8),
+        new("Operator", "Operate SCADA and execute tasks", 1, 5),
+        new("Viewer", "Read-only access", 1, 3)
+    ];
+}

@@ -1,11 +1,11 @@
-﻿<nav class="operations-nav" aria-label="Main navigation">
+<nav class="operations-nav" aria-label="Main navigation">
     <div class="nav-section-label">@(!Compact ? "OVERVIEW" : null)</div>
     <NavLink class="nav-entry" href="" Match="NavLinkMatch.All" title="Dashboard">
         <MudIcon Icon="@Icons.Material.Filled.SpaceDashboard" />
         <span>Dashboard</span>
     </NavLink>
 
-    <details class="nav-group" open>
+    <details class="nav-group" name="nav-groups">
         <summary title="Manufacturing">
             <MudIcon Icon="@Icons.Material.Filled.PrecisionManufacturing" />
             <span>Manufacturing</span>
@@ -19,7 +19,7 @@
         </div>
     </details>
 
-    <details class="nav-group" open>
+    <details class="nav-group" name="nav-groups">
         <summary title="Warehouse">
             <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
             <span>Warehouse</span>
@@ -41,7 +41,7 @@
         </div>
     </details>
 
-    <details class="nav-group" open>
+    <details class="nav-group" name="nav-groups">
         <summary title="SCADA">
             <MudIcon Icon="@Icons.Material.Filled.MonitorHeart" />
             <span>SCADA</span>
@@ -75,7 +75,7 @@
         </div>
     </details>
 
-    <details class="nav-group" open>
+    <details class="nav-group" name="nav-groups">
         <summary title="Statistics">
             <MudIcon Icon="@Icons.Material.Filled.BarChart" />
             <span>Statistics</span>
@@ -89,6 +89,28 @@
             <NavLink class="nav-entry" href="statistics/bridge-movements" title="Gantry bridge movements">
                 <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" />
                 <span>Bridge movements</span>
+            </NavLink>
+        </div>
+    </details>
+
+    <details class="nav-group" name="nav-groups">
+        <summary title="User Management">
+            <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
+            <span>User Management</span>
+            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
+        </summary>
+        <div class="nav-children">
+            <NavLink class="nav-entry" href="user-management/users" title="Users">
+                <MudIcon Icon="@Icons.Material.Filled.People" />
+                <span>Users</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="user-management/roles" title="Roles">
+                <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+                <span>Roles</span>
+            </NavLink>
+            <NavLink class="nav-entry" href="user-management/permissions" title="Permissions">
+                <MudIcon Icon="@Icons.Material.Filled.VpnKey" />
+                <span>Permissions</span>
             </NavLink>
         </div>
     </details>

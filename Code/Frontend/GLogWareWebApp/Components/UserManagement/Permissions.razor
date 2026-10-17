@@ -1,0 +1,41 @@
+@page "/user-management/permissions"
+
+<PageTitle>Permissions</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Permissions</MudText>
+        <MudText Color="Color.Secondary">Overview of available permissions per area</MudText>
+    </div>
+</div>
+
+<MudPaper Elevation="0">
+    <MudTable Items="_permissions" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Permission</MudTh>
+            <MudTh>Area</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.Area</MudTd>
+            <MudTd>@context.Description</MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private record PermissionRow(string Name, string Area, string Description);
+
+    private readonly List<PermissionRow> _permissions =
+    [
+        new("orders.view", "Manufacturing", "View work orders"),
+        new("orders.manage", "Manufacturing", "Create and edit work orders"),
+        new("warehouse.view", "Warehouse", "View inventory and receipts"),
+        new("warehouse.manage", "Warehouse", "Receive and pick stock"),
+        new("scada.view", "SCADA", "View equipment status"),
+        new("scada.control", "SCADA", "Send commands to equipment"),
+        new("statistics.view", "Statistics", "View statistics"),
+        new("users.manage", "User Management", "Manage users, roles and permissions")
+    ];
+}
