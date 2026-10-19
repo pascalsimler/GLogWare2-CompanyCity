@@ -45,7 +45,14 @@
 </div>
 
 <MudPaper Elevation="0">
-    <MudDataGrid T="BridgeStatistic" @ref="_grid" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
+    <MudDataGrid T="BridgeStatistic" @ref="_grid" Class="grouped-header-grid" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
+        <Header>
+            <tr class="mud-table-row group-header-row">
+                <th class="mud-table-cell" style="font-weight:bold" colspan="@(1 + (_showHour ? 1 : 0) + (_showBridge ? 1 : 0))">Key</th>
+                <th class="mud-table-cell" style="font-weight:bold" colspan="4">Movements</th>
+                <th class="mud-table-cell" style="font-weight:bold" colspan="4">Tires</th>
+            </tr>
+        </Header>
         <Columns>
             <PropertyColumn Property="x => x.Period" Title="Period" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold">
                 <FooterTemplate>
@@ -133,8 +140,17 @@
         Granularity.Monthly => "Monthly",
         _ => "Monthly"
     };
-    private string Period => _start is null || _end is null ? "-" : $"{(_end.Value.Date - _start.Value.Date).Days + 1} days";
     private bool _loading;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _grid is not null)
+        {
+            await _grid.SetSortAsync(nameof(BridgeStatistic.Period), SortDirection.Descending, x => x.Period);
+            await _grid.ExtendSortAsync(nameof(BridgeStatistic.Hour), SortDirection.Descending, x => x.Hour);
+            await _grid.ExtendSortAsync(nameof(BridgeStatistic.BridgeNr), SortDirection.Ascending, x => x.BridgeNr);
+        }
+    }
 
     private async Task Refresh()
     {
@@ -206,13 +222,13 @@
                     if (_start != null)
                     {   
                         int startYear, startWeek;
-                        (startYear, startWeek) = GetIsoYearWeek(_start.Value);
+                        (startYear, startWeek) = _start.Value.GetIsoYearWeek();
                         q1 = q1.Where(s => s.Year > startYear || (s.Year == startYear && s.Week >= startWeek));
                     }
                     if (_end != null)
                     {
                         int endYear, endWeek;
-                        (endYear, endWeek) = GetIsoYearWeek(_end.Value);
+                        (endYear, endWeek) = _end.Value.GetIsoYearWeek();
                         q1 = q1.Where(s => s.Year < endYear || (s.Year == endYear && s.Week <= endWeek));
                     }
                     q = q1.Select(s => new BridgeStatistic
@@ -295,13 +311,13 @@
                     if (_start != null)
                     {
                         int startYear, startWeek;
-                        (startYear, startWeek) = GetIsoYearWeek(_start.Value);
+                        (startYear, startWeek) = _start.Value.GetIsoYearWeek();
                         q1 = q1.Where(s => s.Year > startYear || (s.Year == startYear && s.Week >= startWeek));
                     }
                     if (_end != null)
                     {
                         int endYear, endWeek;
-                        (endYear, endWeek) = GetIsoYearWeek(_end.Value);
+                        (endYear, endWeek) = _end.Value.GetIsoYearWeek();
                         q1 = q1.Where(s => s.Year < endYear || (s.Year == endYear && s.Week <= endWeek));
                     }
                     q = q1.Select(s => new BridgeStatistic
@@ -351,26 +367,6 @@
         {
             _loading = false;
         }
-    }
-
-    public static (int Year, int Week) GetIsoYearWeek(DateTime dt)
-    {
-        // ISO day: Monday = 1, Sunday = 7
-        int isoDay = dt.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)dt.DayOfWeek;
-
-        // Thursday of the current week
-        var thursday = dt.AddDays(4 - isoDay);
-
-        int isoYear = thursday.Year;
-
-        // First Thursday of ISO year
-        var firstThursday = new DateTime(isoYear, 1, 1);
-        int firstIsoDay = firstThursday.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)firstThursday.DayOfWeek;
-        var firstThursdayAdjusted = firstThursday.AddDays(4 - firstIsoDay);
-
-        int isoWeek = (thursday.DayOfYear - firstThursdayAdjusted.DayOfYear) / 7 + 1;
-
-        return (isoYear, isoWeek);
     }
 
     private class BridgeStatistic

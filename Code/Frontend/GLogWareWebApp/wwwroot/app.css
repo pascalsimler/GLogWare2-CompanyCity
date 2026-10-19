@@ -222,3 +222,7 @@ h1:focus { outline: none; }
 .stat-bar-row { display: grid; grid-template-columns: 60px 1fr 60px; align-items: center; gap: 10px; padding: 10px 0; font: .78rem monospace; }
 .stat-bar { height: 14px; background: #eaecf0; }
 .stat-bar div { height: 100%; background: #155eef; }
+
+/* Grouped header row above the column headers of a fixed-header grid */
+.grouped-header-grid .group-header-row th { position: sticky; top: 0; z-index: 3; background-color: var(--mud-palette-surface); height: 36px; box-sizing: border-box; text-align: center; font-weight: bold; border-left: 1px solid var(--mud-palette-lines-default); border-right: 1px solid var(--mud-palette-lines-default); }
+.grouped-header-grid thead tr:nth-child(2) th { top: 36px !important; }
