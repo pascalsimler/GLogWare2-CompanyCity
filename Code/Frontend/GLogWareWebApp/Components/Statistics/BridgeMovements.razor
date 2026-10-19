@@ -40,20 +40,18 @@
                 <span>Refresh</span>
             }
         </MudButton>
-        <!--
-        <CsvExportButton T="BridgeStatistic" FileName="bridge-movements" Items="@(() => _rows)" Columns="@CsvColumns" />
-        -->
+        <CsvExportButton T="BridgeStatistic" FileName="BridgeStatisti" Items="@(() => _grid?.FilteredItems)" Columns="@_csvColumns" />
     </MudStack>
 </div>
 
 <MudPaper Elevation="0">
-    <MudDataGrid T="BridgeStatistic" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
+    <MudDataGrid T="BridgeStatistic" @ref="_grid" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
         <Columns>
             <PropertyColumn Property="x => x.Period" Title="Period" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold">
                 <FooterTemplate>
                     @context.Items.Count() records
                 </FooterTemplate>
-            </PropertyColumn> />
+            </PropertyColumn>
             <PropertyColumn Property="x => x.Hour" Title="Hour" Hidden="@(!_showHour)" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold" />
             <PropertyColumn Property="x => x.BridgeNr" Title="Bridge" Hidden="@(!_showBridge)" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold" />
             <PropertyColumn Property="x => x.CountOrdersIn" Title="In" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
@@ -103,13 +101,27 @@
 
 @code {
     private const int MaxRows = 1000;
+    private MudDataGrid<BridgeStatistic>? _grid;
     private List<BridgeStatistic> _rows = new();
+    private readonly IReadOnlyList<CsvExportButton<BridgeStatistic>.CsvColumn> _csvColumns =
+    [
+        new("BridgeNr", x => x.BridgeNr),
+        new("Period", x => x.Period),
+        new("Hour", x => x.Hour),
+        new("CountOrdersIn", x => x.CountOrdersIn),
+        new("CountOrdersOut", x => x.CountOrdersOut),
+        new("CountOrdersRelocation", x => x.CountOrdersRelocation),
+        new("CountOrdersTotal", x => x.CountOrdersTotal),
+        new("CountTiresIn", x => x.CountTiresIn),
+        new("CountTiresOut", x => x.CountTiresOut),
+        new("CountTiresRelocation", x => x.CountTiresRelocation),
+        new("CountTiresTotal", x => x.CountTiresTotal)
+    ];
     private DateTime? _start = DateTime.Today.AddDays(-6);
     private DateTime? _end = DateTime.Today;
     private enum Granularity { Hourly, Daily, Weekly, Monthly }
     private Granularity _granularity = Granularity.Daily;
     private bool _allBridges = true;
-    // Column visibility reflects the options used for the displayed data (updated on Refresh)
     private bool _showHour;
     private bool _showBridge;
     private string UnitName => _granularity.ToString().ToLowerInvariant();
@@ -122,17 +134,6 @@
         _ => "Monthly"
     };
     private string Period => _start is null || _end is null ? "-" : $"{(_end.Value.Date - _start.Value.Date).Days + 1} days";
-
-    // private IReadOnlyList<CsvExportButton<Row>.CsvColumn> CsvColumns =>
-    // [
-    //     new("Period start", r => r.Start),
-    //     .. Gantries.Where(_ => _allBridges).Select(g => new CsvExportButton<Row>.CsvColumn(g, r => r.Values[g])),
-    //     new("Total", r => r.Total)
-    // ];
-
-    //protected override void OnInitialized() => Refresh();
-
-
     private bool _loading;
 
     private async Task Refresh()
@@ -341,16 +342,6 @@
             _loading = false;
         }
     }
-
-   
-    private string Label(DateTime b) => _granularity switch
-    {
-        Granularity.Hourly => b.ToString("ddd dd.MM. HH:00"),
-        Granularity.Daily => b.ToString("ddd dd.MM.yyyy"),
-        Granularity.Weekly => $"Week of {b:dd.MM.yyyy}",
-        Granularity.Monthly => b.ToString("MMMM yyyy"),
-        _ => b.ToString("MMMM yyyy")
-    };
 
     private class BridgeStatistic
     {
