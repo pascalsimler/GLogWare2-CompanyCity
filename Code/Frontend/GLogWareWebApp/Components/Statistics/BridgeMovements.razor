@@ -201,27 +201,33 @@
                     });
                     break;
                 case Granularity.Weekly:
-                    q = q0
-                        .GroupBy(s => new {  
-                            Year = s.Day.Year,
-                            Week = EF.Functions.DateDiffWeek(
-                                EF.Functions.DateFromParts(s.Day.Year, 1, 1),
-                                s.Day.ToDateTime(TimeOnly.MinValue)
-                            ) + 1
-                        })
-                        .Select(s => new BridgeStatistic
+                    var q1 = DbContext.ViewStatisticBridgePerWeekConsolidateds
+                              .AsQueryable();
+                    if (_start != null)
+                    {   
+                        int startYear, startWeek;
+                        (startYear, startWeek) = GetIsoYearWeek(_start.Value);
+                        q1 = q1.Where(s => s.Year > startYear || (s.Year == startYear && s.Week >= startWeek));
+                    }
+                    if (_end != null)
+                    {
+                        int endYear, endWeek;
+                        (endYear, endWeek) = GetIsoYearWeek(_end.Value);
+                        q1 = q1.Where(s => s.Year < endYear || (s.Year == endYear && s.Week <= endWeek));
+                    }
+                    q = q1.Select(s => new BridgeStatistic
                     {
                         BridgeNr = "*",
-                        Period = $"{s.Key.Year:0000}-{s.Key.Week:00}",
+                        Period = $"{s.Year:0000}-{s.Week:00}",
                         Hour = "*",
-                        CountOrdersIn = s.Sum(x => x.Counter01),
-                        CountOrdersOut = s.Sum(x => x.Counter02),
-                        CountOrdersRelocation = s.Sum(x => x.Counter03),
-                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
-                        CountTiresIn = s.Sum(x => x.Counter11),
-                        CountTiresOut = s.Sum(x => x.Counter12),
-                        CountTiresRelocation = s.Sum(x => x.Counter13),
-                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                        CountOrdersIn = s.CountStacksIn,
+                        CountOrdersOut = s.CountStacksOut,
+                        CountOrdersRelocation = s.CountStacksRelocated,
+                        CountOrdersTotal = s.CountStacksTotal,
+                        CountTiresIn = s.CountTiresIn,
+                        CountTiresOut = s.CountTiresOut,
+                        CountTiresRelocation = s.CountTiresRelocated,
+                        CountTiresTotal = s.CountTiresTotal
                     });
                     break;
                 case Granularity.Monthly:
@@ -284,29 +290,33 @@
                     });
                     break;
                 case Granularity.Weekly:
-                    q = q0
-                        .GroupBy(s => new
-                        {
-                            s.Element,
-                            Year = s.Day.Year,
-                            Week = EF.Functions.DateDiffWeek(
-                                EF.Functions.DateFromParts(s.Day.Year, 1, 1),
-                                s.Day.ToDateTime(TimeOnly.MinValue)
-                            ) + 1
-                        })
-                        .Select(s => new BridgeStatistic
+                    var q1 = DbContext.ViewStatisticBridgePerWeeks
+                            .AsQueryable();
+                    if (_start != null)
                     {
-                        BridgeNr = s.Key.Element,
-                        Period = $"{s.Key.Year:0000}-{s.Key.Week:00}",
+                        int startYear, startWeek;
+                        (startYear, startWeek) = GetIsoYearWeek(_start.Value);
+                        q1 = q1.Where(s => s.Year > startYear || (s.Year == startYear && s.Week >= startWeek));
+                    }
+                    if (_end != null)
+                    {
+                        int endYear, endWeek;
+                        (endYear, endWeek) = GetIsoYearWeek(_end.Value);
+                        q1 = q1.Where(s => s.Year < endYear || (s.Year == endYear && s.Week <= endWeek));
+                    }
+                    q = q1.Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = s.BridgeNr,
+                        Period = $"{s.Year:0000}-{s.Week:00}",
                         Hour = "*",
-                        CountOrdersIn = s.Sum(x => x.Counter01),
-                        CountOrdersOut = s.Sum(x => x.Counter02),
-                        CountOrdersRelocation = s.Sum(x => x.Counter03),
-                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
-                        CountTiresIn = s.Sum(x => x.Counter11),
-                        CountTiresOut = s.Sum(x => x.Counter12),
-                        CountTiresRelocation = s.Sum(x => x.Counter13),
-                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                        CountOrdersIn = s.CountStacksIn,
+                        CountOrdersOut = s.CountStacksOut,
+                        CountOrdersRelocation = s.CountStacksRelocated,
+                        CountOrdersTotal = s.CountStacksTotal,
+                        CountTiresIn = s.CountTiresIn,
+                        CountTiresOut = s.CountTiresOut,
+                        CountTiresRelocation = s.CountTiresRelocated,
+                        CountTiresTotal = s.CountTiresTotal
                     });
                     break;
                 case Granularity.Monthly:
@@ -343,18 +353,38 @@
         }
     }
 
+    public static (int Year, int Week) GetIsoYearWeek(DateTime dt)
+    {
+        // ISO day: Monday = 1, Sunday = 7
+        int isoDay = dt.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)dt.DayOfWeek;
+
+        // Thursday of the current week
+        var thursday = dt.AddDays(4 - isoDay);
+
+        int isoYear = thursday.Year;
+
+        // First Thursday of ISO year
+        var firstThursday = new DateTime(isoYear, 1, 1);
+        int firstIsoDay = firstThursday.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)firstThursday.DayOfWeek;
+        var firstThursdayAdjusted = firstThursday.AddDays(4 - firstIsoDay);
+
+        int isoWeek = (thursday.DayOfYear - firstThursdayAdjusted.DayOfYear) / 7 + 1;
+
+        return (isoYear, isoWeek);
+    }
+
     private class BridgeStatistic
     {
         public string BridgeNr { get; set; } = default!;
         public string Period { get; set; } = default!;
         public string Hour { get; set; } = default!;
-        public int CountOrdersIn { get; set; }
-        public int CountOrdersOut { get; set; }
-        public int CountOrdersRelocation { get; set; }
-        public int CountOrdersTotal { get; set; }
-        public int CountTiresIn { get; set; }
-        public int CountTiresOut { get; set; }
-        public int CountTiresRelocation { get; set; }
-        public int CountTiresTotal { get; set; }
+        public int? CountOrdersIn { get; set; }
+        public int? CountOrdersOut { get; set; }
+        public int? CountOrdersRelocation { get; set; }
+        public int? CountOrdersTotal { get; set; }
+        public int? CountTiresIn { get; set; }
+        public int? CountTiresOut { get; set; }
+        public int? CountTiresRelocation { get; set; }
+        public int? CountTiresTotal { get; set; }
     }
 }
