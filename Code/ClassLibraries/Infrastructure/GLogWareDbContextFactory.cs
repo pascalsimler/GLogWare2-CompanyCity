@@ -5,7 +5,7 @@ namespace Gudel.GLogWare.Infrastructure;
 
 public class GLogWareDbContextFactory : DbProviderContextFactory<GLogWareDbContext>
 {
-    protected override string ConfigPathConnectionString => $"Database:GLogWareBusiness:ConnectionString";
+    protected override string ConfigPathConnectionString => $"Database:GLogWare:ConnectionString";
 
     protected override GLogWareDbContext CreateContext(
         DbContextOptions<GLogWareDbContext> options)

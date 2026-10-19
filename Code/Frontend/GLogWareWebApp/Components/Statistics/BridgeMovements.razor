@@ -1,92 +1,369 @@
-@page "/statistics/bridge-movements"
+﻿@page "/statistics/bridge-movements"
+@inject ILogger<BridgeMovements> Logger
+@inject GLogWareDbContext DbContext
 
 <PageTitle>Bridge Movement Statistics</PageTitle>
 
 <div class="page-heading scada-heading">
-    <div>
+    <div style="width:450px">
         <MudText Typo="Typo.h4">Gantry bridge movements</MudText>
-        <MudText Color="Color.Secondary">Number of bridge movements per gantry and day</MudText>
+        <MudText Color="Color.Secondary">Number of bridge movements per gantry and @UnitName</MudText>
     </div>
-    <MudSelect T="int" @bind-Value="_days" Label="Period" Variant="Variant.Outlined" Dense="true" Style="max-width:180px">
-        <MudSelectItem T="int" Value="7">Last 7 days</MudSelectItem>
-        <MudSelectItem T="int" Value="14">Last 14 days</MudSelectItem>
-        <MudSelectItem T="int" Value="30">Last 30 days</MudSelectItem>
-    </MudSelect>
-</div>
-
-<div class="scada-kpis">
-    <div><span>Total movements</span><strong>@Total.ToString("N0")</strong></div>
-    <div><span>Average per day</span><strong>@((Total / _days).ToString("N0"))</strong></div>
-    <div><span>Busiest gantry</span><strong>@Busiest</strong></div>
-    <div><span>Period</span><strong>@_days days</strong></div>
-</div>
-
-<MudGrid Spacing="3">
-    <MudItem xs="12" md="4">
-        <MudPaper Class="scada-panel" Elevation="0">
-            <MudText Typo="Typo.h6">Totals per gantry</MudText>
-            @foreach (var g in Gantries)
+    <MudStack Row="true" Wrap="Wrap.Wrap" AlignItems="AlignItems.Center" Spacing="3" Justify="Justify.FlexEnd">
+        <div style="width:170px">
+            <MudDatePicker T="DateTime?" Label="Start date" @bind-Date="_start" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" DateFormat="dd.MM.yyyy" MaxDate="_end" RelativeWidth="DropdownWidth.Ignore" />
+        </div>
+        <div style="width:170px">
+            <MudDatePicker T="DateTime?" Label="End date" @bind-Date="_end" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" DateFormat="dd.MM.yyyy" MinDate="_start" RelativeWidth="DropdownWidth.Ignore" />
+        </div>
+        <MudPaper Outlined="true" Elevation="0" Class="px-3">
+            <MudRadioGroup T="Granularity" @bind-Value="_granularity">
+                <MudRadio T="Granularity" Value="Granularity.Hourly">Hourly</MudRadio>
+                <MudRadio T="Granularity" Value="Granularity.Daily">Daily</MudRadio>
+                <MudRadio T="Granularity" Value="Granularity.Weekly">Weekly</MudRadio>
+                <MudRadio T="Granularity" Value="Granularity.Monthly">Monthly</MudRadio>
+            </MudRadioGroup>
+        </MudPaper>
+        <MudCheckBox T="bool" @bind-Value="_allBridges" Label="All bridges" />
+        <div style="flex-basis:100%"></div>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Disabled="_loading" OnClick="Refresh"
+                   StartIcon="@(_loading ? null : Icons.Material.Filled.Refresh)">
+            @if (_loading)
             {
-                var sum = Sum(g);
-                <div class="stat-bar-row">
-                    <span>@g</span>
-                    <div class="stat-bar"><div style="width:@(Pct(sum, Gantries.Max(Sum)))%"></div></div>
-                    <b>@sum.ToString("N0")</b>
-                </div>
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Loading...</span>
             }
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" md="8">
-        <MudPaper Class="scada-panel stat-panel" Elevation="0">
-            <MudText Typo="Typo.h6">Daily movements</MudText>
-            <div class="stat-scroll">
-                <table class="stat-table stat-table-wide">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            @foreach (var g in Gantries)
-                            {
-                                <th>@g</th>
-                            }
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (var d = 0; d < _days; d++)
-                        {
-                            var day = d;
-                            <tr>
-                                <th>@Today.AddDays(-day).ToString("ddd dd.MM.")</th>
-                                @foreach (var g in Gantries)
-                                {
-                                    <td>@Moves(g, day).ToString("N0")</td>
-                                }
-                                <td class="stat-avg">@Gantries.Sum(g => Moves(g, day)).ToString("N0")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+            else
+            {
+                <span>Refresh</span>
+            }
+        </MudButton>
+        <!--
+        <CsvExportButton T="BridgeStatistic" FileName="bridge-movements" Items="@(() => _rows)" Columns="@CsvColumns" />
+        -->
+    </MudStack>
+</div>
+
+<MudPaper Elevation="0">
+    <MudDataGrid T="BridgeStatistic" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
+        <Columns>
+            <PropertyColumn Property="x => x.Period" Title="Period" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Count() records
+                </FooterTemplate>
+            </PropertyColumn> />
+            <PropertyColumn Property="x => x.Hour" Title="Hour" Hidden="@(!_showHour)" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold" />
+            <PropertyColumn Property="x => x.BridgeNr" Title="Bridge" Hidden="@(!_showBridge)" HeaderStyle="font-weight:bold" FooterStyle="font-weight:bold" />
+            <PropertyColumn Property="x => x.CountOrdersIn" Title="In" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountOrdersIn)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountOrdersOut" Title="Out" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold"> 
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountOrdersOut)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountOrdersRelocation" Title="Relocation" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountOrdersRelocation)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountOrdersTotal" Title="Total" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountOrdersTotal)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountTiresIn" Title="In" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountTiresIn)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountTiresOut" Title="Out" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold"> 
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountTiresOut)
+                </FooterTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountTiresRelocation" Title="Relocation" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold">
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountTiresRelocation)
+                </FooterTemplate>   
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.CountTiresTotal" Title="Total" CellStyle="text-align:right" HeaderStyle="text-align:right;font-weight:bold" FooterStyle="text-align:right;font-weight:bold"> 
+                <FooterTemplate>
+                    @context.Items.Sum(x => x.CountTiresTotal)
+                </FooterTemplate>
+            </PropertyColumn>
+        </Columns>
+    </MudDataGrid>
+</MudPaper>
+    
 
 @code {
-    private static readonly string[] Gantries = ["GNT-01", "GNT-02", "GNT-03"];
-    private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
-    private int _days = 7;
-
-    private int Total => Gantries.Sum(Sum);
-    private string Busiest => Gantries.MaxBy(Sum)!;
-
-    private int Sum(string gantry) => Enumerable.Range(0, _days).Sum(d => Moves(gantry, d));
-
-    private static int Pct(int value, int max) => max == 0 ? 0 : value * 100 / max;
-
-    // Deterministic sample data until a movement-counter source is connected
-    private static int Moves(string gantry, int daysAgo)
+    private const int MaxRows = 1000;
+    private List<BridgeStatistic> _rows = new();
+    private DateTime? _start = DateTime.Today.AddDays(-6);
+    private DateTime? _end = DateTime.Today;
+    private enum Granularity { Hourly, Daily, Weekly, Monthly }
+    private Granularity _granularity = Granularity.Daily;
+    private bool _allBridges = true;
+    // Column visibility reflects the options used for the displayed data (updated on Refresh)
+    private bool _showHour;
+    private bool _showBridge;
+    private string UnitName => _granularity.ToString().ToLowerInvariant();
+    private string UnitTitle => _granularity switch
     {
-        var seed = Array.IndexOf(Gantries, gantry) * 1000 + Today.AddDays(-daysAgo).DayNumber;
-        return 1200 + new Random(seed).Next(0, 600);
+        Granularity.Hourly => "Hourly",
+        Granularity.Daily => "Daily",
+        Granularity.Weekly => "Weekly",
+        Granularity.Monthly => "Monthly",
+        _ => "Monthly"
+    };
+    private string Period => _start is null || _end is null ? "-" : $"{(_end.Value.Date - _start.Value.Date).Days + 1} days";
+
+    // private IReadOnlyList<CsvExportButton<Row>.CsvColumn> CsvColumns =>
+    // [
+    //     new("Period start", r => r.Start),
+    //     .. Gantries.Where(_ => _allBridges).Select(g => new CsvExportButton<Row>.CsvColumn(g, r => r.Values[g])),
+    //     new("Total", r => r.Total)
+    // ];
+
+    //protected override void OnInitialized() => Refresh();
+
+
+    private bool _loading;
+
+    private async Task Refresh()
+    {
+        if (_start is null || _end is null || _end < _start)
+        {
+            return;
+        }
+
+        _showHour = _granularity == Granularity.Hourly;
+        _showBridge = !_allBridges;
+
+        var q0 =  DbContext.Statistics
+            .Where(s => s.Category == "Bridge")
+            .AsQueryable();
+        if (_start != null)
+        {
+            var startDay = DateOnly.FromDateTime(_start.Value);
+            q0 = q0.Where(s => s.Day >= startDay);
+        }
+        if (_end != null)
+        {
+            var endDay = DateOnly.FromDateTime(_end.Value);
+            q0 = q0.Where(s => s.Day <= endDay);
+        }
+        IQueryable<BridgeStatistic> q = null!;
+        if (_allBridges)
+        {
+            switch (_granularity)
+            {
+                case Granularity.Hourly:
+                    q = q0
+                        .GroupBy(s => new { s.Day, s.Hour })
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = "*",
+                        Period = s.Key.Day.ToString("yyyy-MM-dd"),
+                        Hour = $"{s.Key.Hour:00}->{s.Key.Hour+1:00}",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+                case Granularity.Daily:
+                    q = q0
+                       .GroupBy(s => new { s.Day })
+                       .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = "*",
+                        Period = s.Key.Day.ToString("yyyy-MM-dd"),
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+                case Granularity.Weekly:
+                    q = q0
+                        .GroupBy(s => new {  
+                            Year = s.Day.Year,
+                            Week = EF.Functions.DateDiffWeek(
+                                EF.Functions.DateFromParts(s.Day.Year, 1, 1),
+                                s.Day.ToDateTime(TimeOnly.MinValue)
+                            ) + 1
+                        })
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = "*",
+                        Period = $"{s.Key.Year:0000}-{s.Key.Week:00}",
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+                case Granularity.Monthly:
+                    q = q0
+                         .GroupBy(s => new { Year=s.Day.Year, Month=s.Day.Month })
+                         .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = "*",
+                        Period = $"{s.Key.Year:0000}-{s.Key.Month:00}",
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+            }
+        }
+        else
+        {
+            switch (_granularity)
+            {
+                case Granularity.Hourly:
+                    q = q0
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = s.Element,
+                        Period = s.Day.ToString("yyyy-MM-dd"),
+                        Hour = $"{s.Hour:00}->{s.Hour + 1:00}",
+                        CountOrdersIn = s.Counter01,
+                        CountOrdersOut = s.Counter02,
+                        CountOrdersRelocation = s.Counter03,
+                        CountOrdersTotal = s.Counter01 + s.Counter02 + s.Counter03,
+                        CountTiresIn = s.Counter11,
+                        CountTiresOut = s.Counter12,
+                        CountTiresRelocation = s.Counter13,
+                        CountTiresTotal = s.Counter11 + s.Counter12 + s.Counter13
+                    });
+                    break;
+                case Granularity.Daily:
+                    q = q0
+                        .GroupBy(s => new { s.Element, s.Day })
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = s.Key.Element,
+                        Period = s.Key.Day.ToString("yyyy-MM-dd"),
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+                case Granularity.Weekly:
+                    q = q0
+                        .GroupBy(s => new
+                        {
+                            s.Element,
+                            Year = s.Day.Year,
+                            Week = EF.Functions.DateDiffWeek(
+                                EF.Functions.DateFromParts(s.Day.Year, 1, 1),
+                                s.Day.ToDateTime(TimeOnly.MinValue)
+                            ) + 1
+                        })
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = s.Key.Element,
+                        Period = $"{s.Key.Year:0000}-{s.Key.Week:00}",
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+                case Granularity.Monthly:
+                    q = q0
+                        .GroupBy(s => new { s.Element, Year = s.Day.Year, Month = s.Day.Month })
+                        .Select(s => new BridgeStatistic
+                    {
+                        BridgeNr = s.Key.Element,
+                        Period = $"{s.Key.Year:0000}-{s.Key.Month:00}",
+                        Hour = "*",
+                        CountOrdersIn = s.Sum(x => x.Counter01),
+                        CountOrdersOut = s.Sum(x => x.Counter02),
+                        CountOrdersRelocation = s.Sum(x => x.Counter03),
+                        CountOrdersTotal = s.Sum(x => x.Counter01 + x.Counter02 + x.Counter03),
+                        CountTiresIn = s.Sum(x => x.Counter11),
+                        CountTiresOut = s.Sum(x => x.Counter12),
+                        CountTiresRelocation = s.Sum(x => x.Counter13),
+                        CountTiresTotal = s.Sum(x => x.Counter11 + x.Counter12 + x.Counter13)
+                    });
+                    break;
+            }
+        }
+        string sql = q.ToQueryString();
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();
+        try
+        {
+            _rows = await q.ToListAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+   
+    private string Label(DateTime b) => _granularity switch
+    {
+        Granularity.Hourly => b.ToString("ddd dd.MM. HH:00"),
+        Granularity.Daily => b.ToString("ddd dd.MM.yyyy"),
+        Granularity.Weekly => $"Week of {b:dd.MM.yyyy}",
+        Granularity.Monthly => b.ToString("MMMM yyyy"),
+        _ => b.ToString("MMMM yyyy")
+    };
+
+    private class BridgeStatistic
+    {
+        public string BridgeNr { get; set; } = default!;
+        public string Period { get; set; } = default!;
+        public string Hour { get; set; } = default!;
+        public int CountOrdersIn { get; set; }
+        public int CountOrdersOut { get; set; }
+        public int CountOrdersRelocation { get; set; }
+        public int CountOrdersTotal { get; set; }
+        public int CountTiresIn { get; set; }
+        public int CountTiresOut { get; set; }
+        public int CountTiresRelocation { get; set; }
+        public int CountTiresTotal { get; set; }
     }
 }
