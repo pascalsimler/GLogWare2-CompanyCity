@@ -24,7 +24,9 @@ public static class DatabaseProviderHelper
 #if MYSQL
         databaseProvider = DatabaseProvider.MySql;
 #endif
-
+#if OPENGAUSS
+        databaseProvider = DatabaseProvider.OpenGauss;
+#endif
     }
 
     public static string GetNowSql()
@@ -33,6 +35,7 @@ public static class DatabaseProviderHelper
         {
             DatabaseProvider.Oracle => "LOCALTIMESTAMP",
             DatabaseProvider.Postgres => "LOCALTIMESTAMP",
+            DatabaseProvider.OpenGauss => "LOCALTIMESTAMP",
             DatabaseProvider.MySql => "CURRENT_TIMESTAMP(6)",
             _ => "GETDATE()"
         };
@@ -44,6 +47,7 @@ public static class DatabaseProviderHelper
         {
             DatabaseProvider.Oracle => "CLOB",
             DatabaseProvider.Postgres => "TEXT",
+            DatabaseProvider.OpenGauss => "TEXT",
             DatabaseProvider.MySql => "LONGTEXT",
             _ => "NVARCHAR(MAX)"
         };
@@ -65,6 +69,7 @@ public static class DatabaseProviderHelper
         {
             DatabaseProvider.Oracle => snake.ToUpperInvariant(),
             DatabaseProvider.Postgres => snake.ToLowerInvariant(),
+            DatabaseProvider.OpenGauss => snake.ToLowerInvariant(),
             _ => name
         };
     }
@@ -97,6 +102,14 @@ public static class DatabaseProviderHelper
 #if POSTGRES
         services.AddDbContext<TDbContext>(
             options => options.UseNpgsql(
+                connectionString, 
+                x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+            )
+        );
+#endif
+#if OPENGAUSS
+        services.AddDbContext<TDbContext>(
+            options => options.UseGaussDB(
                 connectionString, 
                 x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
             )
@@ -147,6 +160,14 @@ public static class DatabaseProviderHelper
             )
         );
 #endif
+#if OPENGAUSS
+        services.AddPooledDbContextFactory<TDbContext>(
+            options => options.UseGaussDB(
+                connectionString, 
+                x => x.MigrationsAssembly(typeof(DatabaseProvider).Assembly.FullName)
+            )
+        );
+#endif
 #if MYSQL
         services.AddPooledDbContextFactory<TDbContext>(
             options => options.UseMySQL(
@@ -174,6 +195,9 @@ public static class DatabaseProviderHelper
 #endif
 #if POSTGRES
         optionsBuilder.UseNpgsql(connectionString);
+#endif
+#if OPENGAUSS
+        optionsBuilder.UseGaussDB(connectionString);
 #endif
 #if MYSQL
         optionsBuilder.UseMySQL(connectionString);

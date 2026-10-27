@@ -6,5 +6,6 @@ public enum DatabaseProvider
     SqlServer,
     Oracle,
     MySql,
+    OpenGauss,
     Unknown
 }

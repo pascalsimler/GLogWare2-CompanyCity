@@ -9,31 +9,31 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SQLSERVER</DefineConstants>
+    <DefineConstants>$(DefineConstants);OPENGAUSS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SQLSERVER</DefineConstants>
+    <DefineConstants>$(DefineConstants);OPENGAUSS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.14" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
-	<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.13" />
+	<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.14" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.14" />
     <PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="4.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
 	<ItemGroup Condition="$(DefineConstants.Contains('SQLSERVER'))">
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
 	</ItemGroup>
 	<ItemGroup Condition="$(DefineConstants.Contains('ORACLE'))">
 		<PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26301" />
@@ -44,5 +44,7 @@
 	<ItemGroup Condition="$(DefineConstants.Contains('MYSQL'))">
 		<PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.9" />
 	</ItemGroup>
-	
+	<ItemGroup Condition="$(DefineConstants.Contains('OPENGAUSS'))">
+		<PackageReference Include="DotNetCore.EntityFrameworkCore.GaussDB" Version="10.0.1" />
+	</ItemGroup>
 </Project>

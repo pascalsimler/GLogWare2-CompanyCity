@@ -6,6 +6,7 @@ using Gudel.GLogWare.Interfaces;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.MQTTMessageBus;
 using MudBlazor.Services;
+using MudBlazor.Translations;
 using Serilog;
 using Serilog.Events;
 
@@ -55,6 +56,7 @@ logger.Information($"trigram=[{trigram}]");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddMudServices();
+builder.Services.AddMudTranslations();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbProviderContext<GLogWareDbContext>(connectionString);

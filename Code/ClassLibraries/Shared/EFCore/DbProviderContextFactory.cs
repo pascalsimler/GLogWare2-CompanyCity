@@ -41,6 +41,9 @@ public abstract class DbProviderContextFactory<TDbContext>
 #if POSTGRES
         optionsBuilder.UseNpgsql(connectionString);
 #endif
+#if OPENGAUSS
+        optionsBuilder.UseGaussDB(connectionString);
+#endif
 #if MYSQL
         optionsBuilder.UseMySQL(connectionString);
 #endif

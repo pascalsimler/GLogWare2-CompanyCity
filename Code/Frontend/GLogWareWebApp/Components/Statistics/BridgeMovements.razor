@@ -45,7 +45,7 @@
 </div>
 
 <MudPaper Elevation="0">
-    <MudDataGrid T="BridgeStatistic" @ref="_grid" Class="grouped-header-grid" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="420px">
+    <MudDataGrid T="BridgeStatistic" @ref="_grid" Class="grouped-header-grid" Items="@_rows" Loading="_loading" Dense="true" Hover="true" SortMode="SortMode.Multiple" Filterable="true" Hideable="false" FixedHeader="true" FixedFooter="true" Height="800px">
         <Header>
             <tr class="mud-table-row group-header-row">
                 <th class="mud-table-cell" style="font-weight:bold" colspan="@(1 + (_showHour ? 1 : 0) + (_showBridge ? 1 : 0))">Key</th>
