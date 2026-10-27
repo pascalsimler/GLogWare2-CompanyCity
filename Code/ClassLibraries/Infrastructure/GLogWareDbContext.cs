@@ -76,6 +76,15 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
 
             foreach (var property in entityType.GetProperties())
             {
+                switch (DatabaseProviderHelper.databaseProvider)
+                {
+                    case DatabaseProvider.OpenGauss:
+                        if (property.Name == "Id" && property.ClrType == typeof(int))
+                        {
+                            property.SetAnnotation("GaussDB:ValueGenerationStrategy", "IdentityByDefault");
+                        }
+                        break;
+                }
                 property.SetColumnName(DatabaseProviderHelper.ToProviderName(property.GetColumnName()));
             }
 
