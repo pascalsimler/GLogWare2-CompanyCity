@@ -1,0 +1,7 @@
+<Project>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);OPENGAUSS</DefineConstants>
+  </PropertyGroup>
+
+</Project>

@@ -64,7 +64,11 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
     {
         base.OnModelCreating(modelBuilder);
 
-        // apply BaseTracking properties on all entities inhereting from it.
+#if OPENGAUSS
+        modelBuilder.UseSerialColumns();
+#endif
+
+        // apply BaseTracking properties on all entities inheriting from it.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             string tableName = entityType.GetTableName()!;
@@ -76,15 +80,6 @@ public partial class GLogWareDbContext(DbContextOptions<GLogWareDbContext> optio
 
             foreach (var property in entityType.GetProperties())
             {
-                switch (DatabaseProviderHelper.databaseProvider)
-                {
-                    case DatabaseProvider.OpenGauss:
-                        if (property.Name == "Id" && property.ClrType == typeof(int))
-                        {
-                            property.SetAnnotation("GaussDB:ValueGenerationStrategy", "IdentityByDefault");
-                        }
-                        break;
-                }
                 property.SetColumnName(DatabaseProviderHelper.ToProviderName(property.GetColumnName()));
             }
 
