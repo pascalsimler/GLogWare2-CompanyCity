@@ -1,0 +1,13 @@
+<g transform="translate(@Fmt(Cx), @Fmt(Cy))">
+    <circle r="@Fmt(Radius)" fill="#1f2937" stroke="#000" stroke-width="1.5" />
+    <circle r="@Fmt(Radius * 0.6)" fill="#9ca3af" stroke="#4b5563" stroke-width="1" />
+    <circle r="@Fmt(Radius * 0.2)" fill="#374151" />
+</g>
+
+@code {
+    [Parameter] public double Cx { get; set; }
+    [Parameter] public double Cy { get; set; }
+    [Parameter] public double Radius { get; set; } = 20.4;
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}

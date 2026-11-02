@@ -1,0 +1,166 @@
+@page "/administration/windows-services"
+@using System.ServiceProcess
+
+<PageTitle>Windows services</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Windows services</MudText>
+        <MudText Color="Color.Secondary">Services whose name starts with "@ServicePrefix"</MudText>
+    </div>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PlayArrow"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(true, _selected.ToList()))">Start selected</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(false, _selected.ToList()))">Stop selected</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                   Disabled="_busy" OnClick="RefreshAsync">Refresh</MudButton>
+    </MudStack>
+</div>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3">@_error</MudAlert>
+}
+
+<MudPaper Elevation="0">
+    <MudDataGrid T="WindowsServiceRow" Items="_services" Loading="_busy" Dense="true" Hover="true"
+                 MultiSelection="true" SelectedItems="_selected" SelectedItemsChanged="OnSelectionChanged"
+                 SortMode="SortMode.Multiple" Filterable="true">
+        <Columns>
+            <SelectColumn T="WindowsServiceRow" />
+            <PropertyColumn Property="s => s.Name" Title="Name" />
+            <PropertyColumn Property="s => s.Status" Title="Status">
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsRunning ? Color.Success : context.Item.Status == "Stopped" ? Color.Error : Color.Default)" Variant="Variant.Filled">@context.Item.Status</MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="s => s.DisplayName" Title="Display name" />
+            <TemplateColumn Title="Actions" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @if (context.Item.IsRunning)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" Size="Size.Small"
+                                       Disabled="_busy" OnClick="@(() => RunAsync(false, [context.Item]))" />
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Size="Size.Small"
+                                       Disabled="_busy" OnClick="@(() => RunAsync(true, [context.Item]))" />
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <NoRecordsContent>
+            <MudText Class="pa-4">No services found.</MudText>
+        </NoRecordsContent>
+    </MudDataGrid>
+</MudPaper>
+
+@code {
+    private const string ServicePrefix = "J01-";
+    private static readonly TimeSpan ServiceTimeout = TimeSpan.FromSeconds(30);
+
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private sealed record WindowsServiceRow(string Name, string DisplayName, string Status, string StartType)
+    {
+        public bool IsRunning => Status is "Running" or "StartPending";
+    }
+
+    private List<WindowsServiceRow> _services = [];
+    private HashSet<WindowsServiceRow> _selected = [];
+    private bool _busy;
+    private string? _error;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    private void OnSelectionChanged(HashSet<WindowsServiceRow> items) => _selected = items;
+
+    private async Task RefreshAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            _services = await Task.Run(LoadServices);
+            _selected = [];
+        }
+        catch (Exception ex)
+        {
+            _error = $"Unable to list services: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private static List<WindowsServiceRow> LoadServices()
+    {
+        var services = ServiceController.GetServices()
+            .Where(s => s.ServiceName.StartsWith(ServicePrefix, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        try
+        {
+            return services
+                .Select(s => new WindowsServiceRow(s.ServiceName, s.DisplayName, s.Status.ToString(), s.StartType.ToString()))
+                .OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        finally
+        {
+            services.ForEach(s => s.Dispose());
+        }
+    }
+
+    private async Task RunAsync(bool start, List<WindowsServiceRow> targets)
+    {
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        _busy = true;
+        var action = start ? "start" : "stop";
+        var failures = await Task.Run(() => targets
+            .Select(t => ChangeState(t.Name, start))
+            .Where(e => e is not null)
+            .ToList());
+
+        if (failures.Count == 0)
+        {
+            Snackbar.Add($"{targets.Count} service(s): {action} OK", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"{failures.Count} service(s) failed to {action}: {string.Join("; ", failures)}", Severity.Error);
+        }
+
+        await RefreshAsync();
+    }
+
+    private static string? ChangeState(string name, bool start)
+    {
+        try
+        {
+            using var controller = new ServiceController(name);
+            if (start && controller.Status == ServiceControllerStatus.Stopped)
+            {
+                controller.Start();
+                controller.WaitForStatus(ServiceControllerStatus.Running, ServiceTimeout);
+            }
+            else if (!start && controller.Status == ServiceControllerStatus.Running)
+            {
+                controller.Stop();
+                controller.WaitForStatus(ServiceControllerStatus.Stopped, ServiceTimeout);
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return $"{name}: {(ex.InnerException ?? ex).Message}";
+        }
+    }
+}

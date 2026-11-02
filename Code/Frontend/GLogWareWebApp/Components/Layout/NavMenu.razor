@@ -1,124 +1,43 @@
-<nav class="operations-nav" aria-label="Main navigation">
+<MudNavMenu Class="operations-nav" Color="Color.Primary" Rounded="true">
     <div class="nav-section-label">@(!Compact ? "OVERVIEW" : null)</div>
-    <NavLink class="nav-entry" href="" Match="NavLinkMatch.All" title="Dashboard">
-        <MudIcon Icon="@Icons.Material.Filled.SpaceDashboard" />
-        <span>Dashboard</span>
-    </NavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
 
-    <details class="nav-group" name="nav-groups">
-        <summary title="Manufacturing">
-            <MudIcon Icon="@Icons.Material.Filled.PrecisionManufacturing" />
-            <span>Manufacturing</span>
-            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
-        </summary>
-        <div class="nav-children">
-            <NavLink class="nav-entry" href="manufacturing/orders" title="Work orders">
-                <MudIcon Icon="@Icons.Material.Filled.Assignment" />
-                <span>Work orders</span>
-            </NavLink>
-        </div>
-    </details>
+    <MudNavGroup Title="Manufacturing" Icon="@Icons.Material.Filled.PrecisionManufacturing">
+        <MudNavLink Href="manufacturing/orders" Icon="@Icons.Material.Filled.Assignment">Work orders</MudNavLink>
+    </MudNavGroup>
 
-    <details class="nav-group" name="nav-groups">
-        <summary title="Warehouse">
-            <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
-            <span>Warehouse</span>
-            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
-        </summary>
-        <div class="nav-children">
-            <NavLink class="nav-entry" href="warehouse/inventory" title="Inventory">
-                <MudIcon Icon="@Icons.Material.Filled.Inventory2" />
-                <span>Inventory</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="warehouse/receiving" title="Receiving">
-                <MudIcon Icon="@Icons.Material.Filled.MoveToInbox" />
-                <span>Receiving</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="warehouse/picking" title="Picking">
-                <MudIcon Icon="@Icons.Material.Filled.LocalShipping" />
-                <span>Picking</span>
-            </NavLink>
-        </div>
-    </details>
+    <MudNavGroup Title="Warehouse" Icon="@Icons.Material.Filled.Warehouse">
+        <MudNavLink Href="warehouse/inventory" Icon="@Icons.Material.Filled.Inventory2">Inventory</MudNavLink>
+        <MudNavLink Href="warehouse/receiving" Icon="@Icons.Material.Filled.MoveToInbox">Receiving</MudNavLink>
+        <MudNavLink Href="warehouse/picking" Icon="@Icons.Material.Filled.LocalShipping">Picking</MudNavLink>
+    </MudNavGroup>
 
-    <details class="nav-group" name="nav-groups">
-        <summary title="SCADA">
-            <MudIcon Icon="@Icons.Material.Filled.MonitorHeart" />
-            <span>SCADA</span>
-            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
-        </summary>
-        <div class="nav-children">
-            <NavLink class="nav-entry" href="scada" Match="NavLinkMatch.All" title="SCADA overview">
-                <MudIcon Icon="@Icons.Material.Filled.GridView" />
-                <span>Overview</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="scada/conveyors" title="Conveyors">
-                <MudIcon Icon="@Icons.Material.Filled.ViewWeek" />
-                <span>Conveyors</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="scada/robots" title="Robots">
-                <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
-                <span>Robots</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="scada/stacker-cranes" title="Stacker cranes">
-                <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
-                <span>Stacker cranes</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="visualization" title="Visualization">
-                <MudIcon Icon="@Icons.Material.Filled.OpenWith" />
-                <span>Visualization</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="scada/gantries" title="Gantry systems">
-                <MudIcon Icon="@Icons.Material.Filled.OpenWith" />
-                <span>Gantries</span>
-            </NavLink>
-            <NavLink class="nav-entry nav-entry-deep" href="scada/gantries/stock" title="Tire stock map">
-                <MudIcon Icon="@Icons.Material.Filled.DonutLarge" />
-                <span>Tire stock map</span>
-            </NavLink>
-        </div>
-    </details>
+    <MudNavGroup Title="SCADA" Icon="@Icons.Material.Filled.MonitorHeart">
+        <MudNavLink Href="scada" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GridView">Overview</MudNavLink>
+        <MudNavLink Href="scada/conveyors" Icon="@Icons.Material.Filled.ViewWeek">Conveyors</MudNavLink>
+        <MudNavLink Href="scada/robots" Icon="@Icons.Material.Filled.SmartToy">Robots</MudNavLink>
+        <MudNavLink Href="scada/stacker-cranes" Icon="@Icons.Material.Filled.Warehouse">Stacker cranes</MudNavLink>
+        <MudNavLink Href="visualization" Icon="@Icons.Material.Filled.OpenWith">Visualization</MudNavLink>
+        <MudNavLink Href="scada/gantries" Icon="@Icons.Material.Filled.OpenWith">Gantries</MudNavLink>
+        <MudNavLink Href="scada/gantries/stock" Class="nav-entry-deep" Icon="@Icons.Material.Filled.DonutLarge">Tire stock map</MudNavLink>
+    </MudNavGroup>
 
-    <details class="nav-group" name="nav-groups">
-        <summary title="Statistics">
-            <MudIcon Icon="@Icons.Material.Filled.BarChart" />
-            <span>Statistics</span>
-            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
-        </summary>
-        <div class="nav-children">
-            <NavLink class="nav-entry" href="statistics/fill-level" title="Fill level per gantry and hour">
-                <MudIcon Icon="@Icons.Material.Filled.GridOn" />
-                <span>Fill level</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="statistics/bridge-movements" title="Gantry bridge movements">
-                <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" />
-                <span>Bridge movements</span>
-            </NavLink>
-        </div>
-    </details>
+    <MudNavGroup Title="Statistics" Icon="@Icons.Material.Filled.BarChart">
+        <MudNavLink Href="statistics/fill-level" Icon="@Icons.Material.Filled.GridOn">Fill level</MudNavLink>
+        <MudNavLink Href="statistics/bridge-movements" Icon="@Icons.Material.Filled.SwapHoriz">Bridge movements</MudNavLink>
+    </MudNavGroup>
 
-    <details class="nav-group" name="nav-groups">
-        <summary title="User Management">
-            <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
-            <span>User Management</span>
-            <MudIcon Class="nav-chevron" Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" />
-        </summary>
-        <div class="nav-children">
-            <NavLink class="nav-entry" href="user-management/users" title="Users">
-                <MudIcon Icon="@Icons.Material.Filled.People" />
-                <span>Users</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="user-management/roles" title="Roles">
-                <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
-                <span>Roles</span>
-            </NavLink>
-            <NavLink class="nav-entry" href="user-management/permissions" title="Permissions">
-                <MudIcon Icon="@Icons.Material.Filled.VpnKey" />
-                <span>Permissions</span>
-            </NavLink>
-        </div>
-    </details>
-</nav>
+    <MudNavGroup Title="User Management" Icon="@Icons.Material.Filled.ManageAccounts">
+        <MudNavLink Href="user-management/users" Icon="@Icons.Material.Filled.People">Users</MudNavLink>
+        <MudNavLink Href="user-management/roles" Icon="@Icons.Material.Filled.AdminPanelSettings">Roles</MudNavLink>
+        <MudNavLink Href="user-management/permissions" Icon="@Icons.Material.Filled.VpnKey">Permissions</MudNavLink>
+    </MudNavGroup>
+
+    <MudNavGroup Title="Administration" Icon="@Icons.Material.Filled.AdminPanelSettings">
+        <MudNavLink Href="administration/docker" Icon="@Icons.Material.Filled.Dns">Docker</MudNavLink>
+        <MudNavLink Href="administration/windows-services" Icon="@Icons.Material.Filled.Settings">Windows services</MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>
 
 @code {
     [Parameter] public bool Compact { get; set; }

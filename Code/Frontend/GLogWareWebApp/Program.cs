@@ -5,6 +5,7 @@ using Gudel.GLogWare.Infrastructure;
 using Gudel.GLogWare.Interfaces;
 using Gudel.GLogWare.Logging;
 using Gudel.GLogWare.MQTTMessageBus;
+using Gudel.GLogWare.Secutity;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using Serilog;
@@ -63,6 +64,7 @@ builder.Services.AddDbProviderContext<GLogWareDbContext>(connectionString);
 builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 //builder.Services.AddSingleton<MessageBusService>();
 //builder.Services.AddHostedService<HostedMessageBusService>();
+builder.Services.AddSingleton<PasswordHasher>();
 
 builder.Services.AddWindowsService(options =>
 {

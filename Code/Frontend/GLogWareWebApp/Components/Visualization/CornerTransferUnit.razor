@@ -1,0 +1,38 @@
+<g transform="translate(@Fmt(X), @Fmt(Y))">
+    <rect width="@Fmt(Size)" height="@Fmt(Size)" fill="#e5e7eb" stroke="#374151" stroke-width="2" />
+    @* order across the unit: roller, chain, 2 rollers, chain, roller; roller style is identical to RollerConveyor *@
+    @foreach (var x in new[] { RollerWidth / 2 + 0.5, Size / 2 - RollerPitch / 2, Size / 2 + RollerPitch / 2, Size - RollerWidth / 2 - 0.5 })
+    {
+        <rect x="@Fmt(x - RollerWidth / 2)" y="3" width="@Fmt(RollerWidth)" height="@Fmt(Size - 6)" rx="2" fill="#9ca3af" stroke="#4b5563" />
+    }
+    @* chains at the same positions (fractions of the width) as ChainConveyor, so they line up with the conveyor *@
+    @foreach (var x in StrandFractions.Select(f => Size * f))
+    {
+        <g opacity="@(Lifted ? "1" : "0.35")">
+            <line x1="@Fmt(x)" y1="4" x2="@Fmt(x)" y2="@Fmt(Size - 4)" stroke="#111827" stroke-width="6" />
+            <line x1="@Fmt(x)" y1="4" x2="@Fmt(x)" y2="@Fmt(Size - 4)" stroke="#fbbf24" stroke-width="4" stroke-dasharray="6 4" />
+            <circle cx="@Fmt(x)" cy="4" r="3" fill="#4b5563" />
+            <circle cx="@Fmt(x)" cy="@Fmt(Size - 4)" r="3" fill="#4b5563" />
+        </g>
+    }
+    <text x="@Fmt(Size / 2)" y="@Fmt(Size + 16)" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#374151">@Name</text>
+    @ChildContent
+</g>
+
+@code {
+    [Parameter] public double X { get; set; }
+    [Parameter] public double Y { get; set; }
+    // Square unit; should equal the width of the feeding roller conveyor and of the chain conveyor it feeds
+    [Parameter] public double Size { get; set; } = 40;
+    // Chain positions across the width as fractions of Size; keep equal to the chain conveyor's StrandFractions
+    [Parameter] public double[] StrandFractions { get; set; } = [0.25, 0.75];
+    // true = chains raised (transfer to chain conveyor), false = rollers carry the load
+    [Parameter] public bool Lifted { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private const double RollerWidth = 5;
+    private const double RollerPitch = 8;
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}

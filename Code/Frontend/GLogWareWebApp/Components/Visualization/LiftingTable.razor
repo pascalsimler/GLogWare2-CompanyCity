@@ -1,0 +1,30 @@
+<g transform="translate(@Fmt(X), @Fmt(Y))">
+    <rect y="@Fmt(MaxLift + PlateHeight)" width="@Fmt(Width)" height="@Fmt(Height - MaxLift - PlateHeight)" fill="#e5e7eb" stroke="#374151" stroke-width="2" />
+    @* scissor mechanism *@
+    <line x1="@Fmt(Width * 0.25)" y1="@Fmt(Height)" x2="@Fmt(Width * 0.75)" y2="@Fmt(PlateY + PlateHeight)" stroke="#4b5563" stroke-width="4" />
+    <line x1="@Fmt(Width * 0.75)" y1="@Fmt(Height)" x2="@Fmt(Width * 0.25)" y2="@Fmt(PlateY + PlateHeight)" stroke="#4b5563" stroke-width="4" />
+    <g transform="translate(0, @Fmt(PlateY))">
+        <rect width="@Fmt(Width)" height="@Fmt(PlateHeight)" rx="2" fill="#6b7280" stroke="#374151" stroke-width="2" />
+        @ChildContent
+    </g>
+    <text x="@Fmt(Width / 2)" y="@Fmt(Height + 16)" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#374151">@Name</text>
+</g>
+
+@code {
+    private const double PlateHeight = 12;
+    private const double MaxLift = 30;
+
+    [Parameter] public double X { get; set; }
+    [Parameter] public double Y { get; set; }
+    [Parameter] public double Width { get; set; } = 160;
+    [Parameter] public double Height { get; set; } = 90;
+    // 0 = lowered, 1 = fully raised
+    [Parameter] public double Lift { get; set; }
+    [Parameter] public string? Name { get; set; }
+    // Positioned relative to the top of the plate (y = 0 sits on the plate)
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private double PlateY => MaxLift * (1 - Math.Clamp(Lift, 0, 1));
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}

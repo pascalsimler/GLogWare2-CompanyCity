@@ -1,0 +1,180 @@
+@page "/administration/docker"
+@using System.Diagnostics
+@using System.Text.Json
+
+<PageTitle>Docker</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Docker</MudText>
+        <MudText Color="Color.Secondary">Docker containers on this machine</MudText>
+    </div>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PlayArrow"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync("start", _selected.ToList()))">Start selected</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync("stop", _selected.ToList()))">Stop selected</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                   Disabled="_busy" OnClick="RefreshAsync">Refresh</MudButton>
+    </MudStack>
+</div>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3">@_error</MudAlert>
+}
+
+<MudPaper Elevation="0">
+    <MudDataGrid T="DockerContainer" Items="_containers" Loading="_busy" Dense="true" Hover="true"
+                 MultiSelection="true" SelectedItems="_selected" SelectedItemsChanged="OnSelectionChanged"
+                 SortMode="SortMode.Multiple" Filterable="true">
+        <Columns>
+            <SelectColumn T="DockerContainer" />
+            <PropertyColumn Property="c => c.Name" Title="Name" />
+            <PropertyColumn Property="c => c.Image" Title="Image" />
+            <PropertyColumn Property="c => c.State" Title="State">
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsRunning ? Color.Success : Color.Default)">@context.Item.State</MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="c => c.Status" Title="Status" />
+            <PropertyColumn Property="c => c.Ports" Title="Ports" />
+            <TemplateColumn Title="Actions" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @if (context.Item.IsRunning)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" Size="Size.Small"
+                                       Disabled="_busy" OnClick="@(() => RunAsync("stop", [context.Item]))" />
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Size="Size.Small"
+                                       Disabled="_busy" OnClick="@(() => RunAsync("start", [context.Item]))" />
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <NoRecordsContent>
+            <MudText Class="pa-4">No containers found.</MudText>
+        </NoRecordsContent>
+    </MudDataGrid>
+</MudPaper>
+
+@code {
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private sealed class DockerContainer
+    {
+        public string Id { get; init; } = "";
+        public string Name { get; init; } = "";
+        public string Image { get; init; } = "";
+        public string State { get; init; } = "";
+        public string Status { get; init; } = "";
+        public string Ports { get; init; } = "";
+        public bool IsRunning => State == "running";
+    }
+
+    private List<DockerContainer> _containers = [];
+    private HashSet<DockerContainer> _selected = [];
+    private bool _busy;
+    private string? _error;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    private void OnSelectionChanged(HashSet<DockerContainer> items) => _selected = items;
+
+    private async Task RefreshAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            var (code, output, error) = await ExecuteDockerAsync(["ps", "-a", "--format", "{{json .}}"]);
+            if (code != 0)
+            {
+                _error = string.IsNullOrWhiteSpace(error) ? $"docker exited with code {code}" : error.Trim();
+                return;
+            }
+
+            _containers = output
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(ParseContainer)
+                .OrderBy(c => c.Name)
+                .ToList();
+            _selected = [];
+        }
+        catch (Exception ex)
+        {
+            _error = $"Docker is not available: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RunAsync(string action, List<DockerContainer> targets)
+    {
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            var (code, _, error) = await ExecuteDockerAsync([action, .. targets.Select(t => t.Id)]);
+            if (code == 0)
+            {
+                Snackbar.Add($"{targets.Count} container(s): {action} OK", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"docker {action} failed: {error.Trim()}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"docker {action} failed: {ex.Message}", Severity.Error);
+        }
+
+        await RefreshAsync();
+    }
+
+    private static DockerContainer ParseContainer(string line)
+    {
+        using var doc = JsonDocument.Parse(line);
+        var root = doc.RootElement;
+        string Get(string name) => root.TryGetProperty(name, out var v) ? v.GetString() ?? "" : "";
+        return new DockerContainer
+        {
+            Id = Get("ID"),
+            Name = Get("Names"),
+            Image = Get("Image"),
+            State = Get("State"),
+            Status = Get("Status"),
+            Ports = Get("Ports")
+        };
+    }
+
+    private static async Task<(int Code, string Output, string Error)> ExecuteDockerAsync(IEnumerable<string> args)
+    {
+        var psi = new ProcessStartInfo("docker")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        foreach (var arg in args)
+        {
+            psi.ArgumentList.Add(arg);
+        }
+
+        using var process = Process.Start(psi) ?? throw new InvalidOperationException("Unable to start docker");
+        var output = process.StandardOutput.ReadToEndAsync();
+        var error = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, await output, await error);
+    }
+}

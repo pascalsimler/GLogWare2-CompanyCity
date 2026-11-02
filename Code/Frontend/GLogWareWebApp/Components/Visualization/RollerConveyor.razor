@@ -1,0 +1,20 @@
+<g transform="translate(@Fmt(X), @Fmt(Y))">
+    <rect width="@Fmt(Length)" height="@Fmt(Height)" fill="#e5e7eb" stroke="#374151" stroke-width="2" />
+    @for (var x = 6.0; x < Length - 3; x += 12)
+    {
+        <rect x="@Fmt(x - 2.5)" y="3" width="5" height="@Fmt(Height - 6)" rx="2" fill="#9ca3af" stroke="#4b5563" />
+    }
+    <text x="@Fmt(Length / 2)" y="@Fmt(Height + 16)" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#374151">@Name</text>
+    @ChildContent
+</g>
+
+@code {
+    [Parameter] public double X { get; set; }
+    [Parameter] public double Y { get; set; }
+    [Parameter] public double Length { get; set; } = 400;
+    [Parameter] public double Height { get; set; } = 40;
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}

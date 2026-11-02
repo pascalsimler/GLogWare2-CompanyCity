@@ -1,0 +1,24 @@
+<g transform="translate(@Fmt(X), @Fmt(Y))">
+    <rect width="@Fmt(Size)" height="@Fmt(Size)" fill="#e5e7eb" stroke="#374151" stroke-width="2" />
+    <g transform="translate(@Fmt(Size / 2), @Fmt(Size / 2))">
+        <circle r="@Fmt(Size / 2 - 6)" fill="#9ca3af" stroke="#4b5563" stroke-width="2" />
+        <circle r="@Fmt(Size / 2 - 16)" fill="none" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="4 4" />
+        <g transform="rotate(@Fmt(Angle))">
+            <line x1="@Fmt(-(Size / 2 - 22))" y1="0" x2="@Fmt(Size / 2 - 22)" y2="0" stroke="#374151" stroke-width="3" />
+            <polygon points="@Fmt(Size / 2 - 22),-6 @Fmt(Size / 2 - 10),0 @Fmt(Size / 2 - 22),6" fill="#374151" />
+        </g>
+    </g>
+    <text x="@Fmt(Size / 2)" y="@Fmt(Size + 16)" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#374151">@Name</text>
+    @ChildContent
+</g>
+
+@code {
+    [Parameter] public double X { get; set; }
+    [Parameter] public double Y { get; set; }
+    [Parameter] public double Size { get; set; } = 120;
+    [Parameter] public double Angle { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}

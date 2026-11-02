@@ -1,0 +1,22 @@
+<g transform="translate(@X, @Y)">
+    <rect width="@Length" height="@Height" rx="@(Height / 2)" fill="#6b7280" stroke="#374151" stroke-width="2" />
+    <rect x="6" y="6" width="@(Length - 12)" height="@(Height - 12)" rx="@((Height - 12) / 2)" fill="#4b5563" />
+    @for (var x = 20; x < Length - 10; x += 30)
+    {
+        <line x1="@x" y1="6" x2="@x" y2="@(Height - 6)" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3 3" />
+    }
+    <text x="@(Length / 2)" y="@(Height + 16)" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#374151">@Name</text>
+
+    @ChildContent
+</g>
+
+@code {
+    [Parameter] public double X { get; set; }
+    [Parameter] public double Y { get; set; }
+    [Parameter] public double Length { get; set; } = 400;
+    [Parameter] public double Height { get; set; } = 40;
+    [Parameter] public string? Name { get; set; }
+
+    // Content is positioned relative to the conveyor's top-left corner
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

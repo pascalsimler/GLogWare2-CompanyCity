@@ -1,7 +1,5 @@
 <Project>
-
-  <PropertyGroup>
-    <DefineConstants>$(DefineConstants);OPENGAUSS</DefineConstants>
-  </PropertyGroup>
-
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);SQLSERVER</DefineConstants>
+	</PropertyGroup>
 </Project>

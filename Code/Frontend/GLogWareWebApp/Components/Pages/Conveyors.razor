@@ -1,0 +1,85 @@
+@page "/scada/conveyors"
+@using GLogWareWebApp.Components.Visualization
+@rendermode InteractiveServer
+
+<h3>Conveyors</h3>
+
+<div class="zoom-controls">
+    <MudIconButton Icon="@Icons.Material.Filled.ZoomOut" OnClick="ZoomOut" Disabled="@(_zoom <= MinZoom)" aria-label="Zoom out" />
+    <span class="zoom-level">@((int)Math.Round(_zoom * 100))%</span>
+    <MudIconButton Icon="@Icons.Material.Filled.ZoomIn" OnClick="ZoomIn" Disabled="@(_zoom >= MaxZoom)" aria-label="Zoom in" />
+    <MudIconButton Icon="@Icons.Material.Filled.FitScreen" OnClick="ResetZoom" aria-label="Reset zoom" />
+</div>
+
+<div style="overflow:auto">
+<svg width="@Fmt(SvgWidth * _zoom)" height="@Fmt(SvgHeight * _zoom)" viewBox="0 0 @SvgWidth @SvgHeight">
+    <rect width="@SvgWidth" height="@SvgHeight" rx="8" ry="8" fill="#f3f4f6" stroke="#d1d5db" />
+
+    <Conveyor X="50" Y="30" Length="600" Height="@H" Name="Belt conveyor">
+        @foreach (var x in new[] { 40, 130, 260, 400, 540 })
+        {
+            <Tire Cx="@x" Cy="@(H / 2)" Radius="20.4" />
+        }
+    </Conveyor>
+
+    <RollerConveyor X="50" Y="110" Length="600" Height="@H" Name="Roller conveyor">
+        @foreach (var x in new[] { 80, 220, 350 })
+        {
+            <Tire Cx="@x" Cy="@(H / 2)" Radius="20.4" />
+        }
+    </RollerConveyor>
+
+    <ChainConveyor X="50" Y="190" Length="600" Height="@H" Name="Chain conveyor">
+        @foreach (var x in new[] { 60, 180, 300, 420, 520 })
+        {
+            <Tire Cx="@x" Cy="@(H / 2)" Radius="20.4" />
+        }
+    </ChainConveyor>
+
+    <Turntable X="50" Y="270" Size="120" Angle="45" Name="Turntable">
+        <Tire Cx="60" Cy="60" Radius="20.4" />
+    </Turntable>
+
+    <LiftingTable X="250" Y="270" Width="160" Height="90" Lift="0.8" Name="Lifting table">
+        <Tire Cx="80" Cy="-20.4" Radius="20.4" />
+    </LiftingTable>
+
+    <RollerConveyor X="50" Y="400" Length="150" Height="@H" Name="Roller in">
+        <Tire Cx="60" Cy="@(H / 2)" Radius="16.32" />
+    </RollerConveyor>
+
+    <CornerTransferUnit X="200" Y="400" Size="@H" Lifted="true" Name="Corner transfer unit">
+        @if (_showTransferUnitTire)
+        {
+            <Tire Cx="@(H / 2)" Cy="@(H / 2)" Radius="16.32" />
+        }
+    </CornerTransferUnit>
+
+    <g transform="translate(240, 440) rotate(45)">
+        <ChainConveyor X="0" Y="0" Length="180" Height="@H" Name="Chain out">
+            <Tire Cx="40" Cy="@(H / 2)" Radius="16.32" />
+            <Tire Cx="100" Cy="@(H / 2)" Radius="16.32" />
+        </ChainConveyor>
+    </g>
+</svg>
+</div>
+
+@code {
+    private const int SvgWidth = 700;
+    private const int SvgHeight = 650;
+    private const double H = 40;
+    private const double MinZoom = 0.5;
+    private const double MaxZoom = 3;
+    private const double ZoomStep = 0.25;
+
+    private double _zoom = 1;
+
+    private void ZoomIn() => _zoom = Math.Min(MaxZoom, _zoom + ZoomStep);
+    private void ZoomOut() => _zoom = Math.Max(MinZoom, _zoom - ZoomStep);
+    private void ResetZoom() => _zoom = 1;
+
+    private static string Fmt(double v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    // Toggles the tire on the corner transfer unit
+    private bool _showTransferUnitTire = false;
+}

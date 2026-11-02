@@ -2,12 +2,12 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 
-<MudThemeProvider Theme="_theme" />
+<MudThemeProvider Theme="_current.Theme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="app-shell @(_navigationCollapsed ? "nav-collapsed" : null) @(_mobileNavigationOpen ? "nav-open" : null)">
+<div class="app-shell @_current.CssClass @(_navigationCollapsed ? "nav-collapsed" : null) @(_mobileNavigationOpen ? "nav-open" : null)" style="@_current.ShellStyle">
     @if (_mobileNavigationOpen)
     {
         <div class="nav-backdrop" @onclick="CloseMobileNavigation"></div>
@@ -41,6 +41,18 @@
                 </div>
             </div>
             <div class="title-actions">
+                <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                               Color="Color.Inherit" OnClick="@(() => _isDarkMode = !_isDarkMode)"
+                               aria-label="@(_isDarkMode ? "Switch to light mode" : "Switch to dark mode")" />
+                <MudMenu Icon="@Icons.Material.Filled.Palette" Color="Color.Inherit" AriaLabel="Select theme"
+                         AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                    @foreach (var option in _themes)
+                    {
+                        var selected = option == _current;
+                        <MudMenuItem Icon="@(selected ? Icons.Material.Filled.Check : null)"
+                                     OnClick="@(() => _current = option)">@option.Name</MudMenuItem>
+                    }
+                </MudMenu>
                 <MudBadge Content="3" Color="Color.Error" Overlap="true">
                     <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone" Color="Color.Inherit" />
                 </MudBadge>
@@ -89,7 +101,10 @@
         new("Control center", href: null, disabled: true)
     ];
 
-    private readonly MudTheme _theme = new()
+    private sealed record ThemeOption(string Name, MudTheme Theme, string ShellStyle, string? CssClass = null);
+
+    // Shell (navigation panel + title bar) colors are driven by CSS variables defined in app.css
+    private static readonly ThemeOption FlowOps = new("FlowOps", new MudTheme
     {
         PaletteLight = new PaletteLight
         {
@@ -101,12 +116,70 @@
             AppbarBackground = "#101828",
             TextPrimary = "#101828"
         },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#528bff",
+            Secondary = "#2ed3b7",
+            Tertiary = "#9e77ed",
+            Background = "#0c111d",
+            Surface = "#161b26",
+            AppbarBackground = "#101828",
+            TextPrimary = "#f5f5f6",
+            LinesDefault = "#344054"
+        },
         LayoutProperties = new LayoutProperties { DefaultBorderRadius = "10px" },
         Typography = new Typography
         {
             Default = new DefaultTypography { FontFamily = ["Inter", "sans-serif"] }
         }
-    };
+    }, "");
+
+    // SAP Fiori (Horizon-like): dark shell bar, light grey background, SAP blue accent, small corner radius
+    private static readonly ThemeOption SapFiori = new("SAP Fiori", new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#0070f2",
+            Secondary = "#5b738b",
+            Tertiary = "#8d2a90",
+            Info = "#0070f2",
+            Success = "#107e3e",
+            Warning = "#e9730c",
+            Error = "#bb0000",
+            Background = "#f5f6f7",
+            Surface = "#ffffff",
+            AppbarBackground = "#1d2d3e",
+            TextPrimary = "#1d2d3e",
+            TextSecondary = "#556b82",
+            LinesDefault = "#d9d9d9"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#4da3ff",
+            Secondary = "#8fa6bd",
+            Tertiary = "#c36ac6",
+            Info = "#4da3ff",
+            Success = "#3fb871",
+            Warning = "#f0953a",
+            Error = "#ff6b6b",
+            Background = "#12171c",
+            Surface = "#1b232b",
+            AppbarBackground = "#1d2d3e",
+            TextPrimary = "#eaecee",
+            LinesDefault = "#3a4d61"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "4px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["72", "72full", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"] }
+        }
+    }, "--shell-bg:#1d2d3e;--shell-border:#3a4d61;--shell-brand:#7cb5ff;--shell-muted:#a9b4be;" +
+       "--shell-section:#8396a8;--shell-text:#e5e9ed;--shell-hover:#2b4057;--shell-active:#0070f2;",
+       "theme-sap-fiori");
+
+    private readonly ThemeOption[] _themes = [FlowOps, SapFiori];
+    private ThemeOption _current = FlowOps;
+    private bool _isDarkMode;
 
     private void ToggleNavigation()
     {
