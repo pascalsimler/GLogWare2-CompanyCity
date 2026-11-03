@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.14" />
     <PackageReference Include="MudBlazor" Version="9.11.0" />
     <PackageReference Include="MudBlazor.Translations" Version="3.6.0" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>

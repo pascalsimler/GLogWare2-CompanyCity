@@ -1,0 +1,218 @@
+@page "/administration/cluster-services"
+@using GLogWareWebApp.Services
+
+<PageTitle>Generic services</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">Generic services</MudText>
+        <MudText Color="Color.Secondary">Cluster generic services "@Manager.Prefix*" of @Manager.Host</MudText>
+    </div>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PlayArrow"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(true, _selected.ToList()))">Set selected Online</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(false, _selected.ToList()))">Set selected Offline</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                   Disabled="_busy" OnClick="RefreshAsync">Refresh</MudButton>
+    </MudStack>
+</div>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3">@_error</MudAlert>
+}
+
+<MudPaper Elevation="0" Class="pa-3 mb-3">
+    <MudText Typo="Typo.h6">Cluster nodes</MudText>
+    @if (_group is not null)
+    {
+        <MudText Class="mb-2">Active node of "@_group.Name": <b>@_group.ActiveNode</b></MudText>
+        <MudStack Row="true" Spacing="3" Wrap="Wrap.Wrap">
+            @foreach (var node in _group.Nodes)
+            {
+                <MudPaper Outlined="true" Class="pa-3">
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.subtitle1">@node.Name</MudText>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
+                                 Color="@(node.IsUp ? Color.Success : Color.Error)">@node.State</MudChip>
+                        @if (node.IsActive)
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">Active</MudChip>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.SwapHoriz"
+                                       Disabled="@(_busy || !node.IsUp)" OnClick="@(() => MoveAsync(node.Name))">Make active</MudButton>
+                        }
+                    </MudStack>
+                </MudPaper>
+            }
+        </MudStack>
+    }
+</MudPaper>
+
+<MudPaper Elevation="0">
+    <MudDataGrid T="ClusterServiceInfo" Items="_services" Loading="_loading" Dense="true" Hover="true"
+                 MultiSelection="true" SelectedItems="_selected" SelectedItemsChanged="OnSelectionChanged"
+                 SortMode="SortMode.Multiple" Filterable="true">
+        <Columns>
+            <SelectColumn T="ClusterServiceInfo" />
+            <PropertyColumn Property="s => s.Name" Title="Name" />
+            <PropertyColumn Property="s => s.State" Title="State">
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsOnline ? Color.Success : context.Item.State == "Offline" ? Color.Default : context.Item.IsPending ? Color.Warning : Color.Error)" Variant="Variant.Filled">@context.Item.State</MudChip>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="s => s.Node" Title="Node" />
+            <TemplateColumn Title="Logs" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.Article"
+                               Href="@($"/administration/cluster-services/logs/{context.Item.Name}")" Target="_blank">View logs</MudButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Title="Download log"
+                                   Href="@($"/administration/cluster-services/logs/{context.Item.Name}/download")" Target="_blank" />
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @if (context.Item.IsOnline)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error"                         Size="Size.Small" Title="Set Offline"
+                                                               Disabled="@(_busy || context.Item.IsPending)" OnClick="@(() => RunAsync(false, [context.Item]))" />
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success"                         Size="Size.Small" Title="Set Online"
+                                                               Disabled="@(_busy || context.Item.IsPending)" OnClick="@(() => RunAsync(true, [context.Item]))" />
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <NoRecordsContent>
+            <MudText Class="pa-4">No generic services found.</MudText>
+        </NoRecordsContent>
+    </MudDataGrid>
+</MudPaper>
+
+@code {
+    [Inject] private ClusterServiceManager Manager { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private IDialogService Dialogs { get; set; } = default!;
+
+    private ClusterGroupInfo? _group;
+
+    private List<ClusterServiceInfo> _services = [];
+    private HashSet<ClusterServiceInfo> _selected = [];
+    private bool _busy;
+    private bool _loading;
+    private string? _error;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    private void OnSelectionChanged(HashSet<ClusterServiceInfo> items) => _selected = items;
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            await LoadAsync();
+            _selected = [];
+        }
+        catch (Exception ex)
+        {
+            _error = $"Unable to list cluster resources of {Manager.Host}: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _group = await Manager.GetGroupAsync();
+        _services = await Manager.ListAsync();
+    }
+
+    // Keeps the grid refreshed while a blocking cluster operation runs, so the "pending" states are visible.
+    private async Task<T> RunWithPollingAsync<T>(Task<T> operation)
+    {
+        _busy = true;
+        StateHasChanged();
+        try
+        {
+            while (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
+            {
+                try
+                {
+                    await LoadAsync();
+                    StateHasChanged();
+                }
+                catch
+                {
+                    // Transient errors during a failover; the next poll retries.
+                }
+            }
+
+            return await operation;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task MoveAsync(string node)
+    {
+        var confirmed = await Dialogs.ShowMessageBoxAsync(
+            "Change active node",
+            $"Move \"{_group?.Name}\" and all its generic services to {node}? The services will be briefly interrupted.",
+            yesText: "Move", cancelText: "Cancel");
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var error = await RunWithPollingAsync(Manager.MoveToNodeAsync(node));
+        if (error is null)
+        {
+            Snackbar.Add($"\"{_group?.Name}\" is now active on {node}", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Unable to move to {node}: {error}", Severity.Error);
+        }
+
+        await RefreshAsync();
+    }
+
+    private async Task RunAsync(bool start, List<ClusterServiceInfo> targets)
+    {
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var action = start ? "Online" : "Offline";
+        try
+        {
+            var failures = await RunWithPollingAsync(Manager.SetStateAsync(targets.Select(t => t.Name), start));
+            if (failures.Count == 0)
+            {
+                Snackbar.Add($"{targets.Count} service(s): {action}", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"{failures.Count} service(s) failed to go {action}: {string.Join("; ", failures)}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unable to set services {action}: {ex.Message}", Severity.Error);
+        }
+
+        await RefreshAsync();
+    }
+}

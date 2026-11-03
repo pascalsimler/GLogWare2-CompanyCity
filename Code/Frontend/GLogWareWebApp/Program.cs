@@ -1,4 +1,5 @@
 using GLogWareWebApp.Components;
+using GLogWareWebApp.Services;
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore;
 using Gudel.GLogWare.Infrastructure;
@@ -65,6 +66,8 @@ builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 //builder.Services.AddSingleton<MessageBusService>();
 //builder.Services.AddHostedService<HostedMessageBusService>();
 builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddSingleton<ClusterServiceManager>();
+builder.Services.AddSingleton<GLogWareWebApp.Services.ServiceLogReader>();
 
 builder.Services.AddWindowsService(options =>
 {
@@ -82,6 +85,27 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapGet("/administration/cluster-services/logs/{name}/download", (string name, GLogWareWebApp.Services.ServiceLogReader reader) =>
+{
+    if (!reader.IsValid(name))
+    {
+        return Results.BadRequest("Invalid service name");
+    }
+
+    try
+    {
+        return Results.File(reader.OpenRead(name), "text/plain", $"{name}.{DateTime.Now:yyyy-MM-dd}.log");
+    }
+    catch (IOException)
+    {
+        return Results.NotFound("Log file not found");
+    }
+    catch (UnauthorizedAccessException)
+    {
+        return Results.Problem("Access to the log file is denied", statusCode: 403);
+    }
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

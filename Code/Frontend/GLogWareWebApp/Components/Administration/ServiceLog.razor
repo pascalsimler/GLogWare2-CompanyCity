@@ -1,0 +1,154 @@
+@page "/administration/cluster-services/logs/{Name}"
+@using GLogWareWebApp.Services
+@implements IAsyncDisposable
+@inject ServiceLogReader Reader
+@inject IJSRuntime JS
+
+<PageTitle>Log @Name</PageTitle>
+
+<div class="page-heading">
+    <div>
+        <MudText Typo="Typo.h4">@Name</MudText>
+        <MudText Color="Color.Secondary">@_path</MudText>
+    </div>
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+        <MudSwitch T="bool" @bind-Value="_follow" Color="Color.Primary" Label="Follow" />
+        <MudSwitch T="bool" @bind-Value="_paused" Color="Color.Warning" Label="Pause" />
+        <MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
+            <MudIconButton Icon="@Icons.Material.Filled.ZoomOut" Title="Zoom out" Disabled="@(_fontSize <= MinFont)" OnClick="@(() => Zoom(-1))" />
+            <MudText Style="min-width: 3.5rem; text-align: center;">@_fontSize px</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.ZoomIn" Title="Zoom in" Disabled="@(_fontSize >= MaxFont)" OnClick="@(() => Zoom(1))" />
+        </MudStack>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Clear" OnClick="Clear">Clear</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Download"
+                   Href="@($"/administration/cluster-services/logs/{Name}/download")" Disabled="@(_path is null)">Download</MudButton>
+    </MudStack>
+</div>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3">@_error</MudAlert>
+}
+
+<pre id="service-log" style="height: 75vh; overflow: auto; margin: 0; padding: 8px; background: #1e1e1e; color: #d4d4d4; font-size: @(_fontSize)px; white-space: pre;">@_text</pre>
+
+@code {
+    private const int MaxChars = 400_000;
+    private const int MinFont = 8;
+    private const int MaxFont = 32;
+
+    private int _fontSize = 12;
+
+    private void Zoom(int step) => _fontSize = Math.Clamp(_fontSize + step * 2, MinFont, MaxFont);
+
+    [Parameter] public string Name { get; set; } = "";
+
+    private readonly CancellationTokenSource _cts = new();
+    private string _text = "";
+    private string? _path;
+    private string? _error;
+    private string? _day;
+    private long _offset = -1;
+    private bool _follow = true;
+    private bool _paused;
+
+    protected override void OnParametersSet()
+    {
+        if (Reader.IsValid(Name))
+        {
+            _path = Reader.GetPath(Name);
+        }
+        else
+        {
+            _error = "Invalid service name.";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _error is null)
+        {
+            await PollAsync();
+        }
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        do
+        {
+            if (_paused)
+            {
+                continue;
+            }
+
+            try
+            {
+                var chunk = await Reader.ReadAsync(Name, _offset, _day, _cts.Token);
+                _offset = chunk.Offset;
+                _day = chunk.Day;
+                _path = Reader.GetPath(Name);
+                _error = null;
+                if (chunk.Reset)
+                {
+                    _text = "";
+                }
+
+                if (chunk.Text.Length > 0 || chunk.Reset)
+                {
+                    _text += chunk.Text;
+                    if (_text.Length > MaxChars)
+                    {
+                        var cut = _text.IndexOf('\n', _text.Length - MaxChars);
+                        _text = cut < 0 ? _text[^MaxChars..] : _text[(cut + 1)..];
+                    }
+
+                    await InvokeAsync(StateHasChanged);
+                    if (_follow)
+                    {
+                        await JS.InvokeVoidAsync("eval", "(function(){var e=document.getElementById('service-log');if(e){e.scrollTop=e.scrollHeight;}})()");
+                    }
+                }
+                else if (_error is not null)
+                {
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (JSDisconnectedException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _error = $"Unable to read {_path}: {ex.Message}";
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        while (await WaitAsync(timer));
+    }
+
+    private async Task<bool> WaitAsync(PeriodicTimer timer)
+    {
+        try
+        {
+            return await timer.WaitForNextTickAsync(_cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
+
+    private void Clear() => _text = "";
+
+    public ValueTask DisposeAsync()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}
