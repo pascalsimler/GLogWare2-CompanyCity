@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "BridgeManager-OP7100",
+    "Description": "Bridge Manager for OP7100BR",
+    "ExecutablePath": "",
+    "ExeFileName": "BridgeManager.exe",
+    "EnvironmentVariables": "OP=OP7100BR",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 1
+  },
+  {
+    "Name": "JobManager",
+    "Description": "Job orchestration over the complete plan",
+    "ExecutablePath": "",
+    "ExeFileName": "JobManager.exe",
+    "EnvironmentVariables": "",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 2
+  }
+]

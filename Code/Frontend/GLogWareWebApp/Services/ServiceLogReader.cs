@@ -1,47 +1,40 @@
+using Gudel.GLogWare.Configuration;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace GLogWareWebApp.Services;
 
-public sealed record LogChunk(string Text, long Offset, string Day, bool Reset);
+public sealed record LogChunk(string Text, long Offset, DateOnly Day, bool Reset);
 
-/// <summary>
-/// Reads the daily log file of a generic service: [LogRoot]\[Project]\Log\Appli\[Service].[dd].log
-/// (e.g. J01-QMng -> \\company.com\shares\GLogWare\J01\Log\Appli\QMng.03.log).
-/// </summary>
-public sealed partial class ServiceLogReader(IConfiguration configuration, ClusterServiceManager cluster)
+public class ServiceLogReader
 {
     private const long InitialTailBytes = 64 * 1024;
     private const long MaxChunkBytes = 1024 * 1024;
 
-    [GeneratedRegex(@"^[A-Za-z0-9]+-[A-Za-z0-9_]+$")]
-    private static partial Regex NamePattern();
-
-    private string LogRoot => configuration["ClusterServices:LogRoot"] ?? @"\\company.com\shares\GLogWare";
-
-    public static string Today => DateTime.Now.ToString("dd");
-
-    public bool IsValid(string name) =>
-        NamePattern().IsMatch(name) && name.StartsWith(cluster.Prefix, StringComparison.OrdinalIgnoreCase);
-
-    public string GetPath(string name, string? day = null)
+    public string GetPath(string name, DateOnly? day = null)
     {
-        if (!IsValid(name))
+        string projectRootPath = ConfigurationHelper.GetProjectRootPath();
+        int index = name.IndexOf("-");
+        if (index > -1)
         {
-            throw new ArgumentException("Invalid service name", nameof(name));
+            name = name.Substring(index+1);
         }
+        string logfilePath = ConfigurationHelper.GetLogFilePath(projectRootPath, name);
 
-        var split = name.IndexOf('-');
-        return Path.Combine(LogRoot, name[..split], "Log", "Appli", $"{name[(split + 1)..]}.{day ?? Today}.log");
+        if (day is null)
+        {
+            day = DateOnly.FromDateTime(DateTime.Now);
+        }
+        logfilePath = logfilePath.Replace($".log", $"{day:yyyyMMdd}.log");
+        return logfilePath;
     }
 
     public FileStream OpenRead(string name) =>
         new(GetPath(name), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
     /// <summary>Reads what was appended since <paramref name="offset"/>; a negative offset means "start with the last lines".</summary>
-    public async Task<LogChunk> ReadAsync(string name, long offset, string? day, CancellationToken ct)
+    public async Task<LogChunk> ReadAsync(string name, long offset, DateOnly? day, CancellationToken ct)
     {
-        var today = Today;
+        var today = DateOnly.FromDateTime(DateTime.Now);
         var reset = day is not null && day != today;
         if (reset)
         {

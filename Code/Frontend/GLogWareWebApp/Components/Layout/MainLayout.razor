@@ -1,13 +1,14 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
 @inject NavigationManager Navigation
+@inject Blazored.LocalStorage.ILocalStorageService Storage
 
 <MudThemeProvider Theme="_current.Theme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="app-shell @_current.CssClass @(_navigationCollapsed ? "nav-collapsed" : null) @(_mobileNavigationOpen ? "nav-open" : null)" style="@_current.ShellStyle">
+<div class="app-shell @_current.CssClass @(_isDarkMode ? "app-dark" : null) @(_navigationCollapsed ? "nav-collapsed" : null) @(_mobileNavigationOpen ? "nav-open" : null)" style="@_current.ShellStyle">
     @if (_mobileNavigationOpen)
     {
         <div class="nav-backdrop" @onclick="CloseMobileNavigation"></div>
@@ -42,7 +43,7 @@
             </div>
             <div class="title-actions">
                 <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                               Color="Color.Inherit" OnClick="@(() => _isDarkMode = !_isDarkMode)"
+                               Color="Color.Inherit" OnClick="ToggleDarkModeAsync"
                                aria-label="@(_isDarkMode ? "Switch to light mode" : "Switch to dark mode")" />
                 <MudMenu Icon="@Icons.Material.Filled.Palette" Color="Color.Inherit" AriaLabel="Select theme"
                          AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
@@ -50,7 +51,7 @@
                     {
                         var selected = option == _current;
                         <MudMenuItem Icon="@(selected ? Icons.Material.Filled.Check : null)"
-                                     OnClick="@(() => _current = option)">@option.Name</MudMenuItem>
+                                     OnClick="@(() => SelectThemeAsync(option))">@option.Name</MudMenuItem>
                     }
                 </MudMenu>
                 <MudBadge Content="3" Color="Color.Error" Overlap="true">
@@ -177,9 +178,214 @@
        "--shell-section:#8396a8;--shell-text:#e5e9ed;--shell-hover:#2b4057;--shell-active:#0070f2;",
        "theme-sap-fiori");
 
-    private readonly ThemeOption[] _themes = [FlowOps, SapFiori];
+    // Sahara: sand/gold desert palette
+    private static readonly ThemeOption Sahara = new("Sahara", new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#b8741a",
+            Secondary = "#8a5a2b",
+            Tertiary = "#c2410c",
+            Info = "#b8741a",
+            Success = "#4d7c0f",
+            Warning = "#d97706",
+            Error = "#b91c1c",
+            Background = "#f6e3a1",
+            Surface = "#fbefc2",
+            AppbarBackground = "#8a5a2b",
+            TextPrimary = "#3b2a10",
+            TextSecondary = "#6b5128",
+            LinesDefault = "#d9bd6a"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#e6a940",
+            Secondary = "#c9a36b",
+            Tertiary = "#f08a4b",
+            Background = "#2b2110",
+            Surface = "#3a2d16",
+            AppbarBackground = "#5a3d17",
+            TextPrimary = "#f6e3a1",
+            LinesDefault = "#6b5128"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "6px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"] }
+        }
+    }, "--shell-bg:#e8c766;--shell-border:#c9a23f;--shell-brand:#7a4a10;--shell-muted:#6b5128;" +
+       "--shell-section:#7a5f2a;--shell-text:#3b2a10;--shell-hover:#f0d581;--shell-active:#b8741a;",
+       "theme-sahara");
+
+    // Güdel: corporate look of gudel.com - white, Güdel red (#bf1128) accent, slate grey text
+    private static readonly ThemeOption Gudel = new("Güdel", new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#bf1128",
+            Secondary = "#454d5a",
+            Tertiary = "#7b8594",
+            Info = "#454d5a",
+            Success = "#2e7d32",
+            Warning = "#e08a00",
+            Error = "#bf1128",
+            Background = "#f3f4f6",
+            Surface = "#ffffff",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#454d5a",
+            TextPrimary = "#232930",
+            TextSecondary = "#454d5a",
+            LinesDefault = "#dde0e5"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#e8364c",
+            Secondary = "#a3acb9",
+            Tertiary = "#7b8594",
+            Background = "#1a1e24",
+            Surface = "#242a32",
+            AppbarBackground = "#242a32",
+            TextPrimary = "#f3f4f6",
+            LinesDefault = "#3a424d"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "2px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["Arial", "Helvetica", "sans-serif"] }
+        }
+    }, "--shell-bg:#ffffff;--shell-border:#dde0e5;--shell-brand:#bf1128;--shell-muted:#6b7480;" +
+       "--shell-section:#7b8594;--shell-text:#454d5a;--shell-hover:#f3f4f6;--shell-active:#bf1128;",
+       "theme-gudel");
+
+    // Amazon: jungle greens
+    private static readonly ThemeOption Amazon = new("Amazon", new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#2e7d32",
+            Secondary = "#558b2f",
+            Tertiary = "#00796b",
+            Info = "#00796b",
+            Success = "#1b5e20",
+            Warning = "#f9a825",
+            Error = "#c62828",
+            Background = "#cfe8c4",
+            Surface = "#e3f2dc",
+            AppbarBackground = "#1b5e20",
+            TextPrimary = "#14301a",
+            TextSecondary = "#2f5136",
+            LinesDefault = "#a5cc98"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#66bb6a",
+            Secondary = "#9ccc65",
+            Tertiary = "#4db6ac",
+            Background = "#0f1f12",
+            Surface = "#162a1a",
+            AppbarBackground = "#12301a",
+            TextPrimary = "#e3f2dc",
+            LinesDefault = "#2f5136"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "8px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"] }
+        }
+    }, "--shell-bg:#a9d49b;--shell-border:#82b873;--shell-brand:#1b5e20;--shell-muted:#2f5136;" +
+       "--shell-section:#3d6b44;--shell-text:#14301a;--shell-hover:#bfe1b3;--shell-active:#2e7d32;",
+       "theme-amazon");
+
+    // Ocean: sea blues
+    private static readonly ThemeOption Ocean = new("Ocean", new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#0277bd",
+            Secondary = "#00838f",
+            Tertiary = "#3949ab",
+            Info = "#0277bd",
+            Success = "#00897b",
+            Warning = "#f9a825",
+            Error = "#d32f2f",
+            Background = "#bfdff2",
+            Surface = "#dceefa",
+            AppbarBackground = "#01579b",
+            TextPrimary = "#0b2942",
+            TextSecondary = "#27506f",
+            LinesDefault = "#9cc7e3"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#4fc3f7",
+            Secondary = "#4dd0e1",
+            Tertiary = "#7986cb",
+            Background = "#08182a",
+            Surface = "#0e2540",
+            AppbarBackground = "#0a2a4a",
+            TextPrimary = "#dcefff",
+            LinesDefault = "#27506f"
+        },
+        LayoutProperties = new LayoutProperties { DefaultBorderRadius = "8px" },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = ["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"] }
+        }
+    }, "--shell-bg:#9fcbe8;--shell-border:#78b0d6;--shell-brand:#01579b;--shell-muted:#27506f;" +
+       "--shell-section:#3a6785;--shell-text:#0b2942;--shell-hover:#b8dbf1;--shell-active:#0277bd;",
+       "theme-ocean");
+
+    private readonly ThemeOption[] _themes = [FlowOps, SapFiori, Sahara, Gudel, Amazon, Ocean];
     private ThemeOption _current = FlowOps;
     private bool _isDarkMode;
+    private bool _preferencesLoaded;
+
+    // Persisted in localStorage so pages opened in a new tab keep the selected theme
+    private async Task SelectThemeAsync(ThemeOption option)
+    {
+        _current = option;
+        await SavePreferencesAsync();
+    }
+
+    private async Task ToggleDarkModeAsync()
+    {
+        _isDarkMode = !_isDarkMode;
+        await SavePreferencesAsync();
+    }
+
+    private async Task SavePreferencesAsync()
+    {
+        if (_preferencesLoaded)
+        {
+            await Storage.SetItemAsStringAsync("flowops.theme", _current.Name);
+            await Storage.SetItemAsync("flowops.dark", _isDarkMode);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            var name = await Storage.GetItemAsStringAsync("flowops.theme");
+            if (await Storage.ContainKeyAsync("flowops.dark"))
+            {
+                _isDarkMode = await Storage.GetItemAsync<bool>("flowops.dark");
+            }
+            _current = _themes.FirstOrDefault(t => t.Name == name) ?? _current;
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or System.Text.Json.JsonException)
+        {
+            // Disconnected circuit or unreadable stored data: keep defaults
+        }
+
+        _preferencesLoaded = true;
+        StateHasChanged();
+    }
 
     private void ToggleNavigation()
     {

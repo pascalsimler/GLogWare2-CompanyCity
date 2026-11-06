@@ -32,6 +32,7 @@
   <Folder Name="/Config/">
     <File Path="Config/config.json" />
     <File Path="Config/readme.txt" />
+    <File Path="Config/services.json" />
   </Folder>
   <Folder Name="/Config/Dev/" />
   <Folder Name="/Config/Dev/passim/">

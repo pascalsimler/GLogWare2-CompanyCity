@@ -1,4 +1,4 @@
-@page "/administration/cluster-services/logs/{Name}"
+@page "/administration/logs/{Name}"
 @using GLogWareWebApp.Services
 @implements IAsyncDisposable
 @inject ServiceLogReader Reader
@@ -12,6 +12,9 @@
         <MudText Color="Color.Secondary">@_path</MudText>
     </div>
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+        <MudTextField T="string" @bind-Value="_filter" Immediate="true" DebounceInterval="200" Clearable="true"
+                      Placeholder="Show only lines containing..." Variant="Variant.Outlined" Margin="Margin.Dense"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterAlt" Style="min-width: 18rem;" />
         <MudSwitch T="bool" @bind-Value="_follow" Color="Color.Primary" Label="Follow" />
         <MudSwitch T="bool" @bind-Value="_paused" Color="Color.Warning" Label="Pause" />
         <MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
@@ -21,7 +24,7 @@
         </MudStack>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Clear" OnClick="Clear">Clear</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Download"
-                   Href="@($"/administration/cluster-services/logs/{Name}/download")" Disabled="@(_path is null)">Download</MudButton>
+                   Href="@($"/administration/logs/{Name}/download")" Disabled="@(_path is null)">Download</MudButton>
     </MudStack>
 </div>
 
@@ -30,7 +33,7 @@
     <MudAlert Severity="Severity.Error" Class="mb-3">@_error</MudAlert>
 }
 
-<pre id="service-log" style="height: 75vh; overflow: auto; margin: 0; padding: 8px; background: #1e1e1e; color: #d4d4d4; font-size: @(_fontSize)px; white-space: pre;">@_text</pre>
+<pre id="service-log" style="height: 75vh; overflow: auto; margin: 0; padding: 8px; background: #1e1e1e; color: #d4d4d4; font-size: @(_fontSize)px; white-space: pre;">@DisplayText</pre>
 
 @code {
     private const int MaxChars = 400_000;
@@ -47,21 +50,27 @@
     private string _text = "";
     private string? _path;
     private string? _error;
-    private string? _day;
+    private DateOnly? _day;
     private long _offset = -1;
     private bool _follow = true;
     private bool _paused;
+    private string? _filter;
+
+    // Supports \xNN escapes so control characters (e.g. STX = \x02) can be searched
+    private string? FilterPattern => string.IsNullOrEmpty(_filter)
+        ? null
+        : System.Text.RegularExpressions.Regex.Replace(_filter, @"\\x([0-9a-fA-F]{2})",
+            m => ((char)Convert.ToInt32(m.Groups[1].Value, 16)).ToString());
+
+    private string DisplayText => FilterPattern is not { } pattern
+        ? _text
+        : string.Join('\n', _text
+            .Split('\n')
+            .Where(l => l.Contains(pattern, StringComparison.OrdinalIgnoreCase)));
 
     protected override void OnParametersSet()
     {
-        if (Reader.IsValid(Name))
-        {
-            _path = Reader.GetPath(Name);
-        }
-        else
-        {
-            _error = "Invalid service name.";
-        }
+        _path = Reader.GetPath(Name);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

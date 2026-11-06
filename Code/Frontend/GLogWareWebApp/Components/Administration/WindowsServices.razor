@@ -5,14 +5,18 @@
 
 <div class="page-heading">
     <div>
-        <MudText Typo="Typo.h4">Windows services</MudText>
-        <MudText Color="Color.Secondary">Services whose name starts with "@ServicePrefix"</MudText>
+        <MudText Typo="Typo.h4">GLogWare services</MudText>
+        <MudText Color="Color.Secondary">All Windows Services needed to run the [Company/City] plant</MudText>
     </div>
     <MudStack Row="true" Spacing="2">
         <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PlayArrow"
-                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(true, _selected.ToList()))">Start selected</MudButton>
+                   Disabled="@(_busy || Manager.Selected.Count == 0)" OnClick="@(() => RunAsync(true, Manager.Selected.ToList()))">Start selected</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
-                   Disabled="@(_busy || _selected.Count == 0)" OnClick="@(() => RunAsync(false, _selected.ToList()))">Stop selected</MudButton>
+                   Disabled="@(_busy || Manager.Selected.Count == 0)" OnClick="@(() => RunAsync(false, Manager.Selected.ToList()))">Stop selected</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Download"
+                   Disabled="@(_busy || !Manager.Selected.Any(s => !s.Installed))" OnClick="@(() => InstallAsync(true, Manager.Selected.Where(s => !s.Installed).ToList()))">Install selected</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Warning" StartIcon="@Icons.Material.Filled.DeleteOutline"
+                   Disabled="@(_busy || !Manager.Selected.Any(s => s.Installed))" OnClick="@(() => InstallAsync(false, Manager.Selected.Where(s => s.Installed).ToList()))">Uninstall selected</MudButton>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
                    Disabled="_busy" OnClick="RefreshAsync">Refresh</MudButton>
     </MudStack>
@@ -24,29 +28,49 @@
 }
 
 <MudPaper Elevation="0">
-    <MudDataGrid T="WindowsServiceRow" Items="_services" Loading="_busy" Dense="true" Hover="true"
-                 MultiSelection="true" SelectedItems="_selected" SelectedItemsChanged="OnSelectionChanged"
+    <MudDataGrid T="WindowsService" Items="Manager.Services" Loading="_busy" Dense="true" Hover="true"
+                 MultiSelection="true" SelectedItems="Manager.Selected" SelectedItemsChanged="OnSelectionChanged"
                  SortMode="SortMode.Multiple" Filterable="true">
         <Columns>
-            <SelectColumn T="WindowsServiceRow" />
+            <SelectColumn T="WindowsService" />
             <PropertyColumn Property="s => s.Name" Title="Name" />
-            <PropertyColumn Property="s => s.Status" Title="Status">
+            <PropertyColumn Property="s => s.StatusText" Title="Status">
                 <CellTemplate>
-                    <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsRunning ? Color.Success : context.Item.Status == "Stopped" ? Color.Error : Color.Default)" Variant="Variant.Filled">@context.Item.Status</MudChip>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Item.StatusColor)" Variant="Variant.Filled">@context.Item.StatusText</MudChip>
                 </CellTemplate>
             </PropertyColumn>
-            <PropertyColumn Property="s => s.DisplayName" Title="Display name" />
+            <PropertyColumn Property="s => s.ProcessId" Title="PID" CellStyle="text-align: right;" HeaderStyle="text-align: right;" />
+            <PropertyColumn Property="s => s.EnvVariables" Title="Variables" />
+            <PropertyColumn Property="s => s.Description" Title="Description" />
+            <TemplateColumn Title="Logs" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.Article"
+                               Href="@($"/administration/logs/{context.Item.Name}")" Target="_blank">View logs</MudButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Title="Download log"
+                                   Href="@($"/administration/logs/{context.Item.Name}/download")" Target="_blank" />
+                </CellTemplate>
+            </TemplateColumn>
             <TemplateColumn Title="Actions" Sortable="false" Filterable="false">
                 <CellTemplate>
-                    @if (context.Item.IsRunning)
+                    @if (!context.Item.Installed)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" Size="Size.Small"
-                                       Disabled="_busy" OnClick="@(() => RunAsync(false, [context.Item]))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" Size="Size.Small"
+                                       title="Install" Disabled="_busy" OnClick="@(() => InstallAsync(true, [context.Item]))" />
                     }
                     else
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Size="Size.Small"
-                                       Disabled="_busy" OnClick="@(() => RunAsync(true, [context.Item]))" />
+                        @if (context.Item.IsRunning)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" Size="Size.Small"
+                                           Disabled="_busy" OnClick="@(() => RunAsync(false, [context.Item]))" />
+                        }
+                        else
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Size="Size.Small"
+                                           Disabled="_busy" OnClick="@(() => RunAsync(true, [context.Item]))" />
+                        }
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Warning" Size="Size.Small"
+                                       title="Uninstall" Disabled="_busy" OnClick="@(() => InstallAsync(false, [context.Item]))" />
                     }
                 </CellTemplate>
             </TemplateColumn>
@@ -58,24 +82,21 @@
 </MudPaper>
 
 @code {
-    private const string ServicePrefix = "J01-";
     private static readonly TimeSpan ServiceTimeout = TimeSpan.FromSeconds(30);
 
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private WindowsServiceManager Manager { get; set; } = default!;
 
-    private sealed record WindowsServiceRow(string Name, string DisplayName, string Status, string StartType)
-    {
-        public bool IsRunning => Status is "Running" or "StartPending";
-    }
-
-    private List<WindowsServiceRow> _services = [];
-    private HashSet<WindowsServiceRow> _selected = [];
     private bool _busy;
     private string? _error;
 
-    protected override Task OnInitializedAsync() => RefreshAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await Manager.LoadFromConfigurationFileAsync();
+        await RefreshAsync();
+    }
 
-    private void OnSelectionChanged(HashSet<WindowsServiceRow> items) => _selected = items;
+    private void OnSelectionChanged(HashSet<WindowsService> items) => Manager.Selected = items;
 
     private async Task RefreshAsync()
     {
@@ -83,8 +104,8 @@
         _error = null;
         try
         {
-            _services = await Task.Run(LoadServices);
-            _selected = [];
+            await Task.Run(() => Manager.Refresh());
+            Manager.Selected = [];
         }
         catch (Exception ex)
         {
@@ -96,25 +117,7 @@
         }
     }
 
-    private static List<WindowsServiceRow> LoadServices()
-    {
-        var services = ServiceController.GetServices()
-            .Where(s => s.ServiceName.StartsWith(ServicePrefix, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        try
-        {
-            return services
-                .Select(s => new WindowsServiceRow(s.ServiceName, s.DisplayName, s.Status.ToString(), s.StartType.ToString()))
-                .OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
-        finally
-        {
-            services.ForEach(s => s.Dispose());
-        }
-    }
-
-    private async Task RunAsync(bool start, List<WindowsServiceRow> targets)
+    private async Task InstallAsync(bool install, List<WindowsService> targets)
     {
         if (targets.Count == 0)
         {
@@ -122,9 +125,9 @@
         }
 
         _busy = true;
-        var action = start ? "start" : "stop";
+        var action = install ? "install" : "uninstall";
         var failures = await Task.Run(() => targets
-            .Select(t => ChangeState(t.Name, start))
+            .Select(t => install ? Manager.InstallService(t.Name) : Manager.UninstallService(t.Name))
             .Where(e => e is not null)
             .ToList());
 
@@ -140,27 +143,42 @@
         await RefreshAsync();
     }
 
-    private static string? ChangeState(string name, bool start)
+    private async Task RunAsync(bool start, List<WindowsService> targets)
     {
-        try
+        if (targets.Count == 0)
         {
-            using var controller = new ServiceController(name);
-            if (start && controller.Status == ServiceControllerStatus.Stopped)
-            {
-                controller.Start();
-                controller.WaitForStatus(ServiceControllerStatus.Running, ServiceTimeout);
-            }
-            else if (!start && controller.Status == ServiceControllerStatus.Running)
-            {
-                controller.Stop();
-                controller.WaitForStatus(ServiceControllerStatus.Stopped, ServiceTimeout);
-            }
+            return;
+        }
 
-            return null;
-        }
-        catch (Exception ex)
+        targets = targets
+            .Where(t => t.Installed && (start
+                ? t.Status != System.ServiceProcess.ServiceControllerStatus.Running
+                : t.Status != System.ServiceProcess.ServiceControllerStatus.Stopped))
+            .ToList();
+        if (targets.Count == 0)
         {
-            return $"{name}: {(ex.InnerException ?? ex).Message}";
+            return;
         }
+
+        _busy = true;
+        var action = start ? "start" : "stop";
+        var ordered = start
+            ? targets.OrderBy(t => t.SortOrder).ToList()
+            : targets.OrderByDescending(t => t.SortOrder).ToList();
+        var failures = await Task.Run(() => ordered
+            .Select(t => Manager.ChangeState(t.Name, start, () => InvokeAsync(StateHasChanged)))
+            .Where(e => e is not null)
+            .ToList());
+
+        if (failures.Count == 0)
+        {
+            Snackbar.Add($"{targets.Count} service(s): {action} OK", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"{failures.Count} service(s) failed to {action}: {string.Join("; ", failures)}", Severity.Error);
+        }
+
+        await RefreshAsync();
     }
 }

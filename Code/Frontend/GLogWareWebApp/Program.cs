@@ -57,6 +57,7 @@ logger.Information($"trigram=[{trigram}]");
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+Blazored.LocalStorage.ServiceCollectionExtensions.AddBlazoredLocalStorage(builder.Services);
 builder.Services.AddMudServices();
 builder.Services.AddMudTranslations();
 
@@ -67,7 +68,8 @@ builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 //builder.Services.AddHostedService<HostedMessageBusService>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<ClusterServiceManager>();
-builder.Services.AddSingleton<GLogWareWebApp.Services.ServiceLogReader>();
+builder.Services.AddSingleton<WindowsServiceManager>();
+builder.Services.AddSingleton<ServiceLogReader>();
 
 builder.Services.AddWindowsService(options =>
 {
@@ -85,13 +87,8 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapGet("/administration/cluster-services/logs/{name}/download", (string name, GLogWareWebApp.Services.ServiceLogReader reader) =>
+app.MapGet("/administration/logs/{name}/download", (string name, ServiceLogReader reader) =>
 {
-    if (!reader.IsValid(name))
-    {
-        return Results.BadRequest("Invalid service name");
-    }
-
     try
     {
         return Results.File(reader.OpenRead(name), "text/plain", $"{name}.{DateTime.Now:yyyy-MM-dd}.log");

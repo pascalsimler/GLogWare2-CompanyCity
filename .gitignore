@@ -7,7 +7,7 @@
 *.tar
 obj
 bin
-Config/config.json
+Config/*.json
 Runtime/*
 !Runtime/*.ps1
 Runtime/*/

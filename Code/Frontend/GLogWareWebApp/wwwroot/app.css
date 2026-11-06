@@ -223,4 +223,59 @@ h1:focus { outline: none; }
 
 .theme-sap-fiori .mud-table-head th, .theme-sap-fiori .mud-table-head .mud-table-cell,
 .theme-sap-fiori .grouped-header-grid .group-header-row th { background-color: #0a6ed1; color: #fff; }
+.theme-sap-fiori .navigation-panel { --shell-bg: #dceaf9; --shell-border: #b3cfee; --shell-brand: #0a6ed1; --shell-muted: #556b82; --shell-section: #5b738b; --shell-text: #1d2d3e; --shell-hover: #c5dcf4; background: #dceaf9; color: #1d2d3e; }
+.theme-sap-fiori .brand-copy strong, .theme-sap-fiori .operations-nav .mud-nav-link:hover { color: #1d2d3e; }
+.theme-sap-fiori .mud-table, .theme-sap-fiori .mud-data-grid, .theme-sap-fiori .mud-table-container,
+.theme-sap-fiori .mud-table-body .mud-table-cell { background-color: #eaf3fc; }
+.theme-sap-fiori .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: #d6e7f8; }
+.theme-sahara .navigation-panel, .theme-sahara .title-bar { color: #3b2a10; }
+.theme-sahara .brand-copy strong, .theme-sahara .operations-nav .mud-nav-link:hover { color: #3b2a10; }
+.theme-sahara .operations-nav .mud-nav-link.active:not(.mud-nav-link-disabled) { color: #fff; }
+.theme-sahara .mud-table-head th, .theme-sahara .mud-table-head .mud-table-cell,
+.theme-sahara .grouped-header-grid .group-header-row th { background-color: #b8741a; color: #fff; }
+.theme-sahara .mud-table-head th *, .theme-sahara .mud-table-head .mud-table-cell * { color: inherit; }
+.theme-sahara .mud-table, .theme-sahara .mud-data-grid, .theme-sahara .mud-table-container,
+.theme-sahara .mud-table-body .mud-table-cell { background-color: #fbefc2; }
+.theme-sahara .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: #f3dc8a; }
+
+.theme-gudel .navigation-panel, .theme-gudel .title-bar { color: #454d5a; border-right: 1px solid #dde0e5; }
+.theme-gudel .title-bar { border-right: 0; border-bottom: 3px solid #bf1128; }
+.theme-gudel .brand-copy strong, .theme-gudel .operations-nav .mud-nav-link:hover { color: #232930; }
+.theme-gudel .operations-nav .mud-nav-link { border-radius: 2px; }
+.theme-gudel .operations-nav .mud-nav-link.active:not(.mud-nav-link-disabled) { color: #fff; }
+.theme-gudel .mud-table-head th, .theme-gudel .mud-table-head .mud-table-cell,
+.theme-gudel .grouped-header-grid .group-header-row th { background-color: #454d5a; color: #fff; }
+.theme-gudel .mud-table-head th *, .theme-gudel .mud-table-head .mud-table-cell * { color: inherit; }
+.theme-gudel .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: #fbe9ec; }
+
+.theme-amazon .navigation-panel, .theme-amazon .title-bar { color: #14301a; }
+.theme-amazon .brand-copy strong, .theme-amazon .operations-nav .mud-nav-link:hover { color: #14301a; }
+.theme-amazon .operations-nav .mud-nav-link.active:not(.mud-nav-link-disabled) { color: #fff; }
+.theme-amazon .mud-table-head th, .theme-amazon .mud-table-head .mud-table-cell,
+.theme-amazon .grouped-header-grid .group-header-row th { background-color: #2e7d32; color: #fff; }
+.theme-amazon .mud-table-head th *, .theme-amazon .mud-table-head .mud-table-cell * { color: inherit; }
+.theme-amazon .mud-table, .theme-amazon .mud-data-grid, .theme-amazon .mud-table-container,
+.theme-amazon .mud-table-body .mud-table-cell { background-color: #e3f2dc; }
+.theme-amazon .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: #c9e6bd; }
+
+.theme-ocean .navigation-panel, .theme-ocean .title-bar { color: #0b2942; }
+.theme-ocean .brand-copy strong, .theme-ocean .operations-nav .mud-nav-link:hover { color: #0b2942; }
+.theme-ocean .operations-nav .mud-nav-link.active:not(.mud-nav-link-disabled) { color: #fff; }
+.theme-ocean .mud-table-head th, .theme-ocean .mud-table-head .mud-table-cell,
+.theme-ocean .grouped-header-grid .group-header-row th { background-color: #0277bd; color: #fff; }
+.theme-ocean .mud-table-head th *, .theme-ocean .mud-table-head .mud-table-cell * { color: inherit; }
+.theme-ocean .mud-table, .theme-ocean .mud-data-grid, .theme-ocean .mud-table-container,
+.theme-ocean .mud-table-body .mud-table-cell { background-color: #dcefff; }
+.theme-ocean .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: #c3e0f5; }
+
+/* Dark mode: undo the light grid backgrounds so the light palette text stays readable */
+.app-dark.theme-sap-fiori .mud-table, .app-dark.theme-sap-fiori .mud-data-grid, .app-dark.theme-sap-fiori .mud-table-container, .app-dark.theme-sap-fiori .mud-table-body .mud-table-cell,
+.app-dark.theme-sahara .mud-table, .app-dark.theme-sahara .mud-data-grid, .app-dark.theme-sahara .mud-table-container, .app-dark.theme-sahara .mud-table-body .mud-table-cell,
+.app-dark.theme-amazon .mud-table, .app-dark.theme-amazon .mud-data-grid, .app-dark.theme-amazon .mud-table-container, .app-dark.theme-amazon .mud-table-body .mud-table-cell,
+.app-dark.theme-ocean .mud-table, .app-dark.theme-ocean .mud-data-grid, .app-dark.theme-ocean .mud-table-container, .app-dark.theme-ocean .mud-table-body .mud-table-cell { background-color: var(--mud-palette-surface); color: var(--mud-palette-text-primary); }
+.app-dark.theme-sap-fiori .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell,
+.app-dark.theme-sahara .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell,
+.app-dark.theme-amazon .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell,
+.app-dark.theme-ocean .mud-table-hover .mud-table-body .mud-table-row:hover .mud-table-cell { background-color: var(--mud-palette-action-default-hover, rgba(255,255,255,.08)); }
+
 .theme-sap-fiori .mud-table-head th *, .theme-sap-fiori .mud-table-head .mud-table-cell * { color: inherit; }
