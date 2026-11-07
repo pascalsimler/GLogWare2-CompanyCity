@@ -19,7 +19,7 @@ images=(
   "conveyormanager:$pathBackend/ConveyorManager"
   "conveyorsimulator:$pathBackend/ConveyorSimulator"
   "simulatorwebapp:$pathFrontend/SimulatorWebApp"
-  "glogwarewebapp:$pathFrontend/GLogWareWebApp/GLogWareWebApp"
+  "glogwarewebapp:$pathFrontend/GLogWareWebApp"
 )
 
 clear

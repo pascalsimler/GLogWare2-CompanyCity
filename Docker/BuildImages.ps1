@@ -15,7 +15,7 @@ $images = @(
     [tuple]::Create("conveyormanager", "$pathBackend\ConveyorManager"), 
     [tuple]::Create("conveyorsimulator", "$pathBackend\ConveyorSimulator"), 
     [tuple]::Create("simulatorwebapp", "$pathFrontend\SimulatorWebApp"), 
-    [tuple]::Create("glogwarewebapp", "$pathFrontend\GLogWareWebApp\GLogWareWebApp")
+    [tuple]::Create("glogwarewebapp", "$pathFrontend\GLogWareWebApp")
 )
 
 cls
