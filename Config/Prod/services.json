@@ -1,22 +1,112 @@
 [
   {
-    "Name": "BridgeManager-OP7100",
-    "Description": "Bridge Manager for OP7100BR",
-    "ExecutablePath": "",
-    "ExeFileName": "BridgeManager.exe",
-    "EnvironmentVariables": "OP=OP7100BR",
+    "Name": "CCI-BridgeSimulator-OP7100BR",
+    "Description": "Bridge Simulator for OP7100BR",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\BridgeSimulator",
+    "ExeFileName": "Gudel.GLogWare.Services.BridgeSimulator.exe",
+    "EnvVariables": "OP=OP7100BR",
     "StartAllEnrolled": true,
     "StopAllEnrolled": true,
-    "SortOrder": 1
+    "SortOrder": 111
   },
   {
-    "Name": "JobManager",
-    "Description": "Job orchestration over the complete plan",
-    "ExecutablePath": "",
-    "ExeFileName": "JobManager.exe",
-    "EnvironmentVariables": "",
+    "Name": "CCI-BridgeSimulator-OP7200BR",
+    "Description": "Bridge Simulator for OP7200BR",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\BridgeSimulator",
+    "ExeFileName": "Gudel.GLogWare.Services.BridgeSimulator.exe",
+    "EnvVariables": "OP=OP7200BR",
     "StartAllEnrolled": true,
     "StopAllEnrolled": true,
-    "SortOrder": 2
+    "SortOrder": 112
+  },
+  {
+    "Name": "CCI-ConveyorSimulator-OP1000AL",
+    "Description": "Infeed conveyor Simulator",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\ConveyorSimulator",
+    "ExeFileName": "Gudel.GLogWare.Services.ConveyorSimulator.exe",
+    "EnvVariables": "OP=OP1000AL",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 121
+  },
+  {
+    "Name": "CCI-ConveyorSimulator-OP2000AL",
+    "Description": "Outfeed conveyor Simulator",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\ConveyorSimulator",
+    "ExeFileName": "Gudel.GLogWare.Services.ConveyorSimulator.exe",
+    "EnvVariables": "OP=OP2000AL",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 122
+  },
+  {
+    "Name": "CCI-BridgeManager-OP7100BR",
+    "Description": "Bridge Manager for OP7100BR",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\BridgeManager",
+    "ExeFileName": "Gudel.GLogWare.Services.BridgeManager.exe",
+    "EnvVariables": "OP=OP7100BR",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 211
+  },
+  {
+    "Name": "CCI-BridgeManager-OP7200BR",
+    "Description": "Bridge Manager for OP7200BR",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\BridgeManager",
+    "ExeFileName": "Gudel.GLogWare.Services.BridgeManager.exe",
+    "EnvVariables": "OP=OP7200BR",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 212
+  },
+  {
+    "Name": "CCI-ConveyorManager-OP1000AL",
+    "Description": "Infeed conveyor Manager",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\ConveyorManager",
+    "ExeFileName": "Gudel.GLogWare.Services.ConveyorManager.exe",
+    "EnvVariables": "OP=OP1000AL",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 221
+  },
+  {
+    "Name": "CCI-ConveyorManager-OP2000AL",
+    "Description": "Outfeed conveyor Manager",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\ConveyorManager",
+    "ExeFileName": "Gudel.GLogWare.Services.ConveyorManager.exe",
+    "EnvVariables": "OP=OP2000AL",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 222
+  },
+  {
+    "Name": "CCI-JobManager",
+    "Description": "Job orchestration over the complete plan",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\JobManager",
+    "ExeFileName": "Gudel.GLogWare.Services.JobManager.exe",
+    "EnvVariables": "",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 300
+  },
+  {
+    "Name": "CCI-Reserve",
+    "Description": "Tire reservation for outfeed pallets",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\Reserve",
+    "ExeFileName": "Gudel.GLogWare.Services.Reserve.exe",
+    "EnvVariables": "",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 400
+  },
+  {
+    "Name": "CCI-Garbage",
+    "Description": "Cron tasks",
+    "ExePath": "D:\\GLogWare2\\CompanyCity\\Runtime\\Services\\Garbage",
+    "ExeFileName": "Gudel.GLogWare.Services.Garbage.exe",
+    "EnvVariables": "",
+    "StartAllEnrolled": true,
+    "StopAllEnrolled": true,
+    "SortOrder": 500
   }
 ]

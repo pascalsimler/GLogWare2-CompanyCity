@@ -37,12 +37,15 @@
   <Folder Name="/Config/Dev/" />
   <Folder Name="/Config/Dev/passim/">
     <File Path="Config/Dev/passim/config.json" />
+    <File Path="Config/Dev/passim/services.json" />
   </Folder>
   <Folder Name="/Config/Prod/">
     <File Path="Config/Prod/config.json" />
+    <File Path="Config/Prod/services.json" />
   </Folder>
   <Folder Name="/Config/Test/">
     <File Path="Config/Test/config.json" />
+    <File Path="Config/Test/services.json" />
   </Folder>
   <Folder Name="/Docker/">
     <File Path="Docker/BuildImages.ps1" />
