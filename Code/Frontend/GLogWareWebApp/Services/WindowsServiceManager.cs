@@ -2,11 +2,13 @@
 using Gudel.GLogWare.Logging;
 using MudBlazor;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.ServiceProcess;
 using System.Text.Json;
 
 namespace GLogWareWebApp.Services;
 
+[SupportedOSPlatform("windows")]
 public class WindowsService
 { 
     public string Name { get; set; } = string.Empty;
@@ -38,11 +40,12 @@ public class WindowsService
         : Color.Primary;
  }
 
+[SupportedOSPlatform("windows")]
 public class WindowsServiceManager(
      ILogger<WindowsServiceManager> logger
 )
 {
-    public List<WindowsService> Services { get; set; } = [];
+    public List<WindowsService>? Services { get; set; } = [];
     public HashSet<WindowsService> Selected { get; set; } = [];
     
     private const string _servicesConfigFileName = "services.json";
@@ -72,7 +75,7 @@ public class WindowsServiceManager(
         string? rValue = null;
         try
         {
-            var service = Services.FirstOrDefault(s =>
+            var service = Services!.FirstOrDefault(s =>
                 string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase))
                 ?? throw new InvalidOperationException("Service is not defined in services.json");
 
@@ -221,7 +224,7 @@ public class WindowsServiceManager(
         logger.EnterMethod();
 
         var allServerServices = ServiceController.GetServices().ToList();
-        foreach (var g in Services.OrderBy(g => g.SortOrder))
+        foreach (var g in Services!.OrderBy(g => g.SortOrder))
         {
             var s = allServerServices
                 .Where(s => string.Equals(s.ServiceName, g.Name, StringComparison.OrdinalIgnoreCase))
@@ -252,7 +255,7 @@ public class WindowsServiceManager(
 
         try
         {
-            var model = Services.FirstOrDefault(s =>
+            var model = Services!.FirstOrDefault(s =>
                 string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
             if (model is { Installed: false })
             {

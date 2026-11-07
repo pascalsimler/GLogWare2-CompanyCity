@@ -1,4 +1,4 @@
-@page "/administration/logs/{Name}"
+﻿@page "/administration/logs/{Name}"
 @using GLogWareWebApp.Services
 @implements IAsyncDisposable
 @inject ServiceLogReader Reader
@@ -18,9 +18,9 @@
         <MudSwitch T="bool" @bind-Value="_follow" Color="Color.Primary" Label="Follow" />
         <MudSwitch T="bool" @bind-Value="_paused" Color="Color.Warning" Label="Pause" />
         <MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
-            <MudIconButton Icon="@Icons.Material.Filled.ZoomOut" Title="Zoom out" Disabled="@(_fontSize <= MinFont)" OnClick="@(() => Zoom(-1))" />
+            <MudIconButton Icon="@Icons.Material.Filled.ZoomOut" title="Zoom out" Disabled="@(_fontSize <= MinFont)" OnClick="@(() => Zoom(-1))" />
             <MudText Style="min-width: 3.5rem; text-align: center;">@_fontSize px</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.ZoomIn" Title="Zoom in" Disabled="@(_fontSize >= MaxFont)" OnClick="@(() => Zoom(1))" />
+            <MudIconButton Icon="@Icons.Material.Filled.ZoomIn" title="Zoom in" Disabled="@(_fontSize >= MaxFont)" OnClick="@(() => Zoom(1))" />
         </MudStack>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Clear" OnClick="Clear">Clear</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Download"

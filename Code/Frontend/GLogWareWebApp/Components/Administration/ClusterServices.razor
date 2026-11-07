@@ -1,4 +1,4 @@
-@page "/administration/cluster-services"
+﻿@page "/administration/cluster-services"
 @using GLogWareWebApp.Services
 
 <PageTitle>Generic services</PageTitle>
@@ -69,7 +69,7 @@
                 <CellTemplate>
                     <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.Article"
                                Href="@($"/administration/logs/{context.Item.Name}")" Target="_blank">View logs</MudButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Title="Download log"
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" title="Download log"
                                    Href="@($"/administration/logs/{context.Item.Name}/download")" Target="_blank" />
                 </CellTemplate>
             </TemplateColumn>
@@ -77,12 +77,12 @@
                 <CellTemplate>
                     @if (context.Item.IsOnline)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error"                         Size="Size.Small" Title="Set Offline"
+                        <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error"                         Size="Size.Small" title="Set Offline"
                                                                Disabled="@(_busy || context.Item.IsPending)" OnClick="@(() => RunAsync(false, [context.Item]))" />
                     }
                     else
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success"                         Size="Size.Small" Title="Set Online"
+                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success"                         Size="Size.Small" title="Set Online"
                                                                Disabled="@(_busy || context.Item.IsPending)" OnClick="@(() => RunAsync(true, [context.Item]))" />
                     }
                 </CellTemplate>

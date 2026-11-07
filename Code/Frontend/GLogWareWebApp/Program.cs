@@ -1,4 +1,4 @@
-using GLogWareWebApp.Components;
+﻿using GLogWareWebApp.Components;
 using GLogWareWebApp.Services;
 using Gudel.GLogWare.Configuration;
 using Gudel.GLogWare.EFCore;
@@ -67,8 +67,11 @@ builder.Services.AddSingleton<IMessageBus, MQTTMessageBus>();
 //builder.Services.AddSingleton<MessageBusService>();
 //builder.Services.AddHostedService<HostedMessageBusService>();
 builder.Services.AddSingleton<PasswordHasher>();
-builder.Services.AddSingleton<ClusterServiceManager>();
-builder.Services.AddSingleton<WindowsServiceManager>();
+if (OperatingSystem.IsWindows())
+{
+    builder.Services.AddSingleton<ClusterServiceManager>();
+    builder.Services.AddSingleton<WindowsServiceManager>();
+}
 builder.Services.AddSingleton<ServiceLogReader>();
 
 builder.Services.AddWindowsService(options =>

@@ -11,11 +11,11 @@
     </div>
     <MudStack Row="true" Wrap="Wrap.Wrap" AlignItems="AlignItems.Center" Spacing="3" Justify="Justify.FlexEnd">
         <div style="width:170px">
-            <MudDatePicker T="DateTime?" Label="Start date" @bind-Date="_start" Variant="Variant.Outlined"
+            <MudDatePicker Label="Start date" @bind-Date="_start" Variant="Variant.Outlined"
                            Margin="Margin.Dense" DateFormat="dd.MM.yyyy" MaxDate="_end" RelativeWidth="DropdownWidth.Ignore" />
         </div>
         <div style="width:170px">
-            <MudDatePicker T="DateTime?" Label="End date" @bind-Date="_end" Variant="Variant.Outlined"
+            <MudDatePicker Label="End date" @bind-Date="_end" Variant="Variant.Outlined"
                            Margin="Margin.Dense" DateFormat="dd.MM.yyyy" MinDate="_start" RelativeWidth="DropdownWidth.Ignore" />
         </div>
         <MudPaper Outlined="true" Elevation="0" Class="px-3">

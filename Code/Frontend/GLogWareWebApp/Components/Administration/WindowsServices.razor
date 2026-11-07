@@ -1,4 +1,4 @@
-@page "/administration/windows-services"
+﻿@page "/administration/windows-services"
 @using System.ServiceProcess
 
 <PageTitle>Windows services</PageTitle>
@@ -46,7 +46,7 @@
                 <CellTemplate>
                     <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.Article"
                                Href="@($"/administration/logs/{context.Item.Name}")" Target="_blank">View logs</MudButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Title="Download log"
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" title="Download log"
                                    Href="@($"/administration/logs/{context.Item.Name}/download")" Target="_blank" />
                 </CellTemplate>
             </TemplateColumn>

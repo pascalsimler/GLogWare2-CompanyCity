@@ -1,4 +1,4 @@
-@page "/statistics/fill-level"
+﻿@page "/statistics/fill-level"
 
 <PageTitle>Fill Level Statistics</PageTitle>
 
@@ -7,9 +7,9 @@
         <MudText Typo="Typo.h4">Fill level per gantry and hour</MudText>
         <MudText Color="Color.Secondary">Average buffer occupancy for the selected period</MudText>
     </div>
-    <MudDatePicker T="DateTime?" @bind-Date="_startDate" Label="Start date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
+    <MudDatePicker @bind-Date="_startDate" Label="Start date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
     <MudTimePicker @bind-Time="_startTime" Label="Start time" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:140px" />
-    <MudDatePicker T="DateTime?" @bind-Date="_endDate" Label="End date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
+    <MudDatePicker @bind-Date="_endDate" Label="End date" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:170px" />
     <MudTimePicker @bind-Time="_endTime" Label="End time" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width:140px" />
     <MudSelect T="string" @bind-Value="_gantry" Label="Gantry" Variant="Variant.Outlined" Dense="true" Style="max-width:180px">
         <MudSelectItem T="string" Value="@("All")">All gantries</MudSelectItem>
@@ -36,7 +36,7 @@ else
         <div><span>Gantries shown</span><strong>@rows.Count</strong></div>
     </div>
 
-    <MudTabs Elevation="0" Rounded="true" PanelClass="pt-3">
+    <MudTabs Elevation="0" Rounded="true" TabPanelsClass="pt-3">
         <MudTabPanel Text="Line chart" Icon="@Icons.Material.Filled.ShowChart">
             <MudPaper Class="scada-panel stat-panel" Elevation="0">
                 <MudChart ChartType="ChartType.Line" ChartSeries="@Series" ChartLabels="@Labels" Width="100%" Height="320px" />
